@@ -267,19 +267,26 @@ async function publishedVersion(name) {
   return version;
 }
 
-/** Copies both channel files, as they are on GitHub, to the old feed on R2, for copies installed before the move. */
+/**
+ * Copies both channel files to the old feed on R2, for copies installed before the move. Right after `publish` (as in
+ * the workflow) it uses the files that just went up, as GitHub can take a moment to serve them; otherwise it copies
+ * them from GitHub.
+ */
 async function mirror() {
   const dir = join(target, "mirror");
   mkdirSync(dir, { recursive: true });
   for (const name of ["latest.json", "beta.json"]) {
-    const response = await fetch(`${feedUrl}${name}`, { cache: "no-store" });
-    if (response.status === 404) {
-      console.log(`${name} isn't on GitHub yet; left the old feed's copy alone.`);
-      continue;
+    let file = join(target, "github-release", name);
+    if (!existsSync(file)) {
+      const response = await fetch(`${feedUrl}${name}`, { cache: "no-store" });
+      if (response.status === 404) {
+        console.log(`${name} isn't on GitHub yet; left the old feed's copy alone.`);
+        continue;
+      }
+      if (!response.ok) throw new Error(`Could not read ${feedUrl}${name} (HTTP ${response.status}).`);
+      file = join(dir, name);
+      writeFileSync(file, await response.text());
     }
-    if (!response.ok) throw new Error(`Could not read ${feedUrl}${name} (HTTP ${response.status}).`);
-    const file = join(dir, name);
-    writeFileSync(file, await response.text());
     const object = `${r2Bucket}/${r2Prefix}/${name}`;
     const flags = ["--file", file, "--remote", "--content-type", "application/json", "--cache-control", "no-cache"];
     run(process.execPath, [wrangler, "r2", "object", "put", object, ...flags]);
