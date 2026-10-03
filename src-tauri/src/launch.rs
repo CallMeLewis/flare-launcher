@@ -1,9 +1,12 @@
 //! Links a server's mods into the DayZ folder and starts the game.
 
+use std::ffi::OsStr;
 use std::path::Path;
 use std::process::Command;
+use std::time::{Duration, Instant};
 
 use serde::Deserialize;
+use sysinfo::{ProcessRefreshKind, ProcessesToUpdate, System, UpdateKind};
 use tauri::{AppHandle, State};
 use tauri_plugin_opener::OpenerExt;
 
@@ -15,6 +18,9 @@ use crate::steam::{self, Install};
 /// Short relative paths keep the `-mod=` argument well under the Windows
 /// command line limit on heavily modded servers.
 const LINK_DIR: &str = "!dzsl";
+/// The game itself, started by BattlEye's `DayZ_BE.exe` once its checks pass.
+const GAME_PROCESS: &str = "DayZ_x64.exe";
+const GAME_POLL_INTERVAL: Duration = Duration::from_millis(500);
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -103,6 +109,9 @@ fn game_command(install: &Install, args: &[String]) -> Command {
 fn game_command(_install: &Install, args: &[String]) -> Command {
   let mut command = Command::new("steam");
   command.arg("-applaunch").arg(steam::DAYZ_APP_ID.to_string()).args(args).arg("-nolauncher");
+  // From the AppImage, Steam would otherwise inherit its libraries and fail to start the game.
+  #[cfg(target_os = "linux")]
+  crate::desktop::without_appimage_env(&mut command);
   command
 }
 
@@ -135,10 +144,39 @@ pub fn launch(cache: State<'_, ServerCache>, request: LaunchRequest) -> Result<(
     non_empty(&request.password),
     non_empty(&request.extra_args),
   );
-  game_command(&install, &args)
+  let mut child = game_command(&install, &args)
     .spawn()
     .map_err(|e| Error::msg(format!("DayZ couldn't be started: {e}")))?;
+  // Collected once it ends, so it doesn't linger as a finished process while the launcher stays open.
+  std::thread::spawn(move || child.wait());
   Ok(())
+}
+
+/// Whether a process is the game, from its name and the program on its command line. Under Proton the game soon
+/// renames its process (to `enfMain`), but its command line still starts with its Windows path.
+fn is_game(name: &OsStr, program: Option<&OsStr>) -> bool {
+  let file_name = |path: &OsStr| path.to_string_lossy().rsplit(['/', '\\']).next() == Some(GAME_PROCESS);
+  name == GAME_PROCESS || program.is_some_and(file_name)
+}
+
+fn game_running(system: &mut System) -> bool {
+  let refresh = ProcessRefreshKind::nothing().with_cmd(UpdateKind::OnlyIfNotSet);
+  system.refresh_processes_specifics(ProcessesToUpdate::All, true, refresh);
+  system.processes().values().any(|process| is_game(process.name(), process.cmd().first().map(|arg| arg.as_os_str())))
+}
+
+/// Waits for the game to start, up to `timeout_secs`. Returns whether it did.
+#[tauri::command]
+pub async fn wait_for_game(timeout_secs: u64) -> bool {
+  let deadline = Instant::now() + Duration::from_secs(timeout_secs);
+  let mut system = System::new();
+  while Instant::now() < deadline {
+    if game_running(&mut system) {
+      return true;
+    }
+    tokio::time::sleep(GAME_POLL_INTERVAL).await;
+  }
+  false
 }
 
 /// Opens a mod's Workshop page in the Steam client so it can be subscribed to.
@@ -174,6 +212,18 @@ mod tests {
   #[test]
   fn omits_optional_arguments_for_a_vanilla_server() {
     assert_eq!(build_args("1.2.3.4", 2402, &[], None, None, None), vec!["-connect=1.2.3.4", "-port=2402"]);
+  }
+
+  #[test]
+  fn recognises_the_game_on_windows_and_under_proton() {
+    let os = OsStr::new;
+    assert!(is_game(os("DayZ_x64.exe"), Some(os(r"C:\Steam\steamapps\common\DayZ\DayZ_x64.exe"))));
+    // Under Proton, once the game has renamed its process.
+    assert!(is_game(os("enfMain"), Some(os(r"S:\steamapps\common\DayZ\DayZ_x64.exe"))));
+    assert!(!is_game(os("DayZLauncher.exe"), Some(os(r"S:\steamapps\common\DayZ\DayZLauncher.exe"))));
+    // A shell whose arguments mention the game isn't it.
+    assert!(!is_game(os("bash"), Some(os("bash"))));
+    assert!(!is_game(os("enfMain"), None));
   }
 
   #[test]

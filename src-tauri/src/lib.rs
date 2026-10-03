@@ -2,6 +2,7 @@ mod app_menu;
 #[cfg(target_os = "linux")]
 mod desktop;
 mod error;
+mod lan;
 mod launch;
 mod query;
 mod servers;
@@ -63,11 +64,15 @@ pub fn run() {
       servers::fetch_servers,
       servers::server_mods,
       query::ping_servers,
+      lan::search_lan,
+      lan::query_servers,
+      lan::find_server,
       steam::detect_install,
       steam::installed_mods,
       steam::downloaded_mod_count,
       steam::open_folder,
       launch::launch,
+      launch::wait_for_game,
       launch::open_workshop_page,
       workshop::download_mods,
       workshop::cancel_mod_download,
@@ -143,6 +148,57 @@ mod live_tests {
     }
     assert!(queried > 0, "none of the 10 busiest servers answered an A2S_INFO query");
     assert!(pinged > 0, "none of the 10 busiest servers answered an ICMP echo");
+  }
+
+  #[tokio::test]
+  #[ignore = "needs network access"]
+  async fn asking_a_server_directly_matches_the_list() {
+    let http = reqwest::Client::builder().user_agent("FlareLauncher/test").build().unwrap();
+    let servers = servers::download_list(&http).await.unwrap();
+    // Busy modded servers, and servers with so many mods that the reply comes split over several packets.
+    let mut busy: Vec<_> = servers.values().filter(|s| s.mods.len() >= 5 && s.row.players > 0).collect();
+    busy.sort_by_key(|s| std::cmp::Reverse(s.row.players));
+    let mut most_mods: Vec<_> = servers.values().filter(|s| s.row.players > 0).collect();
+    most_mods.sort_by_key(|s| std::cmp::Reverse(s.mods.len()));
+    let mut matched = 0;
+    for server in busy.iter().take(5).chain(most_mods.iter().take(10)) {
+      let addr: std::net::SocketAddr = format!("{}:{}", server.row.ip, server.row.query_port).parse().unwrap();
+      let (info, mods) = tokio::join!(query::a2s_info(addr), query::a2s_mods(addr));
+      let (Some((_, info)), Some(mods)) = (info, mods) else { continue };
+      let ids = |mods: &[servers::Mod]| {
+        let mut ids: Vec<u64> = mods.iter().map(|m| m.steam_workshop_id).collect();
+        ids.sort();
+        ids
+      };
+      println!("{:>3} mods, game port {:?}, {}", mods.len(), info.game_port, server.row.name);
+      assert_eq!(ids(&mods), ids(&server.mods), "{}", server.row.name);
+      assert_eq!(info.game_port, Some(server.row.game_port));
+      matched += 1;
+    }
+    assert!(matched > 0, "none of the servers answered");
+  }
+
+  #[tokio::test]
+  #[ignore = "needs network access"]
+  async fn finds_a_server_by_the_address_players_join_on() {
+    let http = reqwest::Client::builder().user_agent("FlareLauncher/test").build().unwrap();
+    let servers = servers::download_list(&http).await.unwrap();
+    // Servers whose query port isn't the game port, so finding them means working it out.
+    let mut busy: Vec<_> = servers.values().filter(|s| s.row.query_port != s.row.game_port).collect();
+    busy.sort_by_key(|s| std::cmp::Reverse(s.row.players));
+    let mut found = 0;
+    for server in busy.iter().take(10) {
+      let address = format!("{}:{}", server.row.ip, server.row.game_port);
+      match lan::find(&address).await {
+        Ok(stored) => {
+          println!("{address} -> query port {}: {}", stored.row.query_port, stored.row.name);
+          assert_eq!(stored.row.id, server.row.id, "{}", server.row.name);
+          found += 1;
+        }
+        Err(e) => println!("{address} -> {e}: {}", server.row.name),
+      }
+    }
+    assert!(found > 0, "none of the 10 busiest servers were found by their game port");
   }
 
   #[tokio::test]

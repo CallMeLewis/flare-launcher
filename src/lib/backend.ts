@@ -11,6 +11,7 @@ import type {
   ModProgress,
   Ping,
   ServerList,
+  ServerRow,
   UpdateChannel,
   UpdateSettings,
   UpdateStatus,
@@ -37,6 +38,17 @@ export const backend = {
 
   pingServers: (ids: string[]): Promise<Ping[]> => (isPreview ? Promise.resolve([]) : invoke("ping_servers", { ids })),
 
+  /** Searches the local network for servers. Their rows have no mod positions. */
+  searchLan: (): Promise<ServerRow[]> => (isPreview ? Promise.resolve([]) : invoke("search_lan")),
+
+  /** Asks saved servers missing from the server list for their details. Resolves to those that answered. */
+  queryServers: (ids: string[]): Promise<ServerRow[]> =>
+    isPreview ? Promise.resolve([]) : invoke("query_servers", { ids }),
+
+  /** Finds a server from an address the player typed, such as `192.168.1.20:2302`. */
+  findServer: (address: string): Promise<ServerRow> =>
+    isPreview ? Promise.reject("Joining by address only works in the desktop app.") : invoke("find_server", { address }),
+
   detectInstall: (dayzDir: string): Promise<Install | null> =>
     isPreview ? Promise.resolve(null) : invoke("detect_install", { dayzDir: dayzDir || null }),
 
@@ -45,6 +57,10 @@ export const backend = {
 
   launch: (request: LaunchRequest): Promise<void> =>
     isPreview ? Promise.reject("Launching only works in the desktop app.") : invoke("launch", { request }),
+
+  /** Waits for DayZ to start, up to the given number of seconds. Resolves to whether it did. */
+  waitForGame: (timeoutSecs: number): Promise<boolean> =>
+    isPreview ? Promise.resolve(true) : invoke("wait_for_game", { timeoutSecs }),
 
   /**
    * Subscribes to the mods in Steam and waits for them to install. Resolves to

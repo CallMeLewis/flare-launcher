@@ -170,7 +170,7 @@ export function SettingsDialog({ open, onOpenChange, settings, onChange, install
                 <SettingRow
                   id="after-launch"
                   label="When DayZ starts"
-                  description="What the launcher does once the game is on its way."
+                  description="What the launcher does once the game is running."
                 >
                   <Select
                     value={settings.afterLaunch}

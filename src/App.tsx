@@ -1,13 +1,15 @@
 import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
-import { LoaderCircle, MousePointerClick, SearchX, ServerCrash, Star } from "lucide-react";
+import { LoaderCircle, MousePointerClick, Network, SearchX, ServerCrash, Star } from "lucide-react";
 import { toast } from "sonner";
 import { AppSidebar, type View } from "@/components/app-sidebar";
+import { JoinAddressDialog } from "@/components/join-address-dialog";
 import { ServerDetail } from "@/components/server-detail";
 import { ServerTable } from "@/components/server-table";
 import { ServerToolbar } from "@/components/server-toolbar";
 import { SettingsDialog } from "@/components/settings-dialog";
 import { TitleBar } from "@/components/title-bar";
 import { Button } from "@/components/ui/button";
+import { useLan } from "@/hooks/use-lan";
 import { usePings } from "@/hooks/use-pings";
 import { useServers } from "@/hooks/use-servers";
 import { useAppMenuOffer } from "@/hooks/use-app-menu-offer";
@@ -46,12 +48,23 @@ const DEFAULT_SETTINGS: Settings = {
   afterLaunch: "keep",
 };
 const MAX_RECENT = 30;
+const GAME_START_TIMEOUT_SECS = 90;
 
 const onRefreshFailed = (message: string) => toast.error("Couldn't refresh the server list", { description: message });
+const onLanSearchFailed = (message: string) => toast.error("Couldn't search the network", { description: message });
+
+/** Adds rows to a list, replacing any with the same id. */
+const withRows = (rows: ServerRow[], added: ServerRow[]) => {
+  const ids = new Set(added.map((row) => row.id));
+  return [...rows.filter((row) => !ids.has(row.id)), ...added];
+};
 
 export function App() {
   const servers = useServers(onRefreshFailed);
   const pings = usePings();
+  const lan = useLan(onLanSearchFailed);
+  // Servers asked directly that aren't on the local network: found by address, or saved ones missing from the list.
+  const [askedRows, setAskedRows] = useState<ServerRow[]>([]);
 
   const [storedSettings, setSettings] = useStoredState("settings", DEFAULT_SETTINGS);
   // Settings saved by older versions lack newer fields.
@@ -80,6 +93,7 @@ export function App() {
   const [view, setView] = useState<View>("all");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [joinOpen, setJoinOpen] = useState(false);
   const [install, setInstall] = useState<Install | null | undefined>(undefined);
   const [job, setJob] = useState<PlayJob | null>(null);
   const [installVersion, setInstallVersion] = useState(0);
@@ -110,7 +124,15 @@ export function App() {
   const maps = useMemo(() => mapCounts(servers.rows), [servers.rows]);
   const versions = useMemo(() => versionCounts(servers.rows), [servers.rows]);
   const mods = useMemo(() => modCounts(servers.rows, servers.modNames), [servers.rows, servers.modNames]);
-  const byId = useMemo(() => new Map(servers.rows.map((row) => [row.id, row])), [servers.rows]);
+  // Servers found by asking them directly that the server list doesn't have.
+  const extraRows = useMemo(() => {
+    const listed = new Set(servers.rows.map((row) => row.id));
+    return withRows(askedRows, lan.rows).filter((row) => !listed.has(row.id));
+  }, [servers.rows, askedRows, lan.rows]);
+  const byId = useMemo(
+    () => new Map([...servers.rows, ...extraRows].map((row) => [row.id, row])),
+    [servers.rows, extraRows],
+  );
 
   useEffect(() => {
     if (servers.status !== "ready") return;
@@ -138,19 +160,42 @@ export function App() {
   );
   const unlisted = useMemo(() => new Set(unlistedRows.map((row) => row.id)), [unlistedRows]);
 
+  // A saved server missing from the list may be on the local network or one added by address, so it's asked
+  // directly, once per server list.
+  const asked = useRef<{ rows: ServerRow[]; ids: Set<string> }>({ rows: [], ids: new Set() });
+  useEffect(() => {
+    if (servers.status !== "ready") return;
+    if (asked.current.rows !== servers.rows) asked.current = { rows: servers.rows, ids: new Set() };
+    const ids = [...unlisted].filter((id) => !asked.current.ids.has(id));
+    if (ids.length === 0) return;
+    for (const id of ids) asked.current.ids.add(id);
+    backend
+      .queryServers(ids)
+      .then((found) => setAskedRows((rows) => withRows(rows, found)))
+      .catch(() => {});
+  }, [servers.status, servers.rows, unlisted]);
+
+  useEffect(() => {
+    if (view === "lan") lan.search();
+  }, [view, lan.search]);
+
   const lists = useMemo<Record<View, ServerRow[]>>(() => {
     const unlistedFavourites = unlistedRows.filter((row) => favourites.has(row.id));
+    const known = [...servers.rows, ...extraRows];
     return {
-      all: [...servers.rows, ...unlistedFavourites],
-      favourites: [...servers.rows.filter((row) => favourites.has(row.id)), ...unlistedFavourites],
-      recent: [
-        ...servers.rows.filter((row) => recents.has(row.id)),
-        ...unlistedRows.filter((row) => recents.has(row.id)),
-      ],
+      all: [...servers.rows, ...extraRows.filter((row) => favourites.has(row.id)), ...unlistedFavourites],
+      favourites: [...known.filter((row) => favourites.has(row.id)), ...unlistedFavourites],
+      recent: [...known.filter((row) => recents.has(row.id)), ...unlistedRows.filter((row) => recents.has(row.id))],
+      lan: lan.rows,
     };
-  }, [servers.rows, unlistedRows, favourites, recents]);
+  }, [servers.rows, extraRows, lan.rows, unlistedRows, favourites, recents]);
   const inView = lists[view];
-  const counts = { all: lists.all.length, favourites: lists.favourites.length, recent: lists.recent.length };
+  const counts = {
+    all: lists.all.length,
+    favourites: lists.favourites.length,
+    recent: lists.recent.length,
+    lan: lists.lan.length,
+  };
 
   // Saved lists show every server in them; only the search box narrows them.
   const search = useDeferredValue(filters.search);
@@ -231,6 +276,7 @@ export function App() {
         return;
       }
       playing.current = true;
+      setJob({ serverId: server.id, phase: "checking", startsGame: startGame, progress: [] });
       try {
         const mods = await backend.serverMods(server.id);
         const ids = mods.map((mod) => mod.steamWorkshopId);
@@ -271,7 +317,13 @@ export function App() {
           extraArgs: launchArgs(settings) || null,
         });
         setRecentIds((ids) => [server.id, ...ids.filter((id) => id !== server.id)].slice(0, MAX_RECENT));
-        toast.success("Starting DayZ", { description: server.name });
+        // Play keeps showing DayZ starting until the game is running: on Linux, Steam and Proton take a while first.
+        const started = await backend.waitForGame(GAME_START_TIMEOUT_SECS);
+        if (!started) {
+          toast.info("DayZ hasn't started yet", {
+            description: "It may still be loading. If it doesn't open, check Steam for a message.",
+          });
+        }
         if (settings.afterLaunch === "minimise") void backend.minimiseWindow();
         if (settings.afterLaunch === "close") void backend.closeWindow();
       } catch (e) {
@@ -295,7 +347,8 @@ export function App() {
         <AppSidebar view={view} onViewChange={setView} counts={counts} onOpenSettings={() => setSettingsOpen(true)} />
 
         <main className="flex min-w-0 flex-1 flex-col">
-          {servers.status === "error" ? (
+          {/* The LAN list doesn't need the server list, so it still works without the internet. */}
+          {servers.status === "error" && view !== "lan" ? (
             <Message
               icon={<ServerCrash className="size-6" aria-hidden />}
               title="The server list couldn't be loaded"
@@ -324,12 +377,14 @@ export function App() {
                 mods={mods}
                 shown={listed.length}
                 total={inView.length}
-                refreshing={servers.refreshing}
-                onRefresh={servers.refresh}
+                refreshing={view === "lan" ? lan.searching : servers.refreshing}
+                onRefresh={view === "lan" ? lan.search : servers.refresh}
+                refreshLabel={view === "lan" ? "Search the network again" : "Refresh server list"}
+                onJoinByAddress={() => setJoinOpen(true)}
               />
               <ServerTable
                 rows={listed}
-                loading={servers.status === "loading"}
+                loading={view === "lan" ? !lan.searched : servers.status === "loading"}
                 sort={sort}
                 onSort={setSort}
                 selectedId={selectedId}
@@ -342,7 +397,30 @@ export function App() {
                 search={search}
                 modNames={servers.modNames}
                 empty={
-                  inView.length === 0 && view !== "all" ? (
+                  inView.length === 0 && view === "lan" ? (
+                    <Message
+                      icon={<Network className="size-6" aria-hidden />}
+                      title="No servers found on your network"
+                      description="A server shows here when it's on the same network and answers on a query port from 27015 to 27020. For any other server, join by address."
+                      action={
+                        <div className="flex gap-2">
+                          <Button variant="secondary" onClick={lan.search} disabled={lan.searching}>
+                            {lan.searching ? (
+                              <>
+                                <LoaderCircle className="animate-spin motion-reduce:animate-none" aria-hidden />
+                                Searching…
+                              </>
+                            ) : (
+                              "Search again"
+                            )}
+                          </Button>
+                          <Button variant="secondary" onClick={() => setJoinOpen(true)}>
+                            Join by address
+                          </Button>
+                        </div>
+                      }
+                    />
+                  ) : inView.length === 0 && view !== "all" ? (
                     <Message
                       icon={<Star className="size-6" aria-hidden />}
                       title={view === "favourites" ? "No favourites yet" : "No recent servers"}
@@ -404,6 +482,16 @@ export function App() {
           </aside>
         )}
       </div>
+
+      <JoinAddressDialog
+        open={joinOpen}
+        onOpenChange={setJoinOpen}
+        onFound={(server) => {
+          setAskedRows((rows) => withRows(rows, [server]));
+          setSelectedId(server.id);
+          toast.success("Server found", { description: `${server.name}. Select Play in the panel on the right to join.` });
+        }}
+      />
 
       <SettingsDialog
         open={settingsOpen}

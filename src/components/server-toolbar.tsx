@@ -1,5 +1,5 @@
 import { useId, useLayoutEffect, useRef, useState } from "react";
-import { ListFilter, RefreshCw, Search, X } from "lucide-react";
+import { Link, ListFilter, RefreshCw, Search, X } from "lucide-react";
 import { FilterMenu } from "@/components/filter-menu";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,6 +24,9 @@ type Props = {
   total: number;
   refreshing: boolean;
   onRefresh: () => void;
+  /** What refreshing does in this list, for the button's label. */
+  refreshLabel: string;
+  onJoinByAddress: () => void;
 };
 
 export function ServerToolbar({
@@ -37,6 +40,8 @@ export function ServerToolbar({
   total,
   refreshing,
   onRefresh,
+  refreshLabel,
+  onJoinByAddress,
 }: Props) {
   const set = (patch: Partial<Filters>) => onChange({ ...filters, ...patch });
   const chips = filterChips(filters);
@@ -109,10 +114,18 @@ export function ServerToolbar({
           </p>
           <Tooltip>
             <TooltipTrigger asChild>
+              <Button variant="ghost" size="icon-sm" aria-label="Join by address" onClick={onJoinByAddress}>
+                <Link className="size-4" aria-hidden />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Join by address</TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
               <Button
                 variant="ghost"
                 size="icon-sm"
-                aria-label="Refresh server list"
+                aria-label={refreshLabel}
                 disabled={refreshing}
                 onClick={onRefresh}
               >
@@ -122,7 +135,7 @@ export function ServerToolbar({
                 />
               </Button>
             </TooltipTrigger>
-            <TooltipContent>Refresh server list</TooltipContent>
+            <TooltipContent>{refreshLabel}</TooltipContent>
           </Tooltip>
         </div>
       </div>

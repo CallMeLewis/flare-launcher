@@ -56,7 +56,8 @@ export type ModProgress = {
 /** A join in progress: fetching missing mods first, then starting the game. */
 export type PlayJob = {
   serverId: string;
-  phase: "downloading" | "starting";
+  /** Checking which mods are missing, downloading them, then waiting for DayZ to start. */
+  phase: "checking" | "downloading" | "starting";
   /** False when the player only wants the mods downloaded. */
   startsGame: boolean;
   progress: ModProgress[];

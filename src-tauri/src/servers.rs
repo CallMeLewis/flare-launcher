@@ -1,11 +1,12 @@
 use std::collections::HashMap;
-use std::net::IpAddr;
+use std::net::{IpAddr, SocketAddr};
 use std::sync::RwLock;
 
 use serde::{Deserialize, Serialize};
 use tauri::State;
 
 use crate::error::{Error, Result};
+use crate::query::Info;
 
 const LIST_URL: &str = "https://dayzsalauncher.com/api/v1/launcher/servers/dayz";
 
@@ -96,10 +97,56 @@ pub struct ServerList {
 pub struct StoredServer {
   pub row: ServerRow,
   pub mods: Vec<Mod>,
+  /// False for a server asked directly, one found on the local network or added by address.
+  pub listed: bool,
 }
 
+/// Every server the launcher can ping and join: the server list, plus servers it asked directly.
 #[derive(Default)]
 pub struct ServerCache(pub RwLock<HashMap<String, StoredServer>>);
+
+impl ServerCache {
+  /// Keeps servers asked directly so they can be pinged and joined, and returns their rows.
+  pub fn remember(&self, servers: Vec<StoredServer>) -> Vec<ServerRow> {
+    let mut cache = self.0.write().unwrap();
+    servers
+      .into_iter()
+      .map(|server| {
+        let row = server.row.clone();
+        cache.insert(row.id.clone(), server);
+        row
+      })
+      .collect()
+  }
+}
+
+/// Builds a server from what it said when asked directly. `None` when it didn't say which port to join on.
+pub fn from_query(addr: SocketAddr, info: Info, mods: Vec<Mod>) -> Option<StoredServer> {
+  // DayZ keeps its settings in the keywords, as tags such as `no3rd` and `etm4.000000` and the time as `HH:MM`.
+  let tags: Vec<&str> = info.keywords.split(',').map(str::trim).collect();
+  let has = |tag: &str| tags.contains(&tag);
+  let row = ServerRow {
+    id: addr.to_string(),
+    ip: addr.ip().to_string(),
+    query_port: addr.port(),
+    game_port: info.game_port?,
+    name: info.name.trim().to_string(),
+    map: info.map.trim().to_lowercase(),
+    players: info.players.into(),
+    max_players: info.max_players.into(),
+    password: info.password,
+    first_person_only: has("no3rd"),
+    // Community servers say they run their own hive or an external one.
+    official: !has("privHive") && !has("external"),
+    battl_eye: has("battleye"),
+    version: info.version,
+    time: tags.iter().find(|tag| tag.contains(':')).copied().unwrap_or_default().to_string(),
+    time_acceleration: tags.iter().find_map(|tag| tag.strip_prefix("etm")?.parse().ok()),
+    mod_count: mods.len(),
+    mods: Vec::new(),
+  };
+  Some(StoredServer { row, mods, listed: false })
+}
 
 fn into_stored(api: ApiServer) -> StoredServer {
   let row = ServerRow {
@@ -121,7 +168,7 @@ fn into_stored(api: ApiServer) -> StoredServer {
     mod_count: api.mods.len(),
     mods: Vec::new(),
   };
-  StoredServer { row, mods: api.mods }
+  StoredServer { row, mods: api.mods, listed: true }
 }
 
 /// Parses the list response, skipping entries that don't match the expected
@@ -183,7 +230,10 @@ pub async fn fetch_servers(
 ) -> Result<ServerList> {
   let servers = download_list(&http).await?;
   let list = build_list(&servers);
-  *cache.0.write().unwrap() = servers;
+  let mut cache = cache.0.write().unwrap();
+  // Servers asked directly stay, unless the list now has them too.
+  cache.retain(|_, server| !server.listed);
+  cache.extend(servers);
   Ok(list)
 }
 
@@ -248,5 +298,33 @@ mod tests {
     assert_eq!(names("A"), ["CF", "Expansion Core"]);
     assert_eq!(names("B"), ["Expansion Core", "Mag Obfuscation"]);
     assert!(names("Vanilla").is_empty());
+  }
+
+  #[test]
+  fn reads_dayz_settings_from_a_queried_server() {
+    let info = Info {
+      name: " Home server ".into(),
+      map: "ChernarusPlus".into(),
+      players: 2,
+      max_players: 10,
+      password: true,
+      version: "1.29.162510".into(),
+      game_port: Some(2302),
+      keywords: "battleye,no3rd,privHive,lqs0,etm6.000000,entm2.000000,08:41".into(),
+    };
+    let mods = vec![Mod { name: "CF".into(), steam_workshop_id: 1559212036 }];
+    let server = from_query("192.168.1.20:27016".parse().unwrap(), info, mods).unwrap();
+    assert_eq!(server.row.id, "192.168.1.20:27016");
+    assert_eq!((server.row.game_port, server.row.query_port), (2302, 27016));
+    assert_eq!(server.row.name, "Home server");
+    assert_eq!(server.row.map, "chernarusplus");
+    assert_eq!(server.row.time, "08:41");
+    assert_eq!(server.row.time_acceleration, Some(6.0));
+    assert_eq!(server.row.mod_count, 1);
+    assert!(server.row.password && server.row.first_person_only && server.row.battl_eye && !server.row.official);
+    assert!(!server.listed);
+
+    let no_port = Info { game_port: None, ..Info::default() };
+    assert!(from_query("192.168.1.20:27016".parse().unwrap(), no_port, Vec::new()).is_none());
   }
 }

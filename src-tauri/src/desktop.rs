@@ -60,15 +60,61 @@ const APPIMAGE_VARS: &[&str] = &[
 ];
 
 /// Runs a program as if started from the desktop rather than from inside the AppImage: without the variables that
-/// point at the AppImage's own files, and with its folders taken out of `XDG_DATA_DIRS`. System programs then use
-/// their own settings, and a new copy of the launcher doesn't inherit paths into this copy's soon-gone mount.
+/// point at the AppImage's own files, and with its folders taken out of every list of paths, such as `PATH`,
+/// `LD_LIBRARY_PATH` and `XDG_DATA_DIRS`. System programs then use their own libraries and settings (Steam's start-up
+/// script fails on the AppImage's older libraries), and a new copy of the launcher doesn't inherit paths into this
+/// copy's soon-gone mount.
 pub fn without_appimage_env(command: &mut std::process::Command) -> &mut std::process::Command {
   for var in APPIMAGE_VARS {
     command.env_remove(var);
   }
-  if let (Some(appdir), Ok(dirs)) = (std::env::var("APPDIR").ok(), std::env::var("XDG_DATA_DIRS")) {
-    let system: Vec<&str> = dirs.split(':').filter(|dir| !dir.is_empty() && !dir.starts_with(&appdir)).collect();
-    command.env("XDG_DATA_DIRS", system.join(":"));
+  if let Ok(appdir) = std::env::var("APPDIR") {
+    for (name, value) in outside_appdir(std::env::vars(), &appdir) {
+      match value {
+        Some(value) => command.env(name, value),
+        None => command.env_remove(name),
+      };
+    }
   }
   command
+}
+
+/// The variables that mention the AppImage's folder, each with that folder's entries taken out of it, or `None` when
+/// nothing is left.
+fn outside_appdir(vars: impl Iterator<Item = (String, String)>, appdir: &str) -> Vec<(String, Option<String>)> {
+  vars
+    .filter(|(name, value)| !APPIMAGE_VARS.contains(&name.as_str()) && value.contains(appdir))
+    .map(|(name, value)| {
+      let kept: Vec<&str> = value.split(':').filter(|entry| !entry.is_empty() && !entry.starts_with(appdir)).collect();
+      (name, (!kept.is_empty()).then(|| kept.join(":")))
+    })
+    .collect()
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  #[test]
+  fn takes_the_appimage_out_of_inherited_paths() {
+    let appdir = "/tmp/.mount_flare-Mk";
+    let vars = [
+      ("PATH", "/tmp/.mount_flare-Mk/usr/bin/:/tmp/.mount_flare-Mk/bin/:/usr/local/bin:/usr/bin"),
+      ("LD_LIBRARY_PATH", "/tmp/.mount_flare-Mk/usr/lib/:/tmp/.mount_flare-Mk/usr/lib64"),
+      ("XDG_DATA_DIRS", "/tmp/.mount_flare-Mk/usr/share/:/usr/share:"),
+      ("PYTHONHOME", "/tmp/.mount_flare-Mk/usr/"),
+      ("HOME", "/home/lewis"),
+      ("GTK_PATH", "/tmp/.mount_flare-Mk//usr/lib/gtk-3.0"),
+    ]
+    .map(|(name, value)| (name.to_string(), value.to_string()));
+    let mut cleaned = outside_appdir(vars.into_iter(), appdir);
+    cleaned.sort();
+    let expected: Vec<(String, Option<String>)> = vec![
+      ("LD_LIBRARY_PATH".into(), None),
+      ("PATH".into(), Some("/usr/local/bin:/usr/bin".into())),
+      ("PYTHONHOME".into(), None),
+      ("XDG_DATA_DIRS".into(), Some("/usr/share".into())),
+    ];
+    assert_eq!(cleaned, expected);
+  }
 }

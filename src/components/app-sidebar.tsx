@@ -1,10 +1,10 @@
-import { Clock, List, Settings as SettingsIcon, Star, type LucideIcon } from "lucide-react";
+import { Clock, List, Network, Settings as SettingsIcon, Star, type LucideIcon } from "lucide-react";
 import { UpdateButton } from "@/components/update-button";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
-export type View = "all" | "favourites" | "recent";
+export type View = "all" | "favourites" | "recent" | "lan";
 
 const count = new Intl.NumberFormat();
 
@@ -20,6 +20,7 @@ export function AppSidebar({ view, onViewChange, counts, onOpenSettings }: Props
     { view: "all", label: "All servers", icon: List },
     { view: "favourites", label: "Favourites", icon: Star },
     { view: "recent", label: "Recent", icon: Clock },
+    { view: "lan", label: "LAN", icon: Network },
   ];
 
   return (

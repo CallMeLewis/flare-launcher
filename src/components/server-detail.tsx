@@ -310,7 +310,8 @@ export function ServerDetail({
               size="lg"
               disabled={!canCheckMods || checking || busy}
               onClick={() => onPlay(server, password)}
-              className="min-w-0 flex-1 rounded-r-none font-semibold"
+              // While joining this server the button shows progress, so it isn't greyed out like a disabled one.
+              className={cn("min-w-0 flex-1 rounded-r-none font-semibold", job && "disabled:opacity-100")}
             >
               {job || checking ? (
                 <Loader2 className="animate-spin motion-reduce:animate-none" aria-hidden />
@@ -319,9 +320,9 @@ export function ServerDetail({
               ) : (
                 <Play fill="currentColor" aria-hidden />
               )}
-              {job
-                ? "Starting DayZ"
-                : checking
+              {job?.phase === "starting"
+                ? "Starting DayZ…"
+                : job || checking
                   ? "Checking mods"
                   : missing > 0
                     ? `Download ${missing} ${missing === 1 ? "mod" : "mods"} and play`

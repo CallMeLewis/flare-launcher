@@ -1,6 +1,6 @@
 [package]
 name = "flare-launcher"
-version = "1.1.1-beta.1"
+version = "1.1.1-beta.2"
 description = "Flare Launcher: a server browser and mod launcher for DayZ"
 authors = ["CallMeLewis"]
 license = "GPL-3.0-or-later"
@@ -33,6 +33,8 @@ steamworks = "0.13.1"
 tauri-plugin-window-state = "2.5.0"
 tauri-plugin-dialog = "2.8.1"
 tauri-plugin-updater = "2.13.1"
+if-addrs = "0.15.0"
+sysinfo = { version = "0.38.4", default-features = false, features = ["system"] }
 
 [target.'cfg(target_os = "linux")'.dependencies]
 gtk = "0.18.2"
