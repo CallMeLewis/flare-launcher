@@ -31,7 +31,9 @@ const bucket = process.env.DZSL_R2_BUCKET ?? "darkzone-updates";
 // kept: installed copies check this address for updates.
 const prefix = "dayz-server-launcher";
 const feedUrl = `https://updates.darkzone.dev/${prefix}/`;
-const tauri = join(root, "node_modules", ".bin", process.platform === "win32" ? "tauri.cmd" : "tauri");
+// Run through Node rather than the .bin shim, which on Windows is a .cmd that needs a shell, and a shell drops empty
+// arguments and splits ones with spaces.
+const tauri = join(root, "node_modules", "@tauri-apps", "cli", "tauri.js");
 const target = join(root, "src-tauri", "target");
 const linuxBundles = join(target, "linux", "release", "bundle");
 
@@ -97,7 +99,7 @@ try {
 function keygen() {
   if (existsSync(keyPath)) throw new Error(`A signing key already exists at ${keyPath}. Refusing to replace it.`);
   mkdirSync(dirname(keyPath), { recursive: true });
-  run(tauri, ["signer", "generate", "--ci", "--password", "", "--write-keys", keyPath]);
+  run(process.execPath, [tauri, "signer", "generate", "--ci", "--password", "", "--write-keys", keyPath]);
   console.log(`\nSigning key written to ${keyPath}. Back it up: without it no further updates can be shipped.`);
   console.log(
     `Public key for plugins.updater.pubkey in src-tauri/tauri.conf.json:\n${readFileSync(`${keyPath}.pub`, "utf8").trim()}`,
@@ -133,7 +135,8 @@ function prepare() {
   }
 
   const builds = found.map(({ platform, file, uploadName }) => {
-    run(tauri, ["signer", "sign", "--private-key-path", keyPath, "--password", "", "--app-version", version, file]);
+    const sign = ["signer", "sign", "--private-key-path", keyPath, "--password", "", "--app-version", version, file];
+    run(process.execPath, [tauri, ...sign]);
     console.log(`Signed ${platform} build for ${version}`);
     return {
       platform,
@@ -250,6 +253,6 @@ function git(args, allowFailure = false) {
 }
 
 function run(file, args) {
-  const result = spawnSync(file, args, { stdio: "inherit", shell: process.platform === "win32" });
+  const result = spawnSync(file, args, { stdio: "inherit" });
   if (result.status !== 0) throw new Error(`${[file, ...args].join(" ")} failed.`);
 }
