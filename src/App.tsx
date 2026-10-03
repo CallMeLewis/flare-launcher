@@ -380,7 +380,7 @@ export function App() {
                 refreshing={view === "lan" ? lan.searching : servers.refreshing}
                 onRefresh={view === "lan" ? lan.search : servers.refresh}
                 refreshLabel={view === "lan" ? "Search the network again" : "Refresh server list"}
-                onJoinByAddress={() => setJoinOpen(true)}
+                onAddServer={() => setJoinOpen(true)}
               />
               <ServerTable
                 rows={listed}
@@ -401,7 +401,7 @@ export function App() {
                     <Message
                       icon={<Network className="size-6" aria-hidden />}
                       title="No servers found on your network"
-                      description="A server shows here when it's on the same network and answers on a query port from 27015 to 27020. For any other server, join by address."
+                      description="A server shows here when it's on the same network and answers on a query port from 27015 to 27020. For any other server, use Add server."
                       action={
                         <div className="flex gap-2">
                           <Button variant="secondary" onClick={lan.search} disabled={lan.searching}>
@@ -415,7 +415,7 @@ export function App() {
                             )}
                           </Button>
                           <Button variant="secondary" onClick={() => setJoinOpen(true)}>
-                            Join by address
+                            Add server
                           </Button>
                         </div>
                       }

@@ -1,5 +1,5 @@
 import { useId, useLayoutEffect, useRef, useState } from "react";
-import { Link, ListFilter, RefreshCw, Search, X } from "lucide-react";
+import { ListFilter, Plus, RefreshCw, Search, X } from "lucide-react";
 import { FilterMenu } from "@/components/filter-menu";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,7 +26,8 @@ type Props = {
   onRefresh: () => void;
   /** What refreshing does in this list, for the button's label. */
   refreshLabel: string;
-  onJoinByAddress: () => void;
+  /** Opens Add server, for finding a server by its address. */
+  onAddServer: () => void;
 };
 
 export function ServerToolbar({
@@ -41,7 +42,7 @@ export function ServerToolbar({
   refreshing,
   onRefresh,
   refreshLabel,
-  onJoinByAddress,
+  onAddServer,
 }: Props) {
   const set = (patch: Partial<Filters>) => onChange({ ...filters, ...patch });
   const chips = filterChips(filters);
@@ -112,18 +113,25 @@ export function ServerToolbar({
             <span className="data text-foreground">{count.format(shown)}</span>
             {shown !== total && <> of {count.format(total)}</>} {total === 1 ? "server" : "servers"}
           </p>
+          {/* Folds to its icon below xl, as the sidebar does, so the toolbar still fits the smallest window. */}
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon-sm" aria-label="Join by address" onClick={onJoinByAddress}>
-                <Link className="size-4" aria-hidden />
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-1.5 px-2.5 text-[13px] font-normal max-xl:w-8 max-xl:px-0"
+                onClick={onAddServer}
+              >
+                <Plus aria-hidden />
+                <span className="max-xl:sr-only">Add server</span>
               </Button>
             </TooltipTrigger>
-            <TooltipContent>Join by address</TooltipContent>
+            <TooltipContent className="xl:hidden">Add server</TooltipContent>
           </Tooltip>
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
-                variant="ghost"
+                variant="outline"
                 size="icon-sm"
                 aria-label={refreshLabel}
                 disabled={refreshing}
