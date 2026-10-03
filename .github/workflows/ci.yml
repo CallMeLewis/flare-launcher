@@ -1,0 +1,24 @@
+# Checks and builds every push to main and every pull request, so a change that breaks either platform shows up before
+# it's released. The builds are kept for two weeks under the run's artifacts, for trying a change out.
+name: CI
+
+on:
+  push:
+    branches: [main]
+    paths-ignore: ["docs/**", "site/**", "README.md", "NOTICE.md", "TRADEMARKS.md", "LICENSE"]
+  pull_request:
+    branches: [main]
+    paths-ignore: ["docs/**", "site/**", "README.md", "NOTICE.md", "TRADEMARKS.md", "LICENSE"]
+
+permissions:
+  contents: read
+
+# A newer push to the same branch or pull request replaces a run still in progress.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build
+    uses: ./.github/workflows/build.yml
