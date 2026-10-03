@@ -1,0 +1,42 @@
+[package]
+name = "flare-launcher"
+version = "1.1.1-beta.1"
+description = "Flare Launcher: a server browser and mod launcher for DayZ"
+authors = ["CallMeLewis"]
+license = "GPL-3.0-or-later"
+repository = "https://github.com/CallMeLewis/flare-launcher"
+edition = "2024"
+rust-version = "1.90"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+name = "flare_launcher_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2.7.1", features = [] }
+
+[dependencies]
+serde_json = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+log = "0.4"
+tauri = { version = "2.12.1", features = [] }
+tauri-plugin-log = "2"
+tauri-plugin-opener = "2.7.0"
+thiserror = "2.0.21"
+futures = "0.3.34"
+tokio = { version = "1.53.1", features = ["net", "time", "sync", "macros", "rt-multi-thread"] }
+reqwest = { version = "0.13.5", default-features = false, features = ["json", "form", "gzip", "brotli", "native-tls"] }
+ping-async = "1.0.2"
+steamworks = "0.13.1"
+tauri-plugin-window-state = "2.5.0"
+tauri-plugin-dialog = "2.8.1"
+tauri-plugin-updater = "2.13.1"
+
+[target.'cfg(target_os = "linux")'.dependencies]
+gtk = "0.18.2"
+
+[target."cfg(windows)".dependencies]
+junction = "2.1.0"
+winreg = "0.56.0"
