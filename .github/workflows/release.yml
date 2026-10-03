@@ -1,5 +1,6 @@
 # Builds a release on Windows and Linux, signs it and publishes it as a GitHub release, then updates the update feed.
-# Runs when `pnpm release` pushes a v<version> tag. To build a tag again, run it from the Actions tab and choose the tag.
+# Runs when `pnpm release` pushes a v<version> tag. To build a tag again, run it from the Actions tab on main and enter
+# the tag: the workflow then comes from main, with any fixes, and the code from the tag.
 #
 # Needs the repository secret TAURI_SIGNING_PRIVATE_KEY (the contents of the update signing key). With the secrets
 # CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID it also copies the feed to the old address on R2, which copies installed
@@ -10,9 +11,16 @@ on:
   push:
     tags: ["v*"]
   workflow_dispatch:
+    inputs:
+      tag:
+        description: Tag to build, such as v1.2.0
+        required: true
 
 permissions:
   contents: read
+
+env:
+  TAG: ${{ inputs.tag || github.ref_name }}
 
 concurrency:
   group: release
@@ -24,14 +32,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+        with:
+          ref: ${{ env.TAG }}
       - uses: actions/setup-node@v5
         with:
           node-version: 24
+          package-manager-cache: false
       - name: Tag matches package.json
         run: |
           version=$(node -p 'require("./package.json").version')
-          if [ "$GITHUB_REF_NAME" != "v$version" ]; then
-            echo "::error::Run this on the tag v$version (package.json's version), not $GITHUB_REF_NAME."
+          if [ "$TAG" != "v$version" ]; then
+            echo "::error::Run this on the tag v$version (package.json's version), not $TAG."
             exit 1
           fi
       - name: Release notes are written
@@ -43,6 +54,8 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v5
+        with:
+          ref: ${{ env.TAG }}
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v5
         with:
@@ -66,6 +79,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+        with:
+          ref: ${{ env.TAG }}
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v5
         with:
@@ -93,6 +108,8 @@ jobs:
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
     steps:
       - uses: actions/checkout@v5
+        with:
+          ref: ${{ env.TAG }}
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v5
         with:

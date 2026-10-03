@@ -110,8 +110,9 @@ match the public key in `src-tauri/tauri.conf.json`.
    which starts the workflow, then redeploys the download page so its changelog shows the new version once it is out.
    It refuses to run with uncommitted or unpushed changes. Follow the build with `gh run watch`.
 
-To build a tag again (after a failed run, say), run the Release workflow from the Actions tab and choose the tag. It
-replaces that release's builds.
+To build a tag again (after a failed run, say), run the Release workflow from the Actions tab on `main` and enter the tag
+(or `gh workflow run release.yml -f tag=v<version>`). The workflow comes from `main`, so fixes to it apply, and the code
+from the tag. It replaces that release's builds.
 
 Copies installed before the move to GitHub read the old feed on Cloudflare R2, at
 `https://updates.darkzone.dev/dayz-server-launcher/`. `pnpm release:mirror` copies both channel files there (needs
