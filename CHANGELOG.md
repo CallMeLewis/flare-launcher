@@ -3,6 +3,10 @@
 What changed in each version of Flare Launcher, newest first. Versions before 1.1.0 were released as DayZ Server
 Launcher.
 
+## 1.1.2 - 2026-10-04
+
+- Join by address is now the Add server button, with a plus icon, beside the refresh button, so it's easier to find.
+
 ## 1.1.1 - 2026-10-03
 
 - New LAN list in the sidebar, showing the DayZ servers on your network with their mods, ready to join like any other server, even without an internet connection.
