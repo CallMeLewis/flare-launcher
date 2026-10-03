@@ -3,19 +3,12 @@
 What changed in each version of Flare Launcher, newest first. Versions before 1.1.0 were released as DayZ Server
 Launcher.
 
-## 1.1.1-beta.3 - 2026-10-03
-
-- Fixed a server running on the same computer as the launcher showing several times in the LAN list, once for each of the computer's network connections.
-
-## 1.1.1-beta.2 - 2026-10-03
+## 1.1.1 - 2026-10-03
 
 - New LAN list in the sidebar, showing the DayZ servers on your network with their mods, ready to join like any other server, even without an internet connection.
 - New Join by address button next to the refresh button, for joining a server that isn't in the list by typing its address; favourites and recent servers added this way stay available.
 - Play now shows what it is doing, from checking mods to waiting for DayZ to open, and the When DayZ starts setting in Settings > General now waits until the game is running.
 - On Linux, fixed Play not starting DayZ from the AppImage on newer systems such as Ubuntu 25.04.
-
-## 1.1.1-beta.1 - 2026-10-03
-
 - On Linux, fixed Steam still showing you as playing DayZ after the launcher had finished downloading a server's mods.
 
 ## 1.1.0 - 2026-10-03
