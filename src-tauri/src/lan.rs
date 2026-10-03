@@ -4,7 +4,7 @@
 //! A search sends a server info query to every machine on each network this computer is on, at the query ports DayZ
 //! servers use by default, then asks each server that answers for its details and mods.
 
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 use std::time::Duration;
 
@@ -44,19 +44,39 @@ fn search_targets() -> Vec<Ipv4Addr> {
   targets
 }
 
-/// This computer's own addresses, to spot a server on it that answered twice.
+/// This computer's own addresses, to spot a server running on it.
 fn own_addresses() -> HashSet<IpAddr> {
   if_addrs::get_if_addrs().unwrap_or_default().into_iter().map(|interface| interface.ip()).collect()
 }
 
-/// Drops the copy of a server that answered both on this computer's loopback address and on its network address,
-/// keeping the network one.
-fn without_loopback_twins(found: HashSet<SocketAddr>, own: &HashSet<IpAddr>) -> Vec<SocketAddr> {
-  let twinned = |addr: &SocketAddr| {
-    addr.ip().is_loopback()
-      && found.iter().any(|other| other.port() == addr.port() && !other.ip().is_loopback() && own.contains(&other.ip()))
-  };
-  let mut kept: Vec<SocketAddr> = found.iter().filter(|addr| !twinned(addr)).copied().collect();
+/// The address this computer has on its main network, the one its default route goes through. Connecting a UDP socket
+/// sends nothing; it only picks the route. `None` without a default route.
+fn main_address() -> Option<IpAddr> {
+  let socket = std::net::UdpSocket::bind((Ipv4Addr::UNSPECIFIED, 0)).ok()?;
+  // An address reserved for documentation, reached through the default route like any other.
+  socket.connect((Ipv4Addr::new(192, 0, 2, 1), 9)).ok()?;
+  let ip = socket.local_addr().ok()?.ip();
+  (!ip.is_unspecified()).then_some(ip)
+}
+
+/// A server on this computer answers on every one of its addresses: loopback, the main network, and virtual adapters
+/// such as WSL, VirtualBox or a VPN. Keeps one address per server: the main network's, which other players see too,
+/// then loopback, then the lowest.
+fn one_per_server_here(found: HashSet<SocketAddr>, own: &HashSet<IpAddr>, main: Option<IpAddr>) -> Vec<SocketAddr> {
+  let rank = |addr: SocketAddr| (Some(addr.ip()) != main, !addr.ip().is_loopback(), addr);
+  let mut here: HashMap<u16, SocketAddr> = HashMap::new();
+  let mut kept = Vec::new();
+  for addr in found {
+    if !own.contains(&addr.ip()) && !addr.ip().is_loopback() {
+      kept.push(addr);
+      continue;
+    }
+    let best = here.entry(addr.port()).or_insert(addr);
+    if rank(addr) < rank(*best) {
+      *best = addr;
+    }
+  }
+  kept.extend(here.into_values());
   kept.sort();
   kept
 }
@@ -86,7 +106,7 @@ async fn search() -> Result<Vec<SocketAddr>> {
       Err(_) => break,
     }
   }
-  Ok(without_loopback_twins(found, &own_addresses()))
+  Ok(one_per_server_here(found, &own_addresses(), main_address()))
 }
 
 /// Asks a server for everything the browser shows, and the mods it needs.
@@ -300,14 +320,30 @@ mod tests {
   }
 
   #[test]
-  fn keeps_the_network_copy_of_a_server_on_this_computer() {
-    let own: HashSet<IpAddr> = ["127.0.0.1".parse().unwrap(), "192.168.1.5".parse().unwrap()].into();
-    let found: HashSet<SocketAddr> =
-      ["127.0.0.1:27016", "192.168.1.5:27016", "127.0.0.1:27017", "192.168.1.9:27016"]
-        .iter()
-        .map(|a| a.parse().unwrap())
-        .collect();
-    let kept: Vec<String> = without_loopback_twins(found, &own).iter().map(ToString::to_string).collect();
-    assert_eq!(kept, ["127.0.0.1:27017", "192.168.1.5:27016", "192.168.1.9:27016"]);
+  fn lists_a_server_on_this_computer_once() {
+    // This computer: loopback, the main network, Tailscale, WSL and VirtualBox's host-only network.
+    let own: HashSet<IpAddr> = ["127.0.0.1", "192.168.1.10", "100.98.225.107", "172.31.208.1", "192.168.56.1"]
+      .iter()
+      .map(|ip| ip.parse().unwrap())
+      .collect();
+    let main = Some("192.168.1.10".parse().unwrap());
+    let addrs = |list: &[&str]| -> HashSet<SocketAddr> { list.iter().map(|a| a.parse().unwrap()).collect() };
+    let kept = |found, main| -> Vec<String> {
+      one_per_server_here(found, &own, main).iter().map(ToString::to_string).collect()
+    };
+
+    // One server answering on every address, a second one only on loopback, and another computer's server.
+    let found = addrs(&[
+      "100.98.225.107:27016",
+      "172.31.208.1:27016",
+      "192.168.1.10:27016",
+      "192.168.56.1:27016",
+      "127.0.0.1:27016",
+      "127.0.0.1:27017",
+      "192.168.1.9:27016",
+    ]);
+    assert_eq!(kept(found.clone(), main), ["127.0.0.1:27017", "192.168.1.9:27016", "192.168.1.10:27016"]);
+    // Without a main network, loopback is kept.
+    assert_eq!(kept(found, None), ["127.0.0.1:27016", "127.0.0.1:27017", "192.168.1.9:27016"]);
   }
 }
