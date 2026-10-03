@@ -84,31 +84,39 @@ installed.
 ## The old name
 
 The launcher was first called DayZ Server Launcher. A few things keep that name on purpose, so installed copies carry
-on working: the update feed (`updates.darkzone.dev/dayz-server-launcher/`), the app identifier
+on working: the old update feed (`updates.darkzone.dev/dayz-server-launcher/`), the app identifier
 (`com.callmelewis.dayzserverlauncher`, which holds players' settings), the signing-key folder and the `!dzsl` mod-link
 folder. On Windows, the first Flare Launcher installer removes an old DayZ Server Launcher install and recreates its
 shortcuts under the new name.
 
 ## Releasing
 
-Only the maintainer can publish: releases are signed with a private key that never leaves their machine, and uploaded
-to their Cloudflare account.
+Releases are built and published by the Release workflow (`.github/workflows/release.yml`) on GitHub Actions: it builds
+the Windows installer and the Linux AppImage, .deb and .rpm, signs them, publishes them as the GitHub release
+`v<version>` and then updates the update feed.
 
-The launcher updates itself from a feed on Cloudflare R2, served at `https://updates.darkzone.dev/dayz-server-launcher/`:
-`latest.json` for the stable channel and `beta.json` for beta. Each build is signed with the key at
-`~/.dayz-server-launcher/update-signing-key` (back it up: without it no further updates can be shipped), and the
-launcher refuses an update whose signature or signed version doesn't match the public key in `src-tauri/tauri.conf.json`.
+The update feed is the GitHub release tagged `updater`, at
+`https://github.com/CallMeLewis/flare-launcher/releases/download/updater/`: `latest.json` for the stable channel and
+`beta.json` for beta, each pointing at the builds on its version's release. A stable release also updates `beta.json`
+when it is newer than the latest beta. Builds are signed with the update signing key, kept at
+`~/.dayz-server-launcher/update-signing-key` (back it up: without it no further updates can be shipped) and in the
+repository secret `TAURI_SIGNING_PRIVATE_KEY`. The launcher refuses an update whose signature or signed version doesn't
+match the public key in `src-tauri/tauri.conf.json`.
 
 1. Set the new version in `package.json` (`tauri.conf.json` reads it from there). `1.2.0` is stable, `1.2.0-beta.1` is
    beta.
 2. Add a section for the version at the top of `CHANGELOG.md`, following [release-notes.md](release-notes.md).
-3. Build both platforms: `pnpm dist:cross` and `pnpm dist:linux` on Linux (or `pnpm dist` for the Windows installer
-   on Windows). Every release needs both.
-4. Once per machine: `pnpm exec wrangler login`.
-5. Commit and push, then `pnpm release`. It signs both builds, uploads them, then uploads the channel file. A stable
-   release also updates `beta.json` when it is newer than the latest beta. Then it tags the commit `v<version>`,
-   pushes the tag, and redeploys the download page so its changelog shows the new version. It refuses to run with
-   uncommitted or unpushed changes.
+3. Commit and push, then `pnpm release`. It checks the release notes, tags the commit `v<version>` and pushes the tag,
+   which starts the workflow, then redeploys the download page so its changelog shows the new version once it is out.
+   It refuses to run with uncommitted or unpushed changes. Follow the build with `gh run watch`.
+
+To build a tag again (after a failed run, say), run the Release workflow from the Actions tab and choose the tag. It
+replaces that release's builds.
+
+Copies installed before the move to GitHub read the old feed on Cloudflare R2, at
+`https://updates.darkzone.dev/dayz-server-launcher/`. `pnpm release:mirror` copies both channel files there (needs
+`pnpm exec wrangler login`); with the repository secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` the workflow
+does it after every release. Once a channel's first GitHub release is mirrored, its players move over with that update.
 
 To try the update flow without publishing, write a feed to a folder with `pnpm release:feed <dir> <url>`, serve the
 folder at `<url>`, and start a development build with `DZSL_UPDATE_TEST_URL=<url>`. Development builds otherwise don't

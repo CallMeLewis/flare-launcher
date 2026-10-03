@@ -19,8 +19,9 @@
     "dist": "pnpm changelog && tauri build --bundles nsis",
     "dist:cross": "pnpm changelog && tauri build --runner cargo-xwin --target x86_64-pc-windows-msvc --bundles nsis",
     "dist:linux": "pnpm changelog && node scripts/build-linux.mjs",
-    "release": "node scripts/publish-update.mjs publish",
+    "release": "node scripts/publish-update.mjs release",
     "release:feed": "node scripts/publish-update.mjs feed",
+    "release:mirror": "node scripts/publish-update.mjs mirror",
     "site": "wrangler dev --config site/wrangler.jsonc",
     "site:deploy": "wrangler deploy --config site/wrangler.jsonc"
   },

@@ -33,5 +33,5 @@ release that only works on one of them is not finished.
 
 ## Releases
 
-- Every release carries both builds; `pnpm release` refuses to publish until both exist.
+- Every release carries both builds; the Release workflow publishes nothing unless both platforms built.
 - When a change only affects one platform, say so in its release-notes bullet (for example "On Linux, ...").

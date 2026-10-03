@@ -15,7 +15,7 @@ Every version's notes are a section of [`CHANGELOG.md`](../CHANGELOG.md), newest
 
 - The heading is `## ` and the version, then ` - ` and the release date (YYYY-MM-DD).
 - The build stops if the version in `package.json` has no section, or the section has no bullets.
-- The launcher shows the running version's section in Settings > About, and `pnpm release` puts it in the update
+- The launcher shows the running version's section in Settings > About, and the release puts it in the update
   feed so the launcher can show it when the update is offered. The download page's changelog lists every section.
 - A beta gets its own section (`## 1.2.0-beta.1`) while it is current. When the stable version ships, write its
   section fresh for someone coming from the last stable version, and delete the beta sections: each beta build
