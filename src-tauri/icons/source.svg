@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <rect x="48" y="48" width="928" height="928" rx="208" fill="#0B1120"/>
+  <rect x="48" y="48" width="928" height="928" rx="208" fill="none" stroke="#22C55E" stroke-opacity="0.35" stroke-width="12"/>
+  <!-- A green signal flare: a smoke trail rising to a burst. Flat, in the launcher's primary green. -->
+  <g fill="none" stroke="#22C55E" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M262 806 Q 300 590 470 552" stroke-width="60" stroke-opacity="0.5"/>
+    <g stroke-width="60"><line x1="590.0" y1="265.0" x2="590.0" y2="168.0"/><line x1="706.7" y1="313.3" x2="775.3" y2="244.7"/><line x1="755.0" y1="430.0" x2="852.0" y2="430.0"/><line x1="706.7" y1="546.7" x2="775.3" y2="615.3"/><line x1="590.0" y1="595.0" x2="590.0" y2="692.0"/><line x1="425.0" y1="430.0" x2="328.0" y2="430.0"/><line x1="473.3" y1="313.3" x2="404.7" y2="244.7"/></g>
+  </g>
+  <circle cx="590" cy="430" r="100" fill="#22C55E"/>
+</svg>
