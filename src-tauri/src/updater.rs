@@ -1,4 +1,5 @@
-//! Keeps the launcher up to date from the update feed on GitHub Releases.
+//! Keeps the launcher up to date from the update feed on Cloudflare R2. The
+//! feed points at the builds on each version's GitHub release.
 //!
 //! Nothing downloads or installs without the player asking: downloading and
 //! installing are separate actions, and installing is only reached through a
@@ -24,10 +25,9 @@ use serde::{Deserialize, Serialize};
 use tauri::{AppHandle, Emitter, Manager, State};
 use tauri_plugin_updater::{Update, UpdaterExt};
 
-/// Must match `feedUrl` in scripts/publish-update.mjs: the GitHub release that holds the channel files. Every installed
-/// copy checks this address, so moving it would strand them. Copies from before the move to GitHub read
-/// `https://updates.darkzone.dev/dayz-server-launcher/`, which `pnpm release:mirror` keeps in step.
-const FEED_URL: &str = "https://github.com/CallMeLewis/flare-launcher/releases/download/updater/";
+/// Must match `feedUrl` in scripts/publish-update.mjs. Keeps the launcher's first name, DayZ Server Launcher: every
+/// installed copy checks this address, so moving it would strand them.
+const FEED_URL: &str = "https://updates.darkzone.dev/dayz-server-launcher/";
 const CHECK_INTERVAL: Duration = Duration::from_secs(6 * 60 * 60);
 const PROGRESS_INTERVAL: Duration = Duration::from_millis(250);
 /// A check that hasn't heard back by then gives up, rather than leaving the window showing it as checking.

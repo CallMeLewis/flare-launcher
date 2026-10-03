@@ -6,9 +6,10 @@
 import changelogText from "../../CHANGELOG.md";
 import { compareVersions, parseChangelog } from "../../scripts/changelog.mjs";
 
-// The update feed: the GitHub release that holds the channel files, each pointing at its version's own release.
-const FEED = "https://github.com/CallMeLewis/flare-launcher/releases/download/updater/latest.json";
-const BETA_FEED = "https://github.com/CallMeLewis/flare-launcher/releases/download/updater/beta.json";
+// The update feed on R2, each channel file pointing at its version's GitHub release. Still at the launcher's first name,
+// DayZ Server Launcher, which installed copies check for updates.
+const FEED = "https://updates.darkzone.dev/dayz-server-launcher/latest.json";
+const BETA_FEED = "https://updates.darkzone.dev/dayz-server-launcher/beta.json";
 
 /** The page's name for each download, and the feed's. `linux` is the AppImage, which /download/linux has always
  * given. */

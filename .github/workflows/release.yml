@@ -1,11 +1,10 @@
 # Checks the tag and the repo, builds a release on Windows and Linux, signs it and publishes it as a GitHub release, then
-# updates the update feed.
+# updates the update feed on R2 to point at it.
 # Runs when `pnpm release` pushes a v<version> tag. To build a tag again, run it from the Actions tab on main and enter
 # the tag: the workflow then comes from main, with any fixes, and the code from the tag.
 #
-# Needs the repository secret TAURI_SIGNING_PRIVATE_KEY (the contents of the update signing key). With the secrets
-# CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID it also copies the feed to the old address on R2, which copies installed
-# before the move to GitHub still read.
+# Needs the repository secrets TAURI_SIGNING_PRIVATE_KEY (the contents of the update signing key), and
+# CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID for writing the feed to R2.
 name: Release
 
 on:
@@ -91,6 +90,3 @@ jobs:
         run: node scripts/publish-update.mjs publish
         env:
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
-      - name: Copy the feed to the old address
-        if: env.CLOUDFLARE_API_TOKEN != ''
-        run: node scripts/publish-update.mjs mirror

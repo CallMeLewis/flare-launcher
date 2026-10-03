@@ -84,7 +84,7 @@ installed.
 ## The old name
 
 The launcher was first called DayZ Server Launcher. A few things keep that name on purpose, so installed copies carry
-on working: the old update feed (`updates.darkzone.dev/dayz-server-launcher/`), the app identifier
+on working: the update feed's address (`updates.darkzone.dev/dayz-server-launcher/`), the app identifier
 (`com.callmelewis.dayzserverlauncher`, which holds players' settings), the signing-key folder and the `!dzsl` mod-link
 folder. On Windows, the first Flare Launcher installer removes an old DayZ Server Launcher install and recreates its
 shortcuts under the new name.
@@ -95,9 +95,9 @@ Releases are built and published by the Release workflow (`.github/workflows/rel
 the Windows installer and the Linux AppImage, .deb and .rpm, signs them, publishes them as the GitHub release
 `v<version>` and then updates the update feed.
 
-The update feed is the GitHub release tagged `updater`, at
-`https://github.com/CallMeLewis/flare-launcher/releases/download/updater/`: `latest.json` for the stable channel and
-`beta.json` for beta, each pointing at the builds on its version's release. A stable release also updates `beta.json`
+The update feed is on Cloudflare R2, at `https://updates.darkzone.dev/dayz-server-launcher/`: `latest.json` for the
+stable channel and `beta.json` for beta, each pointing at the builds on its version's GitHub release. The workflow
+writes it with the repository secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`. A stable release also updates `beta.json`
 when it is newer than the latest beta. Builds are signed with the update signing key, kept at
 `~/.dayz-server-launcher/update-signing-key` (back it up: without it no further updates can be shipped) and in the
 repository secret `TAURI_SIGNING_PRIVATE_KEY`. The launcher refuses an update whose signature or signed version doesn't
@@ -113,11 +113,6 @@ match the public key in `src-tauri/tauri.conf.json`.
 To build a tag again (after a failed run, say), run the Release workflow from the Actions tab on `main` and enter the tag
 (or `gh workflow run release.yml -f tag=v<version>`). The workflow comes from `main`, so fixes to it apply, and the code
 from the tag. It replaces that release's builds.
-
-Copies installed before the move to GitHub read the old feed on Cloudflare R2, at
-`https://updates.darkzone.dev/dayz-server-launcher/`. `pnpm release:mirror` copies both channel files there (needs
-`pnpm exec wrangler login`); with the repository secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` the workflow
-does it after every release. Once a channel's first GitHub release is mirrored, its players move over with that update.
 
 To try the update flow without publishing, write a feed to a folder with `pnpm release:feed <dir> <url>`, serve the
 folder at `<url>`, and start a development build with `DZSL_UPDATE_TEST_URL=<url>`. Development builds otherwise don't

@@ -21,7 +21,6 @@
     "dist:linux": "pnpm changelog && node scripts/build-linux.mjs",
     "release": "node scripts/publish-update.mjs release",
     "release:feed": "node scripts/publish-update.mjs feed",
-    "release:mirror": "node scripts/publish-update.mjs mirror",
     "site": "wrangler dev --config site/wrangler.jsonc",
     "site:deploy": "wrangler deploy --config site/wrangler.jsonc"
   },

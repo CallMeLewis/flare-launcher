@@ -35,7 +35,7 @@
     "updater": {
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDg3NUI2NTJEM0RFMTY5RkEKUldUNmFlRTlMV1ZiaDlWTzlUeWZRREI2U3hKREpDZEhFTlAwQVN3YWJBNU1QRDY3V3NIUG44S0oK",
       "endpoints": [
-        "https://github.com/CallMeLewis/flare-launcher/releases/download/updater/latest.json"
+        "https://updates.darkzone.dev/dayz-server-launcher/latest.json"
       ],
       "requireSignedVersion": true,
       "windows": {

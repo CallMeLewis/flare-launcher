@@ -5,19 +5,15 @@
 //                                                    v<version> and push the tag, which starts the workflow, then
 //                                                    redeploy the download page so its changelog shows the new version
 //   node scripts/publish-update.mjs publish          (the workflow) sign the builds, publish them as the GitHub release
-//                                                    v<version>, then update the channel file on the update feed
-//   node scripts/publish-update.mjs mirror           copy the channel files to the old feed on Cloudflare R2 (needs
+//                                                    v<version>, then update the channel file on the update feed (needs
 //                                                    `pnpm exec wrangler login`, or a Cloudflare API token in CI)
 //   node scripts/publish-update.mjs feed <dir> [url] sign local builds and write a feed to <dir> instead of
 //                                                    publishing, for testing; [url] is where <dir> will be served
 //   node scripts/publish-update.mjs keygen           create the signing key (once) and print its public key
 //
-// The update feed is the GitHub release tagged "updater": the app's stable channel reads its latest.json and its beta
-// channel its beta.json. A stable release is also published as beta.json when it is newer than the latest beta. Each
-// channel file points at the builds attached to that version's own release.
-//
-// Copies installed before the move to GitHub read the same files from https://updates.darkzone.dev, so `mirror` copies
-// them there. One mirrored release is enough to move them over: it is a build that reads the GitHub feed.
+// The update feed is on Cloudflare R2, at https://updates.darkzone.dev/dayz-server-launcher/: the app's stable channel
+// reads latest.json and its beta channel beta.json. A stable release is also published as beta.json when it is newer
+// than the latest beta. Each channel file points at the builds attached to that version's GitHub release.
 //
 // Every release carries every build, so no player is left with a feed that has nothing for them. Each is signed with
 // the private key (a repository secret in CI), and the signature is bound to the version. The app refuses an update
@@ -35,12 +31,11 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const keyFromEnv = Boolean(process.env.TAURI_SIGNING_PRIVATE_KEY);
 const keyPath = process.env.DZSL_UPDATE_SIGNING_KEY ?? join(homedir(), ".dayz-server-launcher", "update-signing-key");
 const repo = process.env.GITHUB_REPOSITORY ?? "CallMeLewis/flare-launcher";
-// The release that holds the channel files. Must match FEED_URL in src-tauri/src/updater.rs.
-const feedTag = "updater";
-const feedUrl = `https://github.com/${repo}/releases/download/${feedTag}/`;
-// The feed before the move to GitHub. Installed copies older than that still read it.
+// The R2 bucket behind https://updates.darkzone.dev. Must match FEED_URL in src-tauri/src/updater.rs. Named after the
+// launcher's first name, DayZ Server Launcher, and kept: installed copies check this address for updates.
 const r2Bucket = process.env.DZSL_R2_BUCKET ?? "darkzone-updates";
 const r2Prefix = "dayz-server-launcher";
+const feedUrl = `https://updates.darkzone.dev/${r2Prefix}/`;
 // Run through Node rather than the .bin shim, which on Windows is a .cmd that needs a shell, and a shell drops empty
 // arguments and splits ones with spaces.
 const tauri = join(root, "node_modules", "@tauri-apps", "cli", "tauri.js");
@@ -103,8 +98,7 @@ try {
     const release = prepare();
     await publishRelease(release);
     await publishFeed(release);
-  } else if (command === "mirror") await mirror();
-  else throw new Error(`Unknown command "${command}". Use release, publish, mirror, feed or keygen.`);
+  } else throw new Error(`Unknown command "${command}". Use release, publish, feed or keygen.`);
 } catch (error) {
   console.error(`\n${error.message}`);
   process.exit(1);
@@ -231,7 +225,6 @@ async function publishRelease(release) {
  * release too, unless a newer beta is already out.
  */
 async function publishFeed(release) {
-  ensureFeedRelease();
   const builds = `https://github.com/${repo}/releases/download/v${release.version}/`;
   const file = join(target, "github-release", channelFile(release));
   writeFileSync(file, JSON.stringify(manifest(release, builds), null, 2) + "\n");
@@ -241,57 +234,25 @@ async function publishFeed(release) {
     if (beta && compareVersions(release.version, beta) <= 0) {
       console.log(`Left beta.json on ${beta}, which is newer than ${release.version}.`);
     } else {
-      copyFileSync(file, join(dirname(file), "beta.json"));
       names.push("beta.json");
     }
   }
-  gh(["release", "upload", feedTag, ...names.map((name) => join(dirname(file), name)), "--clobber"]);
+  for (const name of names) {
+    const object = `${r2Bucket}/${r2Prefix}/${name}`;
+    const flags = ["--file", file, "--remote", "--content-type", "application/json", "--cache-control", "no-cache"];
+    run(process.execPath, [wrangler, "r2", "object", "put", object, ...flags]);
+  }
   console.log(`Published ${release.version} to ${names.map((name) => `${feedUrl}${name}`).join(" and ")}`);
-}
-
-/** The release that holds the feed, made the first time. A pre-release, so it never shows as the latest version. */
-function ensureFeedRelease() {
-  if (gh(["release", "view", feedTag, "--json", "tagName"], true)) return;
-  const notes =
-    "The launcher's update feed: latest.json for the stable channel and beta.json for beta. Downloads are on each version's own release.";
-  gh(["release", "create", feedTag, "--title", "Update feed", "--notes", notes, "--prerelease", "--latest=false"]);
 }
 
 /** Version in a channel file on the live feed, or null if it has not been published. */
 async function publishedVersion(name) {
-  const response = await fetch(`${feedUrl}${name}`, { cache: "no-store" });
+  const response = await fetch(`${feedUrl}${name}?t=${Date.now()}`, { cache: "no-store" });
   if (response.status === 404) return null;
   if (!response.ok) throw new Error(`Could not read ${feedUrl}${name} (HTTP ${response.status}).`);
   const { version } = await response.json();
   if (!version) throw new Error(`${feedUrl}${name} has no version.`);
   return version;
-}
-
-/**
- * Copies both channel files to the old feed on R2, for copies installed before the move. Right after `publish` (as in
- * the workflow) it uses the files that just went up, as GitHub can take a moment to serve them; otherwise it copies
- * them from GitHub.
- */
-async function mirror() {
-  const dir = join(target, "mirror");
-  mkdirSync(dir, { recursive: true });
-  for (const name of ["latest.json", "beta.json"]) {
-    let file = join(target, "github-release", name);
-    if (!existsSync(file)) {
-      const response = await fetch(`${feedUrl}${name}`, { cache: "no-store" });
-      if (response.status === 404) {
-        console.log(`${name} isn't on GitHub yet; left the old feed's copy alone.`);
-        continue;
-      }
-      if (!response.ok) throw new Error(`Could not read ${feedUrl}${name} (HTTP ${response.status}).`);
-      file = join(dir, name);
-      writeFileSync(file, await response.text());
-    }
-    const object = `${r2Bucket}/${r2Prefix}/${name}`;
-    const flags = ["--file", file, "--remote", "--content-type", "application/json", "--cache-control", "no-cache"];
-    run(process.execPath, [wrangler, "r2", "object", "put", object, ...flags]);
-    console.log(`Mirrored ${name} to the old feed`);
-  }
 }
 
 /**
