@@ -111,9 +111,11 @@ jobs:
       - uses: actions/checkout@v5
         with:
           ref: ${{ inputs.ref }}
+      # Only runs the build script: pnpm runs inside the container, so there's no pnpm here to cache.
       - uses: actions/setup-node@v5
         with:
           node-version: 24
+          package-manager-cache: false
       # The build runs in a container, but the cache is keyed on the runner's Rust, which is the same stable release.
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
