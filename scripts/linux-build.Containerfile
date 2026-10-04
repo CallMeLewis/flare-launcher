@@ -1,6 +1,6 @@
 # Builds the Linux packages (AppImage, .deb and .rpm) on Ubuntu 22.04. Linux programs run on systems at least as new
 # as the one they were built on, so building here makes them work on Ubuntu 22.04, Debian 12 and anything newer.
-# Used by `pnpm dist:linux` (scripts/build-linux.mjs).
+# Used by `pnpm dist:linux` (scripts/build-linux.ts).
 FROM docker.io/library/ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -16,10 +16,10 @@ RUN curl -fsSL "https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-l
 
 ENV RUSTUP_HOME=/usr/local/rustup CARGO_HOME=/usr/local/cargo PATH=/usr/local/cargo/bin:$PATH
 # Rust itself is installed on the first build, from the repo's rust-toolchain.toml, into a volume (see
-# scripts/build-linux.mjs), so the container uses the same version as everywhere else.
+# scripts/build-linux.ts), so the container uses the same version as everywhere else.
 RUN curl -fsSL https://sh.rustup.rs | sh -s -- -y --profile minimal --default-toolchain none
 
-# pnpm's store lives in a volume (see scripts/build-linux.mjs). Left alone, pnpm puts it beside the project, which here is
+# pnpm's store lives in a volume (see scripts/build-linux.ts). Left alone, pnpm puts it beside the project, which here is
 # the repo itself. Set in the global config, so pnpm runs started by other tools, such as Tauri's frontend build, use it.
 RUN mkdir -p /root/.config/pnpm && printf 'store-dir=/pnpm-store\n' > /root/.config/pnpm/rc
 

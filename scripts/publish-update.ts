@@ -1,14 +1,14 @@
 // Publishes releases to GitHub. The builds are made and published by the Release workflow
 // (.github/workflows/release.yml), which runs when a v<version> tag is pushed.
 //
-//   node scripts/publish-update.mjs release          (pnpm release) check the version is ready, tag the commit
+//   node scripts/publish-update.ts release           (pnpm release) check the version is ready, tag the commit
 //                                                    v<version> and push the tag, which starts the workflow
-//   node scripts/publish-update.mjs publish          (the workflow) sign the builds, publish them as the GitHub release
+//   node scripts/publish-update.ts publish           (the workflow) sign the builds, publish them as the GitHub release
 //                                                    v<version>, then update the channel file on the update feed (needs
 //                                                    `pnpm exec wrangler login`, or a Cloudflare API token in CI)
-//   node scripts/publish-update.mjs feed <dir> [url] sign local builds and write a feed to <dir> instead of
+//   node scripts/publish-update.ts feed <dir> [url]  sign local builds and write a feed to <dir> instead of
 //                                                    publishing, for testing; [url] is where <dir> will be served
-//   node scripts/publish-update.mjs keygen           create the signing key (once) and print its public key
+//   node scripts/publish-update.ts keygen            create the signing key (once) and print its public key
 //
 // The update feed is on Cloudflare R2, at https://updates.darkzone.dev/dayz-server-launcher/: the app's stable channel
 // reads latest.json and its beta channel beta.json. A stable release is also published as beta.json when it is newer
@@ -23,7 +23,7 @@ import { copyFileSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSyn
 import { homedir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { compareVersions, notesFor } from "./changelog.mjs";
+import { compareVersions, notesFor } from "./changelog.ts";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 // In CI the key comes from the TAURI_SIGNING_PRIVATE_KEY secret, which the Tauri CLI reads itself.
@@ -43,7 +43,28 @@ const target = join(root, "src-tauri", "target");
 const linuxBundles = join(target, "linux", "release", "bundle");
 
 /** What each release ships. `platform` is the updater's key for it; `paths` are where Tauri may have built it. */
-const BUILDS = [
+interface Build {
+  platform: string;
+  paths: (product: string, version: string) => string[];
+  uploadName: (version: string) => string;
+  buildWith: string;
+}
+
+/** A version ready to publish: its notes as "- " lines, and every build signed. */
+interface Release {
+  version: string;
+  notes: string;
+  builds: { platform: string; file: string; uploadName: string; signature: string }[];
+  prerelease: boolean;
+}
+
+/** The parts of src-tauri/tauri.conf.json used here. */
+interface TauriConfig {
+  productName: string;
+  plugins?: { updater?: { pubkey?: string } };
+}
+
+const BUILDS: Build[] = [
   {
     platform: "windows-x86_64",
     paths: (product, version) =>
@@ -53,7 +74,7 @@ const BUILDS = [
     uploadName: (version) => `Flare-Launcher-Setup-${version}.exe`,
     buildWith: "pnpm dist:cross (pnpm dist on Windows)",
   },
-  // The Linux builds come from the Ubuntu 22.04 container (scripts/build-linux.mjs), so they run on older systems too.
+  // The Linux builds come from the Ubuntu 22.04 container (scripts/build-linux.ts), so they run on older systems too.
   // Each install updates itself in its own format: the launcher looks for its own format's entry in the feed.
   {
     platform: "linux-x86_64-appimage",
@@ -81,7 +102,7 @@ try {
   if (command === "keygen") keygen();
   else if (command === "feed") {
     const [dir, url = "http://127.0.0.1:8765/"] = args;
-    if (!dir) throw new Error("Usage: node scripts/publish-update.mjs feed <dir> [url]");
+    if (!dir) throw new Error("Usage: node scripts/publish-update.ts feed <dir> [url]");
     const release = prepare();
     const out = resolve(dir);
     mkdirSync(out, { recursive: true });
@@ -98,11 +119,11 @@ try {
     await publishFeed(release);
   } else throw new Error(`Unknown command "${command}". Use release, publish, feed or keygen.`);
 } catch (error) {
-  console.error(`\n${error.message}`);
+  console.error(`\n${error instanceof Error ? error.message : error}`);
   process.exit(1);
 }
 
-function keygen() {
+function keygen(): void {
   if (existsSync(keyPath)) throw new Error(`A signing key already exists at ${keyPath}. Refusing to replace it.`);
   mkdirSync(dirname(keyPath), { recursive: true });
   run(process.execPath, [tauri, "signer", "generate", "--ci", "--password", "", "--write-keys", keyPath]);
@@ -113,12 +134,12 @@ function keygen() {
   console.log(`\nFor the Release workflow: gh secret set TAURI_SIGNING_PRIVATE_KEY < ${keyPath}`);
 }
 
-function packageVersion() {
+function packageVersion(): string {
   return JSON.parse(readFileSync(join(root, "package.json"), "utf8")).version;
 }
 
 /** The version's release notes as "- " lines, after checking the version is one the channels can carry. */
-function releaseNotes(version) {
+function releaseNotes(version: string): string {
   const prerelease = version.split("-")[1];
   if (prerelease && !/^beta(\.\d+)?$/.test(prerelease)) {
     throw new Error(
@@ -132,12 +153,12 @@ function releaseNotes(version) {
 }
 
 /** Checks the builds and their notes, then signs each build for this version. */
-function prepare() {
+function prepare(): Release {
   const version = packageVersion();
   const notes = releaseNotes(version);
-  const config = JSON.parse(readFileSync(join(root, "src-tauri", "tauri.conf.json"), "utf8"));
+  const config: TauriConfig = JSON.parse(readFileSync(join(root, "src-tauri", "tauri.conf.json"), "utf8"));
   if (!keyFromEnv && !existsSync(keyPath)) {
-    throw new Error(`No signing key at ${keyPath}. Run: node scripts/publish-update.mjs keygen`);
+    throw new Error(`No signing key at ${keyPath}. Run: node scripts/publish-update.ts keygen`);
   }
 
   const found = BUILDS.map((build) => ({ ...build, file: build.paths(config.productName, version).find(existsSync) }));
@@ -148,7 +169,8 @@ function prepare() {
   }
 
   const key = keyFromEnv ? [] : ["--private-key-path", keyPath];
-  const builds = found.map(({ platform, file, uploadName }) => {
+  const builds = found.map(({ platform, file: built, uploadName }) => {
+    const file = built!; // Every build was found, or the check above stopped.
     run(process.execPath, [tauri, "signer", "sign", ...key, "--password", "", "--app-version", version, file]);
     const signature = readFileSync(`${file}.sig`, "utf8").trim();
     if (keyId(signature) !== keyId(config.plugins?.updater?.pubkey ?? "")) {
@@ -165,16 +187,16 @@ function prepare() {
  * The id of the key behind a Tauri public key or signature: both are base64 of a minisign file whose second line is
  * base64 of a two-byte algorithm, then the eight-byte key id.
  */
-function keyId(base64) {
+function keyId(base64: string): string {
   const line = Buffer.from(base64, "base64").toString("utf8").split("\n")[1] ?? "";
   return Buffer.from(line, "base64").subarray(2, 10).toString("hex");
 }
 
-function channelFile(release) {
+function channelFile(release: Release): string {
   return release.prerelease ? "beta.json" : "latest.json";
 }
 
-function manifest(release, baseUrl) {
+function manifest(release: Release, baseUrl: string) {
   const base = baseUrl.endsWith("/") ? baseUrl : `${baseUrl}/`;
   return {
     version: release.version,
@@ -193,7 +215,7 @@ function manifest(release, baseUrl) {
  * The GitHub release v<version> with every build, made as a draft and only published once all of them are attached.
  * Running it again for the same version replaces the builds.
  */
-async function publishRelease(release) {
+async function publishRelease(release: Release): Promise<void> {
   const tag = `v${release.version}`;
   const staging = join(target, "github-release");
   rmSync(staging, { recursive: true, force: true });
@@ -222,7 +244,7 @@ async function publishRelease(release) {
  * The channel file last, so the app never sees a version whose builds are not there yet. Beta players get a stable
  * release too, unless a newer beta is already out.
  */
-async function publishFeed(release) {
+async function publishFeed(release: Release): Promise<void> {
   const builds = `https://github.com/${repo}/releases/download/v${release.version}/`;
   const file = join(target, "github-release", channelFile(release));
   writeFileSync(file, JSON.stringify(manifest(release, builds), null, 2) + "\n");
@@ -244,11 +266,11 @@ async function publishFeed(release) {
 }
 
 /** Version in a channel file on the live feed, or null if it has not been published. */
-async function publishedVersion(name) {
+async function publishedVersion(name: string): Promise<string | null> {
   const response = await fetch(`${feedUrl}${name}?t=${Date.now()}`, { cache: "no-store" });
   if (response.status === 404) return null;
   if (!response.ok) throw new Error(`Could not read ${feedUrl}${name} (HTTP ${response.status}).`);
-  const { version } = await response.json();
+  const { version } = (await response.json()) as { version?: string };
   if (!version) throw new Error(`${feedUrl}${name} has no version.`);
   return version;
 }
@@ -257,7 +279,7 @@ async function publishedVersion(name) {
  * Every release is tagged and built from its tag, so the tag has to name what is meant to ship: refuse uncommitted or
  * unpushed work, missing notes, and a version whose tag already points at another commit.
  */
-function checkReady() {
+function checkReady(): string {
   const version = packageVersion();
   releaseNotes(version);
   if (git(["status", "--porcelain"])) throw new Error("Commit your changes before releasing: every release is tagged.");
@@ -274,7 +296,7 @@ function checkReady() {
  * Tags the commit v<version>, like "Release 1.0.0", and pushes the tag, which starts the Release workflow. If the tag
  * is already on GitHub, run the workflow again from the Actions tab instead.
  */
-function tagRelease(version) {
+function tagRelease(version: string): void {
   const tag = `v${version}`;
   if (!git(["rev-parse", "--quiet", "--verify", `${tag}^{commit}`], true)) {
     run("git", ["tag", "--annotate", tag, "--message", `Release ${version}`]);
@@ -284,16 +306,16 @@ function tagRelease(version) {
 }
 
 /** A git command's output. `allowFailure` returns "" instead of throwing, for lookups that may find nothing. */
-function git(args, allowFailure = false) {
+function git(args: string[], allowFailure = false): string {
   return capture("git", args, allowFailure);
 }
 
 /** A GitHub CLI command's output, run against this repository. */
-function gh(args, allowFailure = false) {
+function gh(args: string[], allowFailure = false): string {
   return capture("gh", [...args, "--repo", repo], allowFailure);
 }
 
-function capture(file, args, allowFailure) {
+function capture(file: string, args: string[], allowFailure: boolean): string {
   const result = spawnSync(file, args, { cwd: root, encoding: "utf8" });
   if (result.status !== 0) {
     if (allowFailure) return "";
@@ -302,7 +324,7 @@ function capture(file, args, allowFailure) {
   return result.stdout.trim();
 }
 
-function run(file, args) {
+function run(file: string, args: string[]): void {
   const result = spawnSync(file, args, { stdio: "inherit" });
   if (result.status !== 0) throw new Error(`${[file, ...args].join(" ")} failed.`);
 }

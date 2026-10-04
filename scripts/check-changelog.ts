@@ -2,21 +2,21 @@
 // app bundles that section to show the running version's notes in Settings > About, and the release script puts it
 // in the update feed.
 //
-//   node scripts/check-changelog.mjs
+//   node scripts/check-changelog.ts
 import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { notesFor } from "./changelog.mjs";
+import { notesFor } from "./changelog.ts";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const { version } = JSON.parse(readFileSync(resolve(root, "package.json"), "utf8"));
+const { version }: { version: string } = JSON.parse(readFileSync(resolve(root, "package.json"), "utf8"));
 
 const notes = notesFor(readFileSync(resolve(root, "CHANGELOG.md"), "utf8"), version);
 if (!notes) fail(`CHANGELOG.md has no "## ${version}" section.`);
 if (notes.length === 0) fail(`The "## ${version}" section of CHANGELOG.md has no "- " bullet points.`);
 console.log(`Release notes for ${version}:\n\n${notes.map((item) => `- ${item}`).join("\n")}\n`);
 
-function fail(problem) {
+function fail(problem: string): never {
   console.error(`\n${problem}\nAdd release notes for ${version} (see docs/release-notes.md) before building.\n`);
   process.exit(1);
 }

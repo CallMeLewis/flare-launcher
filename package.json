@@ -10,7 +10,7 @@
   },
   "scripts": {
     "dev": "vite --host 127.0.0.1 --port 5173 --strictPort",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && tsc -p scripts && vite build",
     "tauri": "tauri",
     "app": "tauri dev",
     "app:build": "tauri build",
@@ -18,13 +18,13 @@
     "lint": "oxlint --deny-warnings",
     "format": "prettier --write . && cargo fmt --manifest-path src-tauri/Cargo.toml",
     "format:check": "prettier --check . && cargo fmt --check --manifest-path src-tauri/Cargo.toml",
-    "changelog": "node scripts/check-changelog.mjs",
-    "bump": "node scripts/bump-version.mjs",
+    "changelog": "node scripts/check-changelog.ts",
+    "bump": "node scripts/bump-version.ts",
     "dist": "pnpm changelog && tauri build --bundles nsis",
     "dist:cross": "pnpm changelog && tauri build --runner cargo-xwin --target x86_64-pc-windows-msvc --bundles nsis",
-    "dist:linux": "pnpm changelog && node scripts/build-linux.mjs",
-    "release": "node scripts/publish-update.mjs release",
-    "release:feed": "node scripts/publish-update.mjs feed"
+    "dist:linux": "pnpm changelog && node scripts/build-linux.ts",
+    "release": "node scripts/publish-update.ts release",
+    "release:feed": "node scripts/publish-update.ts feed"
   },
   "dependencies": {
     "@fontsource-variable/fira-code": "5.3.0",

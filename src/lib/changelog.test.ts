@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { compareVersions, notesFor, parseChangelog } from "../../scripts/changelog.mjs";
+import { compareVersions, notesFor, parseChangelog } from "../../scripts/changelog.ts";
 
 const changelog = `# Changelog
 

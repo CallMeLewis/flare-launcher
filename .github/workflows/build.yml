@@ -129,9 +129,9 @@ jobs:
         with:
           workspaces: src-tauri -> target/linux
           save-if: ${{ github.ref == 'refs/heads/main' }}
-      # Builds in the same Ubuntu 22.04 container as on a desktop (scripts/build-linux.mjs), with the runner's podman.
+      # Builds in the same Ubuntu 22.04 container as on a desktop (scripts/build-linux.ts), with the runner's podman.
       # The release notes were checked above, so this skips `pnpm dist:linux`'s own check.
-      - run: node scripts/build-linux.mjs
+      - run: node scripts/build-linux.ts
       - uses: actions/upload-artifact@v7
         with:
           name: linux

@@ -87,6 +87,6 @@ jobs:
           name: linux
           path: src-tauri/target/linux/release/bundle
       - name: Sign and publish
-        run: node scripts/publish-update.mjs publish
+        run: node scripts/publish-update.ts publish
         env:
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}

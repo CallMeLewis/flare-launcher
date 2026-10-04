@@ -9,7 +9,7 @@
 //! someone who already chose to update never installs an outdated version or
 //! one from the channel they left.
 //!
-//! Every installer is signed (scripts/publish-update.mjs) and the plugin
+//! Every installer is signed (scripts/publish-update.ts) and the plugin
 //! refuses one whose signature doesn't match the public key in
 //! tauri.conf.json, or whose signed version differs from the one the feed
 //! announces, so a tampered feed cannot push a different installer.
@@ -25,7 +25,7 @@ use serde::{Deserialize, Serialize};
 use tauri::{AppHandle, Emitter, Manager, State};
 use tauri_plugin_updater::{Update, UpdaterExt};
 
-/// Must match `feedUrl` in scripts/publish-update.mjs. Keeps the launcher's first name, DayZ Server Launcher: every
+/// Must match `feedUrl` in scripts/publish-update.ts. Keeps the launcher's first name, DayZ Server Launcher: every
 /// installed copy checks this address, so moving it would strand them.
 const FEED_URL: &str = "https://updates.darkzone.dev/dayz-server-launcher/";
 const CHECK_INTERVAL: Duration = Duration::from_secs(6 * 60 * 60);

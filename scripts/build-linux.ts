@@ -1,7 +1,7 @@
 // Builds the Linux AppImage, .deb and .rpm inside an Ubuntu 22.04 container (scripts/linux-build.Containerfile), so
 // they run on Ubuntu 22.04, Debian 12 and newer rather than only on systems as new as this one. Needs podman.
 //
-//   node scripts/build-linux.mjs     (pnpm dist:linux)
+//   node scripts/build-linux.ts     (pnpm dist:linux)
 //
 // Output goes to src-tauri/target/linux/release/bundle/{appimage,deb,rpm}/. The container keeps its own node_modules
 // and download caches in podman volumes, so the local node_modules is left alone and later builds are quicker.
@@ -13,7 +13,7 @@ import { fileURLToPath } from "node:url";
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const image = "flare-launcher-linux-build";
 
-function run(args) {
+function run(args: string[]) {
   const result = spawnSync("podman", args, { stdio: "inherit" });
   if (result.error) throw new Error(`podman couldn't be started (${result.error.message}). Install podman first.`);
   if (result.status !== 0) throw new Error(`podman ${args[0]} failed.`);
@@ -42,6 +42,6 @@ try {
   rmSync(join(root, ".pnpm-store"), { recursive: true, force: true });
   console.log("\nLinux builds are in src-tauri/target/linux/release/bundle/");
 } catch (error) {
-  console.error(`\n${error.message}`);
+  console.error(`\n${error instanceof Error ? error.message : error}`);
   process.exit(1);
 }
