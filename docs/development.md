@@ -1,7 +1,7 @@
 # Developing Flare Launcher
 
 Built with Tauri v2, Rust, React, TypeScript, Tailwind CSS and shadcn/ui. Every change has to work on both Windows and
-Linux: see [platforms.md](platforms.md) for how the two differ.
+Linux: see [Windows and Linux](#windows-and-linux).
 
 ## Run it
 
@@ -48,7 +48,9 @@ directly on this machine, for development.
 
 Each build stops if `CHANGELOG.md` has no section for the version being built (see [Releasing](#releasing)).
 
-## How it works on each platform
+## Windows and Linux
+
+The launcher ships for both, and a feature, fix or release that only works on one of them is not finished.
 
 - **Windows:** an NSIS installer and the launcher's own title bar. Mods are linked into the DayZ folder with
   junctions, and DayZ starts through `DayZ_BE.exe`. Steam is found through the registry.
@@ -61,6 +63,25 @@ Each build stops if `CHANGELOG.md` has no section for the version being built (s
 - Steam's library ships per platform: `src-tauri/steam_api64.dll` through `tauri.windows.conf.json` and
   `src-tauri/libsteam_api.so` through `tauri.linux.conf.json`. Both are Valve's redistributable Steamworks library,
   copied from the `steamworks-sys` crate.
+- DayZ is a Windows program on both, so anything passed to the game (such as `-mod=` paths) stays Windows-style.
+
+When writing code:
+
+- Put platform differences behind `cfg(windows)` / `cfg(target_os = "linux")` in Rust, with both branches written, not
+  one branch and a `todo!()`. Keep the frontend platform-neutral: ask the backend or the window rather than sniffing the
+  user agent.
+- Anything platform-specific added to bundling (resources, libraries) goes in `tauri.windows.conf.json` or
+  `tauri.linux.conf.json`, not in the shared `tauri.conf.json`.
+- Wording must suit both: "this computer", not "this PC" or "Windows", unless the text is about one platform only.
+
+Before opening a pull request:
+
+- Build both, `pnpm dist:cross` and `pnpm dist:linux`. Both must succeed.
+- Run the Linux build, not just compile it. Under Xvfb for most things; for anything about the window or title bar,
+  under Weston nested in Xvfb with `GDK_BACKEND=wayland`, because Ubuntu uses Wayland and behaves differently from X11.
+  The window is created with the system title bar because Wayland ignores turning it on later.
+- Say in the pull request which platform-specific parts you couldn't test (anything needing real Steam, DayZ or
+  Windows).
 
 What hasn't been tried for real yet: finding Steam through the registry, junctions, starting `DayZ_BE.exe`, the Windows
 ping path and mod downloads compile for Windows but haven't been run on a Windows PC with Steam and DayZ installed. The
@@ -79,25 +100,17 @@ installed.
 - `src-tauri/src/workshop.rs`: subscribes to and downloads mods through Steamworks.
 - `src-tauri/src/updater.rs`: checks for, downloads and installs launcher updates.
 - `src-tauri/src/app_menu.rs`: on Linux, moves the AppImage to `~/Applications` and adds it to the app menu.
-- `src-tauri/windows/installer-hooks.nsh`: removes an install made under the launcher's old name (see below).
+- `src-tauri/windows/installer-hooks.nsh`: removes an install made under the launcher's old name.
 - `scripts/`: the release tooling. `CHANGELOG.md` holds every version's notes, read through `scripts/changelog.mjs`.
-- `site/`: the download page.
-- `docs/design.md` and `docs/design-download-page.md`: the visual rules the launcher and the download page follow.
+- `docs/design.md`: the visual rules the launcher follows.
 - `src-tauri/icons/source.svg`: the icon artwork. Regenerate the icon set with `pnpm tauri icon src-tauri/icons/source.svg`.
-
-## The old name
-
-The launcher was first called DayZ Server Launcher. A few things keep that name on purpose, so installed copies carry
-on working: the update feed's address (`updates.darkzone.dev/dayz-server-launcher/`), the app identifier
-(`com.callmelewis.dayzserverlauncher`, which holds players' settings), the signing-key folder and the `!dzsl` mod-link
-folder. On Windows, the first Flare Launcher installer removes an old DayZ Server Launcher install and recreates its
-shortcuts under the new name.
 
 ## Releasing
 
 Releases are built and published by the Release workflow (`.github/workflows/release.yml`) on GitHub Actions: it builds
 the Windows installer and the Linux AppImage, .deb and .rpm, signs them, publishes them as the GitHub release
-`v<version>` and then updates the update feed.
+`v<version>` and then updates the update feed. Every release carries both platforms: the workflow publishes nothing
+unless both built.
 
 The update feed is on Cloudflare R2, at `https://updates.darkzone.dev/dayz-server-launcher/`: `latest.json` for the
 stable channel and `beta.json` for beta, each pointing at the builds on its version's GitHub release. The workflow
@@ -125,9 +138,6 @@ check for updates.
 
 ## The download page
 
-`site/` offers the current stable build for the visitor's system, then opens a thank-you page that starts the download
-and shows the first-run steps. It reads the same `latest.json`, so it needs no change when a release goes out.
-`/changelog` lists every published version's notes, built from `CHANGELOG.md` when the page is deployed; a section
-for a version that isn't in a feed yet stays hidden.
-`pnpm site` runs it locally, and `pnpm site:deploy` publishes it to Cloudflare (a Worker with static assets, named
-`flare-launcher`), served at [flare.darkzone.dev](https://flare.darkzone.dev).
+The download page at [flare.darkzone.dev](https://flare.darkzone.dev) lives in its own folder, `flare-site`, next to
+this one. Its changelog page is built from this repo's `CHANGELOG.md`, which is why `pnpm release` redeploys it (and
+skips that step if the folder isn't there).

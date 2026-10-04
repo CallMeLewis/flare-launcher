@@ -287,10 +287,16 @@ function tagRelease(version) {
 
 /**
  * The download page reads the feed itself, but its changelog page is built from CHANGELOG.md when it is deployed. A
- * section shows once its version is in a feed, so deploying before the builds are out is fine.
+ * section shows once its version is in a feed, so deploying before the builds are out is fine. The page lives in
+ * ../flare-site, next to this repo.
  */
 function deploySite() {
-  run(process.execPath, [wrangler, "deploy", "--config", join(root, "site", "wrangler.jsonc")]);
+  const config = join(root, "..", "flare-site", "wrangler.jsonc");
+  if (!existsSync(config)) {
+    console.warn(`Skipped redeploying the download page: ${config} not found`);
+    return;
+  }
+  run(process.execPath, [wrangler, "deploy", "--config", config]);
   console.log("Redeployed the download page");
 }
 

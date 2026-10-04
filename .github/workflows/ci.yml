@@ -5,10 +5,10 @@ name: CI
 on:
   push:
     branches: [main]
-    paths-ignore: ["docs/**", "site/**", "README.md", "NOTICE.md", "TRADEMARKS.md", "LICENSE"]
+    paths-ignore: ["docs/**", "README.md", "NOTICE.md", "TRADEMARKS.md", "LICENSE"]
   pull_request:
     branches: [main]
-    paths-ignore: ["docs/**", "site/**", "README.md", "NOTICE.md", "TRADEMARKS.md", "LICENSE"]
+    paths-ignore: ["docs/**", "README.md", "NOTICE.md", "TRADEMARKS.md", "LICENSE"]
 
 permissions:
   contents: read

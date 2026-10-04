@@ -24,9 +24,7 @@
     "dist:cross": "pnpm changelog && tauri build --runner cargo-xwin --target x86_64-pc-windows-msvc --bundles nsis",
     "dist:linux": "pnpm changelog && node scripts/build-linux.mjs",
     "release": "node scripts/publish-update.mjs release",
-    "release:feed": "node scripts/publish-update.mjs feed",
-    "site": "wrangler dev --config site/wrangler.jsonc",
-    "site:deploy": "wrangler deploy --config site/wrangler.jsonc"
+    "release:feed": "node scripts/publish-update.mjs feed"
   },
   "dependencies": {
     "@fontsource-variable/fira-code": "5.3.0",

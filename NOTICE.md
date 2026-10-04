@@ -12,8 +12,8 @@ distributed under Valve's Steamworks SDK terms. Steam and Steamworks are tradema
 
 ## Fonts
 
-The launcher and the download page use Fira Sans and Fira Code, under the SIL Open Font License 1.1. Their licence
-texts are in `site/public/fonts/OFL-fira-sans.txt` and `site/public/fonts/OFL-fira-code.txt`.
+The launcher uses Fira Sans and Fira Code, under the SIL Open Font License 1.1. Their licence texts are in
+`licenses/OFL-fira-sans.txt` and `licenses/OFL-fira-code.txt`.
 
 - Fira Sans: Copyright 2012-2018 The Mozilla Foundation and Telefonica S.A.
 - Fira Code: Copyright 2014-2020 The Fira Code Project Authors.
