@@ -1,5 +1,6 @@
-# Checks the repo, then builds the Windows installer and the Linux packages from it. Called by CI on every push and pull
-# request, and by Release before it publishes. The builds only start once every check has passed.
+# Checks the repo and builds the Windows installer and the Linux packages from it. Called by CI on every push and pull
+# request, and by Release before it publishes. The checks and builds run side by side, to finish sooner; Release only
+# publishes once every one of them has passed.
 #
 # Caches are only saved from main: GitHub lets tags and pull requests read main's caches but not each other's, so main is
 # what keeps release builds warm.
@@ -83,7 +84,6 @@ jobs:
 
   windows:
     name: Build for Windows
-    needs: [frontend, rust]
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v5
@@ -111,8 +111,11 @@ jobs:
 
   linux:
     name: Build for Linux
-    needs: [frontend, rust]
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      # The build container is kept in GitHub's container registry, and published there from main when it changes.
+      packages: write
     steps:
       - uses: actions/checkout@v5
         with:
@@ -129,9 +132,18 @@ jobs:
         with:
           workspaces: src-tauri -> target/linux
           save-if: ${{ github.ref == 'refs/heads/main' }}
+      # Without it the build still works: it builds the container here instead of pulling it.
+      - name: Sign in to the container registry
+        continue-on-error: true
+        run: echo "$TOKEN" | podman login ghcr.io --username "${{ github.actor }}" --password-stdin
+        env:
+          TOKEN: ${{ github.token }}
       # Builds in the same Ubuntu 22.04 container as on a desktop (scripts/build-linux.ts), with the runner's podman.
-      # The release notes were checked above, so this skips `pnpm dist:linux`'s own check.
+      # The release notes are checked by the frontend job, so this skips `pnpm dist:linux`'s own check.
       - run: node scripts/build-linux.ts
+        env:
+          LINUX_BUILD_REGISTRY: ghcr.io/${{ github.repository }}/linux-build
+          LINUX_BUILD_PUSH: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
       - uses: actions/upload-artifact@v7
         with:
           name: linux

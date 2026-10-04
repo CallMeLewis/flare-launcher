@@ -43,8 +43,10 @@ target (`rustup target add x86_64-pc-windows-msvc`, again after each Rust versio
 `pnpm dist:linux` needs podman. It builds inside Ubuntu 22.04 (`scripts/linux-build.Containerfile`), because Linux
 programs only run on systems at least as new as the one they were built on: built there, they run on Ubuntu 22.04,
 Debian 12 and newer. The builds land in `src-tauri/target/linux/release/bundle/{appimage,deb,rpm}/`. The first run
-sets up the container and takes a while; later runs reuse its caches. `pnpm app` and `pnpm app:build` still build
-directly on this machine, for development.
+sets up the container and takes a while; later runs reuse its caches, and only set it up again when the Containerfile
+or the Rust version changes. `pnpm app` and `pnpm app:build` still build directly on this machine, for development.
+CI pulls the container from GitHub's container registry instead of setting it up each run; a push to `main` that
+changes it publishes the new one there.
 
 Each build stops if `CHANGELOG.md` has no section for the version being built (see [Releasing](#releasing)).
 

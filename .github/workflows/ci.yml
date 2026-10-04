@@ -21,4 +21,8 @@ concurrency:
 jobs:
   build:
     name: Build
+    # The Linux build reads its container from GitHub's container registry, and on main publishes it there.
+    permissions:
+      contents: read
+      packages: write
     uses: ./.github/workflows/build.yml

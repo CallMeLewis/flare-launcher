@@ -2,6 +2,8 @@
 # as the one they were built on, so building here makes them work on Ubuntu 22.04, Debian 12 and anything newer.
 # Used by `pnpm dist:linux` (scripts/build-linux.ts).
 FROM docker.io/library/ubuntu:22.04
+# Ties the image CI publishes to this repository, so its workflows can read it.
+LABEL org.opencontainers.image.source=https://github.com/CallMeLewis/flare-launcher
 
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -15,8 +17,6 @@ RUN curl -fsSL "https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-l
     && corepack enable
 
 ENV RUSTUP_HOME=/usr/local/rustup CARGO_HOME=/usr/local/cargo PATH=/usr/local/cargo/bin:$PATH
-# Rust itself is installed on the first build, from the repo's rust-toolchain.toml, into a volume (see
-# scripts/build-linux.ts), so the container uses the same version as everywhere else.
 RUN curl -fsSL https://sh.rustup.rs | sh -s -- -y --profile minimal --default-toolchain none
 
 # pnpm's store lives in a volume (see scripts/build-linux.ts). Left alone, pnpm puts it beside the project, which here is
@@ -25,4 +25,12 @@ RUN mkdir -p /root/.config/pnpm && printf 'store-dir=/pnpm-store\n' > /root/.con
 
 # linuxdeploy, which packs the AppImage, is itself an AppImage; containers have no FUSE to mount it with.
 ENV APPIMAGE_EXTRACT_AND_RUN=1
+
+# Rust itself, from the repo's rust-toolchain.toml (passed in by scripts/build-linux.ts), so the container uses the same
+# version as everywhere else. Last, so a Rust update only redoes this step.
+ARG RUST_TOOLCHAIN
+RUN test -n "$RUST_TOOLCHAIN" \
+    && mkdir /tmp/rust && printf '%s\n' "$RUST_TOOLCHAIN" > /tmp/rust/rust-toolchain.toml \
+    && cd /tmp/rust && rustup toolchain install && rm -rf /tmp/rust
+
 WORKDIR /src

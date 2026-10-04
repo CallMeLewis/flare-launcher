@@ -53,6 +53,10 @@ jobs:
   build:
     name: Build
     needs: version
+    # The Linux build reads its container from GitHub's container registry, and on main publishes it there.
+    permissions:
+      contents: read
+      packages: write
     uses: ./.github/workflows/build.yml
     with:
       ref: ${{ inputs.tag || github.ref_name }}
