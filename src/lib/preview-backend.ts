@@ -72,3 +72,18 @@ export async function fetchServers(): Promise<ServerList> {
 export async function serverMods(id: string): Promise<Mod[]> {
   return mods.get(id) ?? [];
 }
+
+// Remembered passwords last until the page reloads, so the Remember option can be tried in the browser.
+const passwords = new Map<string, string>();
+
+export async function savedPassword(serverId: string): Promise<string | null> {
+  return passwords.get(serverId) ?? null;
+}
+
+export async function savePassword(serverId: string, password: string): Promise<void> {
+  passwords.set(serverId, password);
+}
+
+export async function forgetPassword(serverId: string): Promise<void> {
+  passwords.delete(serverId);
+}

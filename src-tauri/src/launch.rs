@@ -36,6 +36,11 @@ fn non_empty(value: &Option<String>) -> Option<&str> {
   value.as_deref().map(str::trim).filter(|v| !v.is_empty())
 }
 
+/// A password is passed on exactly as typed: a space at either end can be part of it.
+fn password(value: &Option<String>) -> Option<&str> {
+  value.as_deref().filter(|v| !v.is_empty())
+}
+
 fn build_args(
   ip: &str,
   game_port: u16,
@@ -141,7 +146,7 @@ pub fn launch(cache: State<'_, ServerCache>, request: LaunchRequest) -> Result<(
     game_port,
     &mod_ids,
     non_empty(&request.profile_name),
-    non_empty(&request.password),
+    password(&request.password),
     non_empty(&request.extra_args),
   );
   let mut child =
@@ -190,6 +195,17 @@ pub fn open_workshop_page(app: AppHandle, id: u64) -> Result<()> {
 #[cfg(test)]
 mod tests {
   use super::*;
+
+  #[test]
+  fn keeps_a_password_exactly_as_typed() {
+    let typed = |value: &str| password(&Some(value.to_string())).map(String::from);
+    assert_eq!(typed(" spaced out "), Some(" spaced out ".to_string()));
+    assert_eq!(typed("Пароль 日本語 🙂"), Some("Пароль 日本語 🙂".to_string()));
+    assert_eq!(typed(""), None);
+    assert_eq!(password(&None), None);
+    // Other settings still ignore stray spaces.
+    assert_eq!(non_empty(&Some("  Survivor ".to_string())), Some("Survivor"));
+  }
 
   #[test]
   fn builds_arguments_for_a_modded_server() {

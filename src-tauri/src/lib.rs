@@ -1,4 +1,5 @@
 mod app_menu;
+mod credentials;
 #[cfg(target_os = "linux")]
 mod desktop;
 mod error;
@@ -87,6 +88,10 @@ pub fn run() {
       app_menu::app_menu_status,
       app_menu::add_to_app_menu,
       app_menu::remove_from_app_menu,
+      credentials::password_store_available,
+      credentials::saved_password,
+      credentials::save_password,
+      credentials::forget_password,
     ])
     .setup(|app| {
       // The window is built here rather than from the config alone so Linux can keep the system title bar: Linux

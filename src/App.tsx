@@ -266,6 +266,10 @@ export function App() {
         });
         return;
       }
+      // Joining from the list, by double-click or Enter, uses the password the player chose to remember.
+      if (startGame && server.password && !password) {
+        password = (await backend.savedPassword(server.id).catch(() => null)) ?? "";
+      }
       // Without its password the server turns the player away only after the mods download and DayZ starts.
       if (startGame && server.password && !password) {
         toast.info("This server needs a password", {

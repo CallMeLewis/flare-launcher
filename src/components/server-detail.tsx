@@ -8,6 +8,8 @@ import {
   Copy,
   Download,
   ExternalLink,
+  Eye,
+  EyeOff,
   Loader2,
   Lock,
   Play,
@@ -17,6 +19,7 @@ import { toast } from "sonner";
 import { PingValue } from "@/components/server-table";
 import { isNight } from "@/lib/filter";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -79,6 +82,11 @@ export function ServerDetail({
   const [mods, setMods] = useState<Mod[] | null>(null);
   const [installed, setInstalled] = useState<ReadonlySet<number> | null>(null);
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [remember, setRemember] = useState(false);
+  // Whether the password store holds a password for this server.
+  const [saved, setSaved] = useState(false);
+  const [storeAvailable, setStoreAvailable] = useState(true);
   // The mod list couldn't be loaded; bumping modsAttempt loads it again.
   const [modsFailed, setModsFailed] = useState(false);
   const [modsAttempt, setModsAttempt] = useState(0);
@@ -109,8 +117,45 @@ export function ServerDetail({
     };
   }, [server.id, modsAttempt, unlisted]);
 
-  // Only a different server clears the password, not loading the same server's mods again.
-  useEffect(() => setPassword(""), [server.id]);
+  useEffect(() => {
+    backend
+      .passwordStoreAvailable()
+      .then(setStoreAvailable)
+      .catch(() => setStoreAvailable(false));
+  }, []);
+
+  // Only a different server resets the password, not loading the same server's mods again. A remembered one fills in.
+  useEffect(() => {
+    let cancelled = false;
+    setPassword("");
+    setShowPassword(false);
+    setRemember(false);
+    setSaved(false);
+    if (!server.password) return;
+    backend
+      .savedPassword(server.id)
+      .then((stored) => {
+        if (cancelled || stored === null) return;
+        // Anything typed while it loaded wins.
+        setPassword((typed) => typed || stored);
+        setRemember(true);
+        setSaved(true);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [server.id, server.password]);
+
+  // Unticking Remember forgets the password straight away; ticking it saves the password when the player joins.
+  const changeRemember = (checked: boolean) => {
+    setRemember(checked);
+    if (checked || !saved) return;
+    backend
+      .forgetPassword(server.id)
+      .then(() => setSaved(false))
+      .catch((e) => toast.error("Couldn't forget the password", { description: errorMessage(e) }));
+  };
 
   const checkMods = useCallback(async () => {
     if (!mods || !canCheckMods) return;
@@ -141,6 +186,19 @@ export function ServerDetail({
   const address = `${server.ip}:${server.gamePort}`;
   const players = ping?.players ?? server.players;
   const maxPlayers = ping?.maxPlayers ?? server.maxPlayers;
+  const canPlay = canCheckMods && !checking && !busy;
+
+  /** Play, from the button or Enter in the password field. Saves the password first when Remember is ticked. */
+  function join() {
+    if (!canPlay) return;
+    if (server.password && remember && password) {
+      backend
+        .savePassword(server.id, password)
+        .then(() => setSaved(true))
+        .catch((e) => toast.error("Couldn't remember the password", { description: errorMessage(e) }));
+    }
+    onPlay(server, password);
+  }
 
   async function copyAddress() {
     try {
@@ -287,19 +345,64 @@ export function ServerDetail({
         )}
 
         {server.password && !downloading && (
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="server-password" className="text-xs text-muted-foreground">
-              <Lock className="size-3" aria-hidden />
-              Server password
-            </Label>
-            <Input
-              id="server-password"
-              type="password"
-              autoComplete="off"
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              className="h-8"
-            />
+          <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="server-password" className="text-xs text-muted-foreground">
+                <Lock className="size-3" aria-hidden />
+                Server password
+              </Label>
+              <div className="relative">
+                <Input
+                  id="server-password"
+                  type={showPassword ? "text" : "password"}
+                  autoComplete="off"
+                  spellCheck={false}
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key !== "Enter" || event.nativeEvent.isComposing) return;
+                    event.preventDefault();
+                    join();
+                  }}
+                  aria-describedby="server-password-hint"
+                  className="h-8 pr-9"
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-xs"
+                  onClick={() => setShowPassword((shown) => !shown)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  title={showPassword ? "Hide password" : "Show password"}
+                  className="absolute top-1 right-1 text-muted-foreground"
+                >
+                  {showPassword ? <EyeOff aria-hidden /> : <Eye aria-hidden />}
+                </Button>
+              </div>
+              <span id="server-password-hint" className="text-xs text-muted-foreground">
+                If it&rsquo;s wrong, the server turns you away once DayZ has loaded.
+              </span>
+            </div>
+            <div className="flex items-start gap-2.5">
+              <Checkbox
+                id="remember-password"
+                checked={remember}
+                disabled={!storeAvailable}
+                onCheckedChange={(state) => changeRemember(state === true)}
+                aria-describedby={storeAvailable ? undefined : "remember-password-hint"}
+                className="mt-px"
+              />
+              <div className="flex flex-col gap-0.5">
+                <Label htmlFor="remember-password" className="text-[13px] leading-4 font-normal">
+                  Remember password
+                </Label>
+                {!storeAvailable && (
+                  <span id="remember-password-hint" className="text-xs text-muted-foreground">
+                    Needs a password store on this computer, such as GNOME Keyring or KWallet.
+                  </span>
+                )}
+              </div>
+            </div>
           </div>
         )}
 
@@ -309,8 +412,8 @@ export function ServerDetail({
           <div className="flex">
             <Button
               size="lg"
-              disabled={!canCheckMods || checking || busy}
-              onClick={() => onPlay(server, password)}
+              disabled={!canPlay}
+              onClick={join}
               // While joining this server the button shows progress, so it isn't greyed out like a disabled one.
               className={cn("min-w-0 flex-1 rounded-r-none font-semibold", job && "disabled:opacity-100")}
             >

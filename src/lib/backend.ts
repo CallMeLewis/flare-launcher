@@ -60,6 +60,23 @@ export const backend = {
   launch: (request: LaunchRequest): Promise<void> =>
     isPreview ? Promise.reject("Launching only works in the desktop app.") : invoke("launch", { request }),
 
+  /** Whether server passwords can be remembered: it needs a password store on this computer. */
+  passwordStoreAvailable: (): Promise<boolean> =>
+    isPreview ? Promise.resolve(true) : invoke("password_store_available"),
+
+  /** The password remembered for a server, or `null` if there isn't one. */
+  savedPassword: (serverId: string): Promise<string | null> =>
+    isPreview ? preview().then((p) => p.savedPassword(serverId)) : invoke("saved_password", { serverId }),
+
+  /** Remembers a server's password in the computer's password store, replacing any saved before. */
+  savePassword: (serverId: string, password: string): Promise<void> =>
+    isPreview
+      ? preview().then((p) => p.savePassword(serverId, password))
+      : invoke("save_password", { serverId, password }),
+
+  forgetPassword: (serverId: string): Promise<void> =>
+    isPreview ? preview().then((p) => p.forgetPassword(serverId)) : invoke("forget_password", { serverId }),
+
   /** Waits for DayZ to start, up to the given number of seconds. Resolves to whether it did. */
   waitForGame: (timeoutSecs: number): Promise<boolean> =>
     isPreview ? Promise.resolve(true) : invoke("wait_for_game", { timeoutSecs }),
