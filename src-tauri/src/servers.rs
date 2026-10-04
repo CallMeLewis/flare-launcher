@@ -224,10 +224,7 @@ fn build_list(servers: &HashMap<String, StoredServer>) -> ServerList {
 }
 
 #[tauri::command]
-pub async fn fetch_servers(
-  http: State<'_, reqwest::Client>,
-  cache: State<'_, ServerCache>,
-) -> Result<ServerList> {
+pub async fn fetch_servers(http: State<'_, reqwest::Client>, cache: State<'_, ServerCache>) -> Result<ServerList> {
   let servers = download_list(&http).await?;
   let list = build_list(&servers);
   let mut cache = cache.0.write().unwrap();

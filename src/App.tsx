@@ -489,7 +489,9 @@ export function App() {
         onFound={(server) => {
           setAskedRows((rows) => withRows(rows, [server]));
           setSelectedId(server.id);
-          toast.success("Server found", { description: `${server.name}. Select Play in the panel on the right to join.` });
+          toast.success("Server found", {
+            description: `${server.name}. Select Play in the panel on the right to join.`,
+          });
         }}
       />
 

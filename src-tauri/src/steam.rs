@@ -32,17 +32,17 @@ impl Install {
 
   /// When Steam last updated each installed mod, from its record of the Workshop folder.
   fn installed_update_times(&self) -> HashMap<u64, u64> {
-    let manifest = self.workshop_dir.parent().and_then(Path::parent).map(|workshop| {
-      workshop.join(format!("appworkshop_{DAYZ_APP_ID}.acf"))
-    });
+    let manifest = self
+      .workshop_dir
+      .parent()
+      .and_then(Path::parent)
+      .map(|workshop| workshop.join(format!("appworkshop_{DAYZ_APP_ID}.acf")));
     manifest.and_then(|path| std::fs::read_to_string(path).ok()).map(|acf| parse_update_times(&acf)).unwrap_or_default()
   }
 
   /// A mod counts as installed once Steam has put files in its folder.
   pub fn is_mod_installed(&self, workshop_id: u64) -> bool {
-    std::fs::read_dir(self.mod_dir(workshop_id))
-      .map(|mut entries| entries.next().is_some())
-      .unwrap_or(false)
+    std::fs::read_dir(self.mod_dir(workshop_id)).map(|mut entries| entries.next().is_some()).unwrap_or(false)
   }
 }
 
@@ -58,9 +58,7 @@ fn steam_roots() -> Vec<PathBuf> {
   ];
   lookups
     .iter()
-    .filter_map(|(hive, key, value)| {
-      RegKey::predef(*hive).open_subkey(key).ok()?.get_value::<String, _>(value).ok()
-    })
+    .filter_map(|(hive, key, value)| RegKey::predef(*hive).open_subkey(key).ok()?.get_value::<String, _>(value).ok())
     .map(PathBuf::from)
     .collect()
 }
@@ -179,7 +177,8 @@ pub enum Folder {
 #[tauri::command]
 pub fn open_folder(app: tauri::AppHandle, dayz_dir: Option<String>, folder: Folder) -> crate::error::Result<()> {
   use tauri_plugin_opener::OpenerExt;
-  let install = locate(dayz_dir.as_deref()).ok_or_else(|| crate::error::Error::msg("DayZ wasn't found. Set the DayZ folder in Settings."))?;
+  let install = locate(dayz_dir.as_deref())
+    .ok_or_else(|| crate::error::Error::msg("DayZ wasn't found. Set the DayZ folder in Settings."))?;
   let path = match folder {
     Folder::Game => install.dayz_dir,
     Folder::Workshop => install.workshop_dir,

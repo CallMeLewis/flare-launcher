@@ -169,10 +169,8 @@ async fn resolve(host: &str) -> Result<Ipv4Addr> {
 /// The query ports to try. Players usually know the port they join on, which isn't the one a server answers queries
 /// on, so the port they gave is tried along with the offsets hosts commonly use from it, and DayZ's defaults.
 fn candidate_ports(port: Option<u16>) -> Vec<u16> {
-  let mut ports: Vec<u16> = port
-    .into_iter()
-    .flat_map(|p| QUERY_PORT_OFFSETS.iter().filter_map(move |&offset| p.checked_add(offset)))
-    .collect();
+  let mut ports: Vec<u16> =
+    port.into_iter().flat_map(|p| QUERY_PORT_OFFSETS.iter().filter_map(move |&offset| p.checked_add(offset))).collect();
   ports.extend(SEARCH_PORTS);
   if port.is_none() {
     ports.push(2303);
@@ -241,10 +239,7 @@ mod tests {
 
   #[test]
   fn tries_the_given_port_first_without_repeats() {
-    assert_eq!(
-      candidate_ports(Some(2302)),
-      [2302, 2303, 2304, 2305, 2402, 27016, 27015, 27017, 27018, 27019, 27020]
-    );
+    assert_eq!(candidate_ports(Some(2302)), [2302, 2303, 2304, 2305, 2402, 27016, 27015, 27017, 27018, 27019, 27020]);
     assert_eq!(candidate_ports(Some(27016)), [27016, 27017, 27018, 27019, 27116, 27015, 27020]);
     assert_eq!(candidate_ports(Some(65535)), [65535, 27016, 27015, 27017, 27018, 27019, 27020]);
     assert_eq!(candidate_ports(None), [27016, 27015, 27017, 27018, 27019, 27020, 2303]);
@@ -328,9 +323,8 @@ mod tests {
       .collect();
     let main = Some("192.168.1.10".parse().unwrap());
     let addrs = |list: &[&str]| -> HashSet<SocketAddr> { list.iter().map(|a| a.parse().unwrap()).collect() };
-    let kept = |found, main| -> Vec<String> {
-      one_per_server_here(found, &own, main).iter().map(ToString::to_string).collect()
-    };
+    let kept =
+      |found, main| -> Vec<String> { one_per_server_here(found, &own, main).iter().map(ToString::to_string).collect() };
 
     // One server answering on every address, a second one only on loopback, and another computer's server.
     let found = addrs(&[

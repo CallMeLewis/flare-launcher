@@ -40,7 +40,12 @@ async function changelog() {
   // A section written for a release that isn't out yet stays hidden until that version is in a feed. If neither feed
   // can be read, every section shows.
   const versions = await Promise.all(
-    [FEED, BETA_FEED].map((url) => feedRelease(url).then((release) => release.version, () => null)),
+    [FEED, BETA_FEED].map((url) =>
+      feedRelease(url).then(
+        (release) => release.version,
+        () => null,
+      ),
+    ),
   );
   const newest = versions.filter(Boolean).sort(compareVersions).at(-1);
   const releases = parseChangelog(changelogText).filter((r) => !newest || compareVersions(r.version, newest) <= 0);
@@ -51,7 +56,12 @@ async function changelog() {
     .filter((line) => line.trim() && !line.startsWith("#"))
     .join(" ");
   const formatDate = (date) =>
-    new Date(`${date}T00:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
+    new Date(`${date}T00:00:00Z`).toLocaleDateString("en-GB", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+      timeZone: "UTC",
+    });
   const sections = releases
     .map(
       ({ version, date, items }) => `
@@ -120,7 +130,8 @@ function errorPage(status, title, message, headers = {}) {
 }
 
 async function download(platform) {
-  if (!isPlatform(platform)) return errorPage(404, "There's no download here", "Choose your download on the main page.");
+  if (!isPlatform(platform))
+    return errorPage(404, "There's no download here", "Choose your download on the main page.");
   try {
     const key = PLATFORMS[platform];
     const url = (await latestRelease()).platforms?.[key]?.url;

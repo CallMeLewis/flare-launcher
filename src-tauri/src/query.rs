@@ -296,9 +296,7 @@ pub async fn ping_servers(cache: State<'_, ServerCache>, ids: Vec<String>) -> Re
       .into_iter()
       .take(MAX_BATCH)
       .map(|id| {
-        let addr = servers
-          .get(&id)
-          .and_then(|s| format!("{}:{}", s.row.ip, s.row.query_port).parse().ok());
+        let addr = servers.get(&id).and_then(|s| format!("{}:{}", s.row.ip, s.row.query_port).parse().ok());
         (id, addr)
       })
       .collect()

@@ -58,7 +58,8 @@ export function JoinAddressDialog({
           <DialogHeader>
             <DialogTitle className="text-base">Add server</DialogTitle>
             <DialogDescription className="text-[13px]">
-              For a server that isn't in the list. Enter its address and the launcher finds it and shows it on the right, ready to join.
+              For a server that isn't in the list. Enter its address and the launcher finds it and shows it on the
+              right, ready to join.
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col gap-1.5">

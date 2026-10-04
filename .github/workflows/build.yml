@@ -32,6 +32,8 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: Release notes are written
         run: pnpm changelog
+      - name: Formatted
+        run: pnpm exec prettier --check .
       - name: Type check and build
         run: pnpm build
       - name: Test
@@ -70,6 +72,8 @@ jobs:
           save-if: ${{ github.ref == 'refs/heads/main' }}
       # Tauri expects the built frontend to exist; the checks don't need it, so an empty folder will do.
       - run: mkdir -p ../dist
+      - name: Formatted
+        run: cargo fmt --check
       - name: Clippy
         run: cargo clippy --all-targets --locked -- -D warnings
       - name: Test

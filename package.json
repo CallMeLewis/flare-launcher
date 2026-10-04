@@ -15,6 +15,8 @@
     "app": "tauri dev",
     "app:build": "tauri build",
     "test": "vitest run",
+    "format": "prettier --write . && cargo fmt --manifest-path src-tauri/Cargo.toml",
+    "format:check": "prettier --check . && cargo fmt --check --manifest-path src-tauri/Cargo.toml",
     "changelog": "node scripts/check-changelog.mjs",
     "dist": "pnpm changelog && tauri build --bundles nsis",
     "dist:cross": "pnpm changelog && tauri build --runner cargo-xwin --target x86_64-pc-windows-msvc --bundles nsis",

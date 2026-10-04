@@ -144,9 +144,8 @@ pub fn launch(cache: State<'_, ServerCache>, request: LaunchRequest) -> Result<(
     non_empty(&request.password),
     non_empty(&request.extra_args),
   );
-  let mut child = game_command(&install, &args)
-    .spawn()
-    .map_err(|e| Error::msg(format!("DayZ couldn't be started: {e}")))?;
+  let mut child =
+    game_command(&install, &args).spawn().map_err(|e| Error::msg(format!("DayZ couldn't be started: {e}")))?;
   // Collected once it ends, so it doesn't linger as a finished process while the launcher stays open.
   std::thread::spawn(move || child.wait());
   Ok(())

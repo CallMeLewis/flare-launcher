@@ -22,6 +22,8 @@ function run(args) {
 try {
   // Cached after the first time; rebuilt only when the Containerfile changes.
   run(["build", "--tag", image, "--file", join(root, "scripts", "linux-build.Containerfile"), join(root, "scripts")]);
+  // Each flag stays on one line with its value.
+  // prettier-ignore
   run([
     "run",
     "--rm",

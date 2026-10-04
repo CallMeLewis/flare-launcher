@@ -47,7 +47,9 @@ export const backend = {
 
   /** Finds a server from an address the player typed, such as `192.168.1.20:2302`. */
   findServer: (address: string): Promise<ServerRow> =>
-    isPreview ? Promise.reject("Joining by address only works in the desktop app.") : invoke("find_server", { address }),
+    isPreview
+      ? Promise.reject("Joining by address only works in the desktop app.")
+      : invoke("find_server", { address }),
 
   detectInstall: (dayzDir: string): Promise<Install | null> =>
     isPreview ? Promise.resolve(null) : invoke("detect_install", { dayzDir: dayzDir || null }),

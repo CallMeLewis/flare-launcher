@@ -26,8 +26,8 @@ export function InstallUpdateDialog({
         <AlertDialogHeader>
           <AlertDialogTitle>Install version {version}?</AlertDialogTitle>
           <AlertDialogDescription>
-            Flare Launcher will close, install the update in the background and open again in a few seconds. If
-            DayZ is running, it will keep running.
+            Flare Launcher will close, install the update in the background and open again in a few seconds. If DayZ is
+            running, it will keep running.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

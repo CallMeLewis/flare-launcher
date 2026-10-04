@@ -46,12 +46,27 @@ pub enum UpdateStatus {
   Unsupported,
   Idle,
   Checking,
-  UpToDate { checked_at: u64 },
+  UpToDate {
+    checked_at: u64,
+  },
   /// `notes` are the new version's release notes from the feed, as "- " bullet lines.
-  Available { version: String, release_date: Option<String>, notes: Option<String> },
-  Downloading { version: String, percent: f64, notes: Option<String> },
-  Ready { version: String, notes: Option<String> },
-  Error { message: String },
+  Available {
+    version: String,
+    release_date: Option<String>,
+    notes: Option<String>,
+  },
+  Downloading {
+    version: String,
+    percent: f64,
+    notes: Option<String>,
+  },
+  Ready {
+    version: String,
+    notes: Option<String>,
+  },
+  Error {
+    message: String,
+  },
 }
 
 #[derive(Serialize, Deserialize, Clone, Copy, Debug, PartialEq)]
@@ -266,7 +281,8 @@ impl Updater {
         return;
       }
       let Some(update) = inner.offered.clone() else { return };
-      let status = UpdateStatus::Downloading { version: update.version.clone(), percent: 0.0, notes: update.body.clone() };
+      let status =
+        UpdateStatus::Downloading { version: update.version.clone(), percent: 0.0, notes: update.body.clone() };
       inner.status = status.clone();
       (update, status)
     };
@@ -491,7 +507,10 @@ mod tests {
   #[test]
   fn explains_errors_in_plain_words() {
     use tauri_plugin_updater::Error as E;
-    assert_eq!(friendly_error(&E::Network("timeout".into()), UpdateChannel::Stable), "Couldn't reach the update server.");
+    assert_eq!(
+      friendly_error(&E::Network("timeout".into()), UpdateChannel::Stable),
+      "Couldn't reach the update server."
+    );
     assert_eq!(friendly_error(&E::ReleaseNotFound, UpdateChannel::Beta), "No beta release has been published yet.");
     assert!(friendly_error(&E::MissingSignedVersion, UpdateChannel::Stable).contains("security check"));
   }

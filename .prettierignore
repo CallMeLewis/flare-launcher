@@ -1,0 +1,3 @@
+# Markdown is wrapped by hand, and CHANGELOG.md is read line by line by the app and the build.
+*.md
+pnpm-lock.yaml

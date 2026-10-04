@@ -13,8 +13,8 @@ use std::time::Duration;
 
 use serde::{Deserialize, Serialize};
 use steamworks::{Client, DownloadItemResult, ItemState, PublishedFileId, SteamAPIInitError};
-use tauri::ipc::Channel;
 use tauri::State;
+use tauri::ipc::Channel;
 
 use crate::error::{Error, Result};
 use crate::steam::DAYZ_APP_ID;
@@ -126,10 +126,8 @@ fn download(ids: &[u64], cancelled: &AtomicBool, mut report: impl FnMut(&[ModPro
   let finished = Arc::new(Mutex::new(HashSet::new()));
   // A mod already on disk is being updated. Steam can still call it installed before it notices the update, so it
   // only counts once Steam reports the download done or the files change.
-  let updating: HashMap<u64, u32> = ids
-    .iter()
-    .filter_map(|&id| Some((id, ugc.item_install_info(PublishedFileId(id))?.timestamp)))
-    .collect();
+  let updating: HashMap<u64, u32> =
+    ids.iter().filter_map(|&id| Some((id, ugc.item_install_info(PublishedFileId(id))?.timestamp))).collect();
 
   let _on_download = client.register_callback({
     let failed = failed.clone();
@@ -212,7 +210,7 @@ pub mod helper {
   use std::io::{BufRead, BufReader, Read, Write};
   use std::process::{Command, Stdio};
   use std::sync::atomic::{AtomicBool, Ordering};
-  use std::sync::{mpsc, Arc};
+  use std::sync::{Arc, mpsc};
 
   use serde::{Deserialize, Serialize};
 
@@ -255,9 +253,8 @@ pub mod helper {
       }
     });
     let mut out = std::io::stdout();
-    let outcome = super::download(&ids, &cancelled, |progress| {
-      send(&mut out, &HelperMessage::Progress(progress.to_vec()))
-    });
+    let outcome =
+      super::download(&ids, &cancelled, |progress| send(&mut out, &HelperMessage::Progress(progress.to_vec())));
     let (message, code) = match outcome {
       Ok(finished) => (HelperMessage::Done(finished), 0),
       Err(e) => (HelperMessage::Failed(e.to_string()), 1),
@@ -283,14 +280,8 @@ pub mod helper {
   /// Runs [`super::download`] in the helper, closing its stdin to cancel.
   pub fn download(ids: &[u64], cancelled: &AtomicBool, report: impl FnMut(&[ModProgress])) -> Result<bool> {
     let mut command = Command::new(std::env::current_exe()?);
-    command
-      .arg(HELPER_ARG)
-      .args(ids.iter().map(u64::to_string))
-      .stdin(Stdio::piped())
-      .stdout(Stdio::piped());
-    let mut child = command
-      .spawn()
-      .map_err(|e| Error::msg(format!("The download couldn't be started: {e}")))?;
+    command.arg(HELPER_ARG).args(ids.iter().map(u64::to_string)).stdin(Stdio::piped()).stdout(Stdio::piped());
+    let mut child = command.spawn().map_err(|e| Error::msg(format!("The download couldn't be started: {e}")))?;
     let stdout = child.stdout.take().expect("piped stdout");
 
     let outcome = std::thread::scope(|scope| {
