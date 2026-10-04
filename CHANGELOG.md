@@ -3,6 +3,11 @@
 What changed in each version of Flare Launcher, newest first. Versions before 1.1.0 were released as DayZ Server
 Launcher.
 
+## 1.1.4 - 2026-10-04
+
+- New Mods page in the sidebar, listing every Workshop mod you're subscribed to with its size, when it was last updated and how many servers use it; search and sort them, update outdated mods, verify them to fix missing or incomplete files, or unsubscribe from the ones you no longer need.
+- Settings are now split into Game, for how DayZ starts, and Launcher, for the launcher's look and behaviour, with first-time setup now in Settings > Launcher.
+
 ## 1.1.3 - 2026-10-04
 
 - New first-time setup for your character name, intro screens, theme and what happens when DayZ starts; run it again from Settings > General.
