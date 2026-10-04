@@ -86,11 +86,11 @@ export function FilterMenu({ filters, onChange, maps, versions, mods, shown, can
 
           <Group title="Players">
             <Check
-              label="Has players"
+              label="Hide empty servers"
               checked={filters.hasPlayers}
               onChange={(hasPlayers) => onChange({ hasPlayers })}
             />
-            <Check label="Not full" checked={filters.notFull} onChange={(notFull) => onChange({ notFull })} />
+            <Check label="Hide full servers" checked={filters.notFull} onChange={(notFull) => onChange({ notFull })} />
           </Group>
 
           <Group title="Connection">

@@ -251,8 +251,8 @@ export function filterChips(filters: Filters): FilterChip[] {
       label: filters.serverType === "official" ? "Official" : "Community",
       clear: { serverType: "any" },
     });
-  if (filters.hasPlayers) chips.push({ key: "hasPlayers", label: "Has players", clear: { hasPlayers: false } });
-  if (filters.notFull) chips.push({ key: "notFull", label: "Not full", clear: { notFull: false } });
+  if (filters.hasPlayers) chips.push({ key: "hasPlayers", label: "Hide empty", clear: { hasPlayers: false } });
+  if (filters.notFull) chips.push({ key: "notFull", label: "Hide full", clear: { notFull: false } });
   if (filters.maxPing !== null)
     chips.push({ key: "maxPing", prefix: "Ping", label: `under ${filters.maxPing} ms`, clear: { maxPing: null } });
   if (filters.hideOffline) chips.push({ key: "hideOffline", label: "Hide offline", clear: { hideOffline: false } });

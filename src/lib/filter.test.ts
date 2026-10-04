@@ -243,7 +243,7 @@ describe("filterChips", () => {
     const chips = filterChips({ ...DEFAULT_FILTERS, map: "Livonia", maxPing: 80, requiredMods: ["CF", "Expansion"] });
     expect(chips.map((chip) => [chip.prefix ?? "", chip.label])).toEqual([
       ["Map", "Livonia"],
-      ["", "Has players"],
+      ["", "Hide empty"],
       ["Ping", "under 80 ms"],
       ["Mod", "CF"],
       ["Mod", "Expansion"],
