@@ -1,6 +1,7 @@
 // Reads CHANGELOG.md, the one place release notes live. A line "## <version>", optionally followed by " - <date>",
 // starts that version's section, and the section's "- " lines are its notes. Everything else is ignored, so the file
-// can have an introduction. Used by the build check, the release script, the app build and the download page.
+// can have an introduction. Used by the build check, the release script and the app build. The download page
+// keeps a copy of the parser, so keep the file's format the same.
 
 /** Every version in the file, in file order (newest first): `{ version, date, items }`. */
 export function parseChangelog(text) {

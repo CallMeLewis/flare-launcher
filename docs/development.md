@@ -125,8 +125,7 @@ match the public key in `src-tauri/tauri.conf.json`.
    beta.
 2. Write the release notes in that section, following [release-notes.md](release-notes.md).
 3. Commit and push, then `pnpm release`. It checks the release notes, tags the commit `v<version>` and pushes the tag,
-   which starts the workflow, then redeploys the download page so its changelog shows the new version once it is out.
-   It refuses to run with uncommitted or unpushed changes. Follow the build with `gh run watch`.
+   which starts the workflow. It refuses to run with uncommitted or unpushed changes. Follow the build with `gh run watch`.
 
 To build a tag again (after a failed run, say), run the Release workflow from the Actions tab on `main` and enter the tag
 (or `gh workflow run release.yml -f tag=v<version>`). The workflow comes from `main`, so fixes to it apply, and the code
@@ -138,6 +137,5 @@ check for updates.
 
 ## The download page
 
-The download page at [flare.darkzone.dev](https://flare.darkzone.dev) lives in its own folder, `flare-site`, next to
-this one. Its changelog page is built from this repo's `CHANGELOG.md`, which is why `pnpm release` redeploys it (and
-skips that step if the folder isn't there).
+The download page at [flare.darkzone.dev](https://flare.darkzone.dev) is kept separately. It reads the update feed for
+its downloads and this repo's `CHANGELOG.md` for its changelog, both when visited, so a release needs nothing from it.

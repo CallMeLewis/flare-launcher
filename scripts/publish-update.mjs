@@ -2,8 +2,7 @@
 // (.github/workflows/release.yml), which runs when a v<version> tag is pushed.
 //
 //   node scripts/publish-update.mjs release          (pnpm release) check the version is ready, tag the commit
-//                                                    v<version> and push the tag, which starts the workflow, then
-//                                                    redeploy the download page so its changelog shows the new version
+//                                                    v<version> and push the tag, which starts the workflow
 //   node scripts/publish-update.mjs publish          (the workflow) sign the builds, publish them as the GitHub release
 //                                                    v<version>, then update the channel file on the update feed (needs
 //                                                    `pnpm exec wrangler login`, or a Cloudflare API token in CI)
@@ -92,7 +91,6 @@ try {
   } else if (command === "release") {
     const version = checkReady();
     tagRelease(version);
-    deploySite();
     console.log(`\nThe Release workflow is now building ${version}. Follow it with: gh run watch`);
   } else if (command === "publish") {
     const release = prepare();
@@ -283,21 +281,6 @@ function tagRelease(version) {
   }
   run("git", ["push", "origin", tag]);
   console.log(`Tagged ${tag}`);
-}
-
-/**
- * The download page reads the feed itself, but its changelog page is built from CHANGELOG.md when it is deployed. A
- * section shows once its version is in a feed, so deploying before the builds are out is fine. The page lives in
- * ../flare-site, next to this repo.
- */
-function deploySite() {
-  const config = join(root, "..", "flare-site", "wrangler.jsonc");
-  if (!existsSync(config)) {
-    console.warn(`Skipped redeploying the download page: ${config} not found`);
-    return;
-  }
-  run(process.execPath, [wrangler, "deploy", "--config", config]);
-  console.log("Redeployed the download page");
 }
 
 /** A git command's output. `allowFailure` returns "" instead of throwing, for lookups that may find nothing. */
