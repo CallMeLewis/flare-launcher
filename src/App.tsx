@@ -2,6 +2,7 @@ import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } f
 import { LoaderCircle, MousePointerClick, Network, SearchX, ServerCrash, Star } from "lucide-react";
 import { toast } from "sonner";
 import { AppSidebar, type View } from "@/components/app-sidebar";
+import { FirstRunDialog } from "@/components/first-run-dialog";
 import { GameStartDialog, type GameStart } from "@/components/game-start-dialog";
 import { JoinAddressDialog } from "@/components/join-address-dialog";
 import { ServerDetail } from "@/components/server-detail";
@@ -94,6 +95,9 @@ export function App() {
   const [view, setView] = useState<View>("all");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  // First-time setup, shown once. Anyone with saved settings has used the launcher before, so it counts as done.
+  const [setupDone, setSetupDone] = useStoredState("setupDone", localStorage.getItem("settings") !== null);
+  const [setupOpen, setSetupOpen] = useState(!setupDone);
   const [joinOpen, setJoinOpen] = useState(false);
   const [install, setInstall] = useState<Install | null | undefined>(undefined);
   const [job, setJob] = useState<PlayJob | null>(null);
@@ -118,7 +122,7 @@ export function App() {
   }, [settings.uiScale]);
 
   useEffect(() => followTheme(settings.theme), [settings.theme]);
-  useAppMenuOffer();
+  useAppMenuOffer(setupDone);
 
   const favourites = useMemo(() => new Set(favouriteIds), [favouriteIds]);
   const recents = useMemo(() => new Set(recentIds), [recentIds]);
@@ -517,6 +521,16 @@ export function App() {
 
       <GameStartDialog start={gameStart} onClose={hideGameStart} />
 
+      <FirstRunDialog
+        open={setupOpen}
+        settings={settings}
+        onChange={setSettings}
+        onDone={() => {
+          setSetupOpen(false);
+          setSetupDone(true);
+        }}
+      />
+
       <JoinAddressDialog
         open={joinOpen}
         onOpenChange={setJoinOpen}
@@ -535,6 +549,10 @@ export function App() {
         settings={settings}
         onChange={setSettings}
         install={install}
+        onRunSetup={() => {
+          setSettingsOpen(false);
+          setSetupOpen(true);
+        }}
       />
     </div>
   );

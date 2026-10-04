@@ -14,6 +14,11 @@ const added = () =>
     duration: 10_000,
   });
 
+/** Records that the player has answered the offer, so it isn't made again. */
+export function markAppMenuOffered() {
+  localStorage.setItem(OFFERED, "1");
+}
+
 /**
  * Adds the launcher to the Linux app menu. When the file has to move, the launcher reopens from its new place and the
  * new window confirms it; otherwise this one does. Resolves to whether it worked.
@@ -36,22 +41,22 @@ export async function addToAppMenu(): Promise<boolean> {
 
 /**
  * On Linux, offers once to put the launcher in the app menu, unless it is already there. An AppImage has no installer,
- * so this is what makes it open like any other app.
+ * so this is what makes it open like any other app. Waits while `enabled` is false: first-time setup offers it itself.
  */
-export function useAppMenuOffer() {
+export function useAppMenuOffer(enabled: boolean) {
   useEffect(() => {
     if (localStorage.getItem(JUST_ADDED)) {
       localStorage.removeItem(JUST_ADDED);
       added();
       return;
     }
-    if (localStorage.getItem(OFFERED)) return;
+    if (!enabled || localStorage.getItem(OFFERED)) return;
     let cancelled = false;
     backend
       .appMenuStatus()
       .then((menu) => {
         if (cancelled || !menu.supported || menu.added) return;
-        const answered = () => localStorage.setItem(OFFERED, "1");
+        const answered = markAppMenuOffered;
         toast("Add Flare Launcher to your app menu?", {
           id: "app-menu-offer",
           description: "Open it like any other app. It moves to your Applications folder.",
@@ -70,5 +75,5 @@ export function useAppMenuOffer() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [enabled]);
 }

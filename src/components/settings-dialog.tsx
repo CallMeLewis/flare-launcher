@@ -37,7 +37,7 @@ import { cn } from "@/lib/utils";
 import appIcon from "../../src-tauri/icons/128x128@2x.png";
 
 const SCALES = [0.9, 1, 1.1, 1.25, 1.5];
-const THEMES: { value: Theme; label: string; icon: LucideIcon }[] = [
+export const THEMES: { value: Theme; label: string; icon: LucideIcon }[] = [
   { value: "light", label: "Light", icon: Sun },
   { value: "dark", label: "Dark", icon: Moon },
   { value: "system", label: "System", icon: Monitor },
@@ -59,9 +59,11 @@ type Props = {
   onChange: (settings: Settings) => void;
   /** `undefined` while detection is still running. */
   install: Install | null | undefined;
+  /** Closes Settings and opens first-time setup again. */
+  onRunSetup: () => void;
 };
 
-export function SettingsDialog({ open, onOpenChange, settings, onChange, install }: Props) {
+export function SettingsDialog({ open, onOpenChange, settings, onChange, install, onRunSetup }: Props) {
   const set = (patch: Partial<Settings>) => onChange({ ...settings, ...patch });
 
   return (
@@ -191,6 +193,21 @@ export function SettingsDialog({ open, onOpenChange, settings, onChange, install
                   </Select>
                 </SettingRow>
                 <AppMenuRow />
+                <SettingRow
+                  id="run-setup"
+                  label="First-time setup"
+                  description="Go through the choices offered when the launcher was first opened."
+                >
+                  <Button
+                    id="run-setup"
+                    variant="outline"
+                    size="sm"
+                    aria-describedby="run-setup-description"
+                    onClick={onRunSetup}
+                  >
+                    Run setup again
+                  </Button>
+                </SettingRow>
               </SettingsGroup>
             </TabsContent>
 
@@ -658,7 +675,7 @@ function SectionHeading({ title, description }: { title: string; description: st
 }
 
 /** A titled card of setting rows. */
-function SettingsGroup({ title, children }: { title: string; children: ReactNode }) {
+export function SettingsGroup({ title, children }: { title: string; children: ReactNode }) {
   const id = `group-${title.toLowerCase().replace(/\W+/g, "-")}`;
   return (
     <section aria-labelledby={id} className="flex flex-col gap-2">
@@ -674,7 +691,7 @@ function SettingsGroup({ title, children }: { title: string; children: ReactNode
  * One setting: what it is and what it does on the left, its control on the right. The control is passed in, so it
  * points `aria-describedby` at `<id>-description` itself; a group of buttons uses `<id>-label` as its name.
  */
-function SettingRow({
+export function SettingRow({
   id,
   label,
   description,
