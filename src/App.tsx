@@ -2,6 +2,7 @@ import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } f
 import { LoaderCircle, MousePointerClick, Network, SearchX, ServerCrash, Star } from "lucide-react";
 import { toast } from "sonner";
 import { AppSidebar, type View } from "@/components/app-sidebar";
+import { GameStartDialog, type GameStart } from "@/components/game-start-dialog";
 import { JoinAddressDialog } from "@/components/join-address-dialog";
 import { ServerDetail } from "@/components/server-detail";
 import { ServerTable } from "@/components/server-table";
@@ -256,6 +257,15 @@ export function App() {
   // One join at a time: downloads whatever mods are missing, then starts the game,
   // unless the player only asked for the mods.
   const playing = useRef(false);
+  // DayZ starting, shown over the app once the mods are ready. The ref says whether the player has hidden it, so a
+  // problem afterwards still reaches them as a notification.
+  const [gameStart, setGameStart] = useState<GameStart | null>(null);
+  const gameStartShown = useRef(false);
+  const showGameStart = useCallback((next: GameStart | null) => {
+    gameStartShown.current = next !== null;
+    setGameStart(next);
+  }, []);
+  const hideGameStart = useCallback(() => showGameStart(null), [showGameStart]);
   const play = useCallback(
     async (server: ServerRow, password = "", startGame = true) => {
       if (playing.current) return;
@@ -316,6 +326,8 @@ export function App() {
         }
 
         setJob({ serverId: server.id, phase: "starting", startsGame: true, progress: [] });
+        const start: GameStart = { server, modCount: ids.length, stage: "starting" };
+        showGameStart(start);
         await backend.launch({
           serverId: server.id,
           dayzDir: settings.dayzDir || null,
@@ -324,24 +336,37 @@ export function App() {
           extraArgs: launchArgs(settings) || null,
         });
         setRecentIds((ids) => [server.id, ...ids.filter((id) => id !== server.id)].slice(0, MAX_RECENT));
-        // Play keeps showing DayZ starting until the game is running: on Linux, Steam and Proton take a while first.
+        // Joining keeps showing DayZ starting until the game is running: on Linux, Steam and Proton take a while first.
         const started = await backend.waitForGame(GAME_START_TIMEOUT_SECS);
         if (!started) {
-          toast.info("DayZ hasn't started yet", {
-            description: "It may still be loading. If it doesn't open, check Steam for a message.",
-          });
+          if (gameStartShown.current) showGameStart({ ...start, stage: "slow" });
+          else
+            toast.info("DayZ hasn't started yet", {
+              description: "It may still be loading. If it doesn't open, check Steam for a message.",
+            });
+        } else if (settings.afterLaunch === "keep") {
+          if (gameStartShown.current) showGameStart({ ...start, stage: "running" });
+        } else {
+          // Out of the way along with the window, so it isn't still there when the launcher comes back.
+          showGameStart(null);
         }
         if (settings.afterLaunch === "minimise") void backend.minimiseWindow();
         if (settings.afterLaunch === "close") void backend.closeWindow();
       } catch (e) {
         setInstallVersion((version) => version + 1);
-        toast.error(startGame ? "Couldn't start DayZ" : "Couldn't download the mods", { description: errorMessage(e) });
+        if (gameStartShown.current) {
+          setGameStart((current) => current && { ...current, stage: "failed", error: errorMessage(e) });
+        } else {
+          toast.error(startGame ? "Couldn't start DayZ" : "Couldn't download the mods", {
+            description: errorMessage(e),
+          });
+        }
       } finally {
         playing.current = false;
         setJob(null);
       }
     },
-    [install, settings, setRecentIds, unlisted],
+    [install, settings, setRecentIds, unlisted, showGameStart],
   );
 
   const selected = selectedId ? (byId.get(selectedId) ?? unlistedRows.find((row) => row.id === selectedId)) : undefined;
@@ -489,6 +514,8 @@ export function App() {
           </aside>
         )}
       </div>
+
+      <GameStartDialog start={gameStart} onClose={hideGameStart} />
 
       <JoinAddressDialog
         open={joinOpen}
