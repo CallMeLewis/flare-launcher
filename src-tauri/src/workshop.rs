@@ -37,34 +37,51 @@ struct DetailsList {
 #[derive(Deserialize)]
 struct Details {
   publishedfileid: String,
+  /// 1 when the Workshop has the mod. Anything else means it was removed or made private.
+  #[serde(default)]
+  result: u32,
+  title: Option<String>,
   time_updated: Option<u64>,
+}
+
+/// What the Workshop says about a mod.
+#[derive(Debug, Clone, PartialEq)]
+pub struct WorkshopItem {
+  pub title: Option<String>,
+  pub time_updated: Option<u64>,
+}
+
+/// The Workshop takes this many mods per request.
+const DETAILS_PER_REQUEST: usize = 100;
+
+/// Looks the mods up on the Workshop. Mods the Workshop doesn't have, such as removed or private ones, are left out.
+pub async fn item_details(http: &reqwest::Client, ids: &[u64]) -> Result<HashMap<u64, WorkshopItem>> {
+  let mut items = HashMap::new();
+  for chunk in ids.chunks(DETAILS_PER_REQUEST) {
+    let mut form = vec![("itemcount".to_string(), chunk.len().to_string())];
+    form.extend(chunk.iter().enumerate().map(|(i, id)| (format!("publishedfileids[{i}]"), id.to_string())));
+    let details: DetailsResponse = http
+      .post(DETAILS_URL)
+      .form(&form)
+      // Checked whenever a server is opened, so a slow answer must not hold up the panel for long.
+      .timeout(Duration::from_secs(10))
+      .send()
+      .await?
+      .error_for_status()?
+      .json()
+      .await?;
+    items.extend(details.response.publishedfiledetails.into_iter().filter(|d| d.result == 1).filter_map(|d| {
+      let title = d.title.map(|title| title.trim().to_string()).filter(|title| !title.is_empty());
+      Some((d.publishedfileid.parse().ok()?, WorkshopItem { title, time_updated: d.time_updated }))
+    }));
+  }
+  Ok(items)
 }
 
 /// When each mod was last updated on the Workshop. Mods the Workshop doesn't know, such as removed ones, are left out.
 pub async fn latest_update_times(http: &reqwest::Client, ids: &[u64]) -> Result<HashMap<u64, u64>> {
-  if ids.is_empty() {
-    return Ok(HashMap::new());
-  }
-  let mut form = vec![("itemcount".to_string(), ids.len().to_string())];
-  form.extend(ids.iter().enumerate().map(|(i, id)| (format!("publishedfileids[{i}]"), id.to_string())));
-  let details: DetailsResponse = http
-    .post(DETAILS_URL)
-    .form(&form)
-    // Checked whenever a server is opened, so a slow answer must not hold up the panel for long.
-    .timeout(Duration::from_secs(10))
-    .send()
-    .await?
-    .error_for_status()?
-    .json()
-    .await?;
-  Ok(
-    details
-      .response
-      .publishedfiledetails
-      .into_iter()
-      .filter_map(|d| Some((d.publishedfileid.parse().ok()?, d.time_updated?)))
-      .collect(),
-  )
+  let items = item_details(http, ids).await?;
+  Ok(items.into_iter().filter_map(|(id, item)| Some((id, item.time_updated?))).collect())
 }
 
 #[derive(Default)]
@@ -119,6 +136,9 @@ fn connect() -> Result<Client> {
 
 /// Subscribes to the mods and waits for Steam to finish installing them.
 /// Returns `false` if the wait was cancelled.
+///
+/// For a mod already installed, Steam first checks its files against the Workshop's list and downloads again any that
+/// are missing or the wrong size, so this also verifies mods.
 fn download(ids: &[u64], cancelled: &AtomicBool, mut report: impl FnMut(&[ModProgress])) -> Result<bool> {
   let client = connect()?;
   let ugc = client.ugc();
@@ -203,8 +223,49 @@ fn download(ids: &[u64], cancelled: &AtomicBool, mut report: impl FnMut(&[ModPro
   }
 }
 
+/// How long Steam gets to confirm the player has unsubscribed.
+const UNSUBSCRIBE_TIMEOUT: Duration = Duration::from_secs(30);
+
+/// Unsubscribes from the mods. Steam then removes them from this computer.
+fn unsubscribe(ids: &[u64]) -> Result<()> {
+  let client = connect()?;
+  let ugc = client.ugc();
+  let answers = Arc::new(Mutex::new(HashMap::new()));
+  for &id in ids {
+    let answers = answers.clone();
+    ugc.unsubscribe_item(PublishedFileId(id), move |result| {
+      if let Err(e) = &result {
+        log::warn!("Steam could not unsubscribe from mod {id}: {e}");
+      }
+      answers.lock().unwrap().insert(id, result.is_ok());
+    });
+  }
+
+  let deadline = std::time::Instant::now() + UNSUBSCRIBE_TIMEOUT;
+  loop {
+    client.run_callbacks();
+    let answers = answers.lock().unwrap();
+    if answers.len() == ids.len() {
+      let failures = answers.values().filter(|ok| !**ok).count();
+      if failures == 0 {
+        return Ok(());
+      }
+      let noun = if failures == 1 { "mod" } else { "mods" };
+      return Err(Error::msg(format!("Steam couldn't unsubscribe you from {failures} {noun}. Try again.")));
+    }
+    drop(answers);
+    if std::time::Instant::now() > deadline {
+      return Err(Error::msg(
+        "Steam didn't answer in time. Make sure Steam is running and you're signed in, then try again.",
+      ));
+    }
+    std::thread::sleep(POLL_INTERVAL);
+  }
+}
+
 /// Linux only: the launcher started again with [`HELPER_ARG`] runs one download and exits, which is what makes
-/// Steam let go of DayZ. It reports progress as JSON lines on stdout and stops early once its stdin closes.
+/// Steam let go of DayZ. It reports progress as JSON lines on stdout and stops early once its stdin closes. Started
+/// with [`UNSUBSCRIBE_ARG`] it unsubscribes instead.
 #[cfg(target_os = "linux")]
 pub mod helper {
   use std::io::{BufRead, BufReader, Read, Write};
@@ -219,6 +280,8 @@ pub mod helper {
 
   /// Starts the launcher as the download helper, followed by the mod ids.
   pub const HELPER_ARG: &str = "--download-mods";
+  /// Starts the launcher as a helper that unsubscribes from the mod ids that follow.
+  pub const UNSUBSCRIBE_ARG: &str = "--unsubscribe-mods";
 
   /// What the helper tells the launcher, one per line.
   #[derive(Serialize, Deserialize, Debug, PartialEq)]
@@ -236,13 +299,23 @@ pub mod helper {
     let _ = writeln!(out, "\n{line}").and_then(|()| out.flush());
   }
 
-  /// Runs the download helper if the launcher was started as one, returning its exit code.
+  /// Runs a helper if the launcher was started as one, returning its exit code.
   pub fn run_helper() -> Option<i32> {
     let mut args = std::env::args().skip(1);
-    if args.next().as_deref() != Some(HELPER_ARG) {
+    let arg = args.next()?;
+    if arg != HELPER_ARG && arg != UNSUBSCRIBE_ARG {
       return None;
     }
     let ids: Vec<u64> = args.filter_map(|id| id.parse().ok()).collect();
+    let mut out = std::io::stdout();
+    if arg == UNSUBSCRIBE_ARG {
+      let (message, code) = match super::unsubscribe(&ids) {
+        Ok(()) => (HelperMessage::Done(true), 0),
+        Err(e) => (HelperMessage::Failed(e.to_string()), 1),
+      };
+      send(&mut out, &message);
+      return Some(code);
+    }
     let cancelled = Arc::new(AtomicBool::new(false));
     std::thread::spawn({
       let cancelled = cancelled.clone();
@@ -252,7 +325,6 @@ pub mod helper {
         cancelled.store(true, Ordering::SeqCst);
       }
     });
-    let mut out = std::io::stdout();
     let outcome =
       super::download(&ids, &cancelled, |progress| send(&mut out, &HelperMessage::Progress(progress.to_vec())));
     let (message, code) = match outcome {
@@ -304,6 +376,16 @@ pub mod helper {
     outcome
   }
 
+  /// Runs [`super::unsubscribe`] in a helper.
+  pub fn unsubscribe(ids: &[u64]) -> Result<()> {
+    let mut command = Command::new(std::env::current_exe()?);
+    command.arg(UNSUBSCRIBE_ARG).args(ids.iter().map(u64::to_string)).stdin(Stdio::null()).stdout(Stdio::piped());
+    let mut child = command.spawn().map_err(|e| Error::msg(format!("Steam couldn't be asked: {e}")))?;
+    let outcome = read_outcome(child.stdout.take().expect("piped stdout"), |_| {});
+    let _ = child.wait();
+    outcome.map(|_| ())
+  }
+
   #[cfg(test)]
   mod tests {
     use super::*;
@@ -332,10 +414,10 @@ pub mod helper {
 }
 
 // On Windows closing the connection is enough, so the download runs in the launcher itself.
-#[cfg(windows)]
-use download as run_download;
 #[cfg(target_os = "linux")]
-use helper::download as run_download;
+use helper::{download as run_download, unsubscribe as run_unsubscribe};
+#[cfg(windows)]
+use {download as run_download, unsubscribe as run_unsubscribe};
 
 /// Downloads the given mods, reporting progress as it changes. Resolves to
 /// `true` once every mod is installed, or `false` if the player cancelled.
@@ -368,6 +450,19 @@ pub async fn download_mods(
 #[tauri::command]
 pub fn cancel_mod_download(downloads: State<'_, Arc<Downloads>>) {
   downloads.cancelled.store(true, Ordering::SeqCst);
+}
+
+/// Unsubscribes from the mods, so Steam removes them from this computer.
+#[tauri::command]
+pub async fn unsubscribe_mods(downloads: State<'_, Arc<Downloads>>, ids: Vec<u64>) -> Result<()> {
+  let downloads = downloads.inner().clone();
+  // One Steam connection at a time.
+  if downloads.running.swap(true, Ordering::SeqCst) {
+    return Err(Error::msg("Mods are being downloaded. Try again once they've finished."));
+  }
+  let outcome = tauri::async_runtime::spawn_blocking(move || run_unsubscribe(&ids)).await;
+  downloads.running.store(false, Ordering::SeqCst);
+  outcome.map_err(|e| Error::msg(format!("Unsubscribing stopped unexpectedly: {e}")))?
 }
 
 #[cfg(test)]

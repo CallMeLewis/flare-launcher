@@ -30,14 +30,23 @@ impl Install {
     self.workshop_dir.join(workshop_id.to_string())
   }
 
-  /// When Steam last updated each installed mod, from its record of the Workshop folder.
-  fn installed_update_times(&self) -> HashMap<u64, u64> {
+  /// Steam's record of the Workshop folder: which mods are installed and who is subscribed to them.
+  fn workshop_record(&self) -> WorkshopRecord {
     let manifest = self
       .workshop_dir
       .parent()
       .and_then(Path::parent)
       .map(|workshop| workshop.join(format!("appworkshop_{DAYZ_APP_ID}.acf")));
-    manifest.and_then(|path| std::fs::read_to_string(path).ok()).map(|acf| parse_update_times(&acf)).unwrap_or_default()
+    manifest
+      .and_then(|path| std::fs::read_to_string(path).ok())
+      .map(|acf| parse_workshop_record(&acf))
+      .unwrap_or_default()
+  }
+
+  /// When Steam last updated each installed mod.
+  fn installed_update_times(&self) -> HashMap<u64, u64> {
+    let record = self.workshop_record();
+    record.installed.into_iter().filter_map(|(id, item)| Some((id, item.time_updated?))).collect()
   }
 
   /// A mod counts as installed once Steam has put files in its folder.
@@ -94,9 +103,22 @@ fn quoted_tokens(line: &str) -> Vec<String> {
   tokens
 }
 
-/// Reads each installed mod's `timeupdated` out of Steam's `appworkshop_221100.acf`.
-fn parse_update_times(acf: &str) -> HashMap<u64, u64> {
-  let mut times = HashMap::new();
+#[derive(Default, Debug, PartialEq)]
+struct InstalledItem {
+  size: Option<u64>,
+  time_updated: Option<u64>,
+}
+
+/// What Steam's `appworkshop_221100.acf` says about each mod.
+#[derive(Default, Debug)]
+struct WorkshopRecord {
+  installed: HashMap<u64, InstalledItem>,
+  /// The Steam accounts on this computer subscribed to each mod.
+  subscribed_by: HashMap<u64, Vec<u32>>,
+}
+
+fn parse_workshop_record(acf: &str) -> WorkshopRecord {
+  let mut record = WorkshopRecord::default();
   let mut sections: Vec<String> = Vec::new();
   let mut name = String::new();
   for line in acf.lines() {
@@ -104,18 +126,106 @@ fn parse_update_times(acf: &str) -> HashMap<u64, u64> {
       ("{", _) => sections.push(std::mem::take(&mut name)),
       ("}", _) => drop(sections.pop()),
       (_, [section]) => name = section.clone(),
-      (_, [key, value]) if key == "timeupdated" => {
-        if let [.., parent, id] = sections.as_slice()
-          && parent == "WorkshopItemsInstalled"
-          && let (Ok(id), Ok(time)) = (id.parse(), value.parse())
-        {
-          times.insert(id, time);
+      (_, [key, value]) => {
+        let [.., parent, id] = sections.as_slice() else { continue };
+        let Ok(id) = id.parse::<u64>() else { continue };
+        match (parent.as_str(), key.as_str()) {
+          ("WorkshopItemsInstalled", "size") => record.installed.entry(id).or_default().size = value.parse().ok(),
+          ("WorkshopItemsInstalled", "timeupdated") => {
+            record.installed.entry(id).or_default().time_updated = value.parse().ok()
+          }
+          ("WorkshopItemDetails", "subscribedby") => {
+            record
+              .subscribed_by
+              .insert(id, value.split(',').filter_map(|account| account.trim().parse().ok()).collect());
+          }
+          _ => {}
         }
       }
       _ => {}
     }
   }
-  times
+  record
+}
+
+/// Steam IDs are an account number added to this.
+const STEAM_ID_BASE: u64 = 76561197960265728;
+
+/// The account that last signed in to Steam, from `loginusers.vdf`, as the account number the Workshop record uses.
+/// Older Steam versions mark it `MostRecent`; newer ones only keep when each account last signed in.
+fn parse_most_recent_account(vdf: &str) -> Option<u32> {
+  let mut latest: Option<(bool, u64, u64)> = None;
+  let mut user: Option<(bool, u64, u64)> = None;
+  let mut sections: Vec<String> = Vec::new();
+  let mut name = String::new();
+  for line in vdf.lines() {
+    match (line.trim(), quoted_tokens(line).as_slice()) {
+      ("{", _) => {
+        sections.push(std::mem::take(&mut name));
+        user = sections.last().and_then(|id| id.parse().ok()).map(|id| (false, 0, id));
+      }
+      ("}", _) => {
+        if let Some(found) = user.take() {
+          latest = latest.max(Some(found));
+        }
+        sections.pop();
+      }
+      (_, [section]) => name = section.clone(),
+      (_, [key, value]) => {
+        if let Some((most_recent, timestamp, _)) = user.as_mut() {
+          if key.eq_ignore_ascii_case("MostRecent") {
+            *most_recent = value == "1";
+          } else if key.eq_ignore_ascii_case("timestamp") {
+            *timestamp = value.parse().unwrap_or(0);
+          }
+        }
+      }
+      _ => {}
+    }
+  }
+  let (_, _, steam_id) = latest?;
+  u32::try_from(steam_id.checked_sub(STEAM_ID_BASE)?).ok()
+}
+
+/// The account Steam is signed in to right now, which Steam keeps in the registry while it runs.
+#[cfg(windows)]
+fn active_account() -> Option<u32> {
+  use winreg::RegKey;
+  use winreg::enums::HKEY_CURRENT_USER;
+  let key = RegKey::predef(HKEY_CURRENT_USER).open_subkey(r"Software\Valve\Steam\ActiveProcess").ok()?;
+  key.get_value::<u32, _>("ActiveUser").ok().filter(|&account| account != 0)
+}
+
+/// The account Steam is signed in to right now, which Steam keeps in `~/.steam/registry.vdf` while it runs.
+#[cfg(not(windows))]
+fn active_account() -> Option<u32> {
+  let vdf = std::fs::read_to_string(std::env::home_dir()?.join(".steam/registry.vdf")).ok()?;
+  vdf.lines().find_map(|line| match quoted_tokens(line).as_slice() {
+    [key, value] if key.eq_ignore_ascii_case("ActiveUser") => value.parse().ok().filter(|&account| account != 0),
+    _ => None,
+  })
+}
+
+/// The Steam account the player uses, so the mods page lists their subscriptions and not another account's.
+fn signed_in_account() -> Option<u32> {
+  active_account().or_else(|| {
+    steam_roots().iter().find_map(|root| {
+      let vdf = std::fs::read_to_string(root.join("config").join("loginusers.vdf")).ok()?;
+      parse_most_recent_account(&vdf)
+    })
+  })
+}
+
+/// The name a mod gives itself in its `meta.cpp`, such as `name = "CF";`.
+fn parse_meta_name(meta: &str) -> Option<String> {
+  meta.lines().find_map(|line| {
+    let (key, value) = line.split_once('=')?;
+    if !key.trim().eq_ignore_ascii_case("name") {
+      return None;
+    }
+    let name = value.trim().trim_end_matches(';').trim().trim_matches('"').trim();
+    (!name.is_empty()).then(|| name.to_string())
+  })
 }
 
 /// Reads the library folders out of Steam's `libraryfolders.vdf`.
@@ -208,6 +318,78 @@ pub async fn installed_mods(
   Ok(installed.into_iter().filter(|id| up_to_date(local.get(id), latest.get(id))).collect())
 }
 
+/// A mod the player is subscribed to.
+#[derive(Serialize, Debug, PartialEq)]
+#[serde(rename_all = "camelCase")]
+pub struct SubscribedMod {
+  pub id: u64,
+  /// Its name on the Workshop, or the name in its files when the Workshop can't say.
+  pub name: Option<String>,
+  /// Whether Steam has put its files on this computer.
+  pub installed: bool,
+  /// Bytes on disk.
+  pub size: Option<u64>,
+  /// When the copy on this computer was published on the Workshop.
+  pub updated_at: Option<u64>,
+  /// When the Workshop's copy was published. `None` when the Workshop couldn't be reached or no longer has it.
+  pub latest_updated_at: Option<u64>,
+  /// The Workshop answered but no longer has the mod: it was removed or made private.
+  pub removed: bool,
+}
+
+/// The mods the signed-in Steam account is subscribed to, from Steam's record on this computer, with names and the
+/// latest versions from the Workshop. `None` when DayZ isn't found.
+#[tauri::command]
+pub async fn subscribed_mods(
+  http: tauri::State<'_, reqwest::Client>,
+  dayz_dir: Option<String>,
+) -> crate::error::Result<Option<Vec<SubscribedMod>>> {
+  let Some(install) = locate(dayz_dir.as_deref()) else { return Ok(None) };
+  let record = install.workshop_record();
+  let ids = subscribed_ids(&record, signed_in_account());
+  let workshop = crate::workshop::item_details(&http, &ids).await;
+  if let Err(e) = &workshop {
+    log::warn!("could not look up subscribed mods on the Workshop: {e}");
+  }
+  Ok(Some(
+    ids
+      .into_iter()
+      .map(|id| {
+        let item = workshop.as_ref().ok().map(|items| items.get(&id));
+        let local = record.installed.get(&id);
+        let name = item.flatten().and_then(|item| item.title.clone()).or_else(|| {
+          let meta = std::fs::read_to_string(install.mod_dir(id).join("meta.cpp")).ok()?;
+          parse_meta_name(&meta)
+        });
+        SubscribedMod {
+          id,
+          name,
+          installed: install.is_mod_installed(id),
+          size: local.and_then(|item| item.size),
+          updated_at: local.and_then(|item| item.time_updated),
+          latest_updated_at: item.flatten().and_then(|item| item.time_updated),
+          removed: item.is_some_and(|item| item.is_none()),
+        }
+      })
+      .collect(),
+  ))
+}
+
+/// The mods the account is subscribed to. Without a known account, every mod anyone on this computer subscribed to.
+fn subscribed_ids(record: &WorkshopRecord, account: Option<u32>) -> Vec<u64> {
+  let mut ids: Vec<u64> = record
+    .subscribed_by
+    .iter()
+    .filter(|(_, accounts)| match account {
+      Some(account) => accounts.contains(&account),
+      None => !accounts.is_empty(),
+    })
+    .map(|(&id, _)| id)
+    .collect();
+  ids.sort_unstable();
+  ids
+}
+
 /// Whether a mod is current. Unknown on either side counts as current, so a missing record never blocks joining.
 fn up_to_date(installed: Option<&u64>, latest: Option<&u64>) -> bool {
   match (installed, latest) {
@@ -245,9 +427,7 @@ mod tests {
     );
   }
 
-  #[test]
-  fn reads_update_times_of_installed_mods() {
-    let acf = r#"
+  const WORKSHOP_ACF: &str = r#"
 "AppWorkshop"
 {
 	"appid"		"221100"
@@ -269,18 +449,94 @@ mod tests {
 		"1559212036"
 		{
 			"timeupdated"		"1"
+			"subscribedby"		"198223138,65974518"
+		}
+		"1750506510"
+		{
+			"subscribedby"		"65974518"
 		}
 		"999"
 		{
 			"timeupdated"		"5"
+			"subscribedby"		""
 		}
 	}
 }
 "#;
-    let times = parse_update_times(acf);
-    assert_eq!(times.len(), 2);
-    assert_eq!(times[&1559212036], 1700000000);
-    assert_eq!(times[&1750506510], 1690000000);
+
+  #[test]
+  fn reads_installed_mods_from_the_workshop_record() {
+    let record = parse_workshop_record(WORKSHOP_ACF);
+    assert_eq!(record.installed.len(), 2);
+    assert_eq!(record.installed[&1559212036], InstalledItem { size: Some(2051364), time_updated: Some(1700000000) });
+    assert_eq!(record.installed[&1750506510], InstalledItem { size: None, time_updated: Some(1690000000) });
+  }
+
+  #[test]
+  fn lists_the_mods_the_signed_in_account_is_subscribed_to() {
+    let record = parse_workshop_record(WORKSHOP_ACF);
+    assert_eq!(subscribed_ids(&record, Some(198223138)), [1559212036]);
+    assert_eq!(subscribed_ids(&record, Some(65974518)), [1559212036, 1750506510]);
+    // Without knowing the account, any subscription counts, but a mod nobody is subscribed to doesn't.
+    assert_eq!(subscribed_ids(&record, None), [1559212036, 1750506510]);
+  }
+
+  #[test]
+  fn finds_the_account_that_last_signed_in() {
+    let users = |first: &str, second: &str| {
+      format!(
+        "\"users\"
+{{
+	\"76561198158488866\"
+	{{
+		\"AccountName\"		\"a\"
+{first}	}}
+	\"76561198026240246\"
+	{{
+{second}	}}
+}}
+"
+      )
+    };
+    // Newer Steam versions only say when each account last signed in.
+    let vdf = users(
+      "		\"timestamp\"		\"1791134641\"
+",
+      "		\"timestamp\"		\"1790953389\"
+",
+    );
+    assert_eq!(parse_most_recent_account(&vdf), Some(198223138));
+    // Older ones mark it.
+    let vdf = users(
+      "		\"MostRecent\"		\"0\"
+		\"timestamp\"		\"1791134641\"
+",
+      "		\"MostRecent\"		\"1\"
+		\"timestamp\"		\"1790953389\"
+",
+    );
+    assert_eq!(parse_most_recent_account(&vdf), Some(65974518));
+    assert_eq!(
+      parse_most_recent_account(
+        "\"users\"
+{
+}
+"
+      ),
+      None
+    );
+  }
+
+  #[test]
+  fn reads_a_mod_name_from_its_meta_file() {
+    let meta = "protocol = 1;
+publishedid = 1559212036;
+name = \"CF\";
+timestamp = 5250757174595880000;
+";
+    assert_eq!(parse_meta_name(meta).as_deref(), Some("CF"));
+    assert_eq!(parse_meta_name("name = \"\";"), None);
+    assert_eq!(parse_meta_name("protocol = 1;"), None);
   }
 
   #[test]

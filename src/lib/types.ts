@@ -26,6 +26,8 @@ export type ServerList = {
   servers: ServerRow[];
   /** One name per distinct mod, shared between servers. */
   modNames: string[];
+  /** Each mod's Workshop id, in the same order as `modNames`. */
+  modIds: number[];
 };
 
 export type Mod = {
@@ -41,6 +43,23 @@ export type Ping = {
   estimated: boolean;
   players: number | null;
   maxPlayers: number | null;
+};
+
+/** A mod the player is subscribed to on the Workshop. */
+export type SubscribedMod = {
+  id: number;
+  /** Its name on the Workshop, or the name in its files when the Workshop can't say. */
+  name: string | null;
+  /** Whether Steam has put its files on this computer. */
+  installed: boolean;
+  /** Bytes on disk. */
+  size: number | null;
+  /** When the copy on this computer was published on the Workshop, in seconds since 1970. */
+  updatedAt: number | null;
+  /** When the Workshop's copy was published. `null` when the Workshop couldn't be reached or no longer has it. */
+  latestUpdatedAt: number | null;
+  /** The Workshop no longer has the mod: it was removed or made private. */
+  removed: boolean;
 };
 
 export type ModStatus = "queued" | "downloading" | "installed" | "failed";

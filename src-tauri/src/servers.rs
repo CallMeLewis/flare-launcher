@@ -92,6 +92,8 @@ pub struct ServerRow {
 pub struct ServerList {
   pub servers: Vec<ServerRow>,
   pub mod_names: Vec<String>,
+  /// Each mod's Workshop id, in the same order as `mod_names`.
+  pub mod_ids: Vec<u64>,
 }
 
 pub struct StoredServer {
@@ -203,6 +205,7 @@ pub async fn download_list(http: &reqwest::Client) -> Result<HashMap<String, Sto
 fn build_list(servers: &HashMap<String, StoredServer>) -> ServerList {
   let mut positions: HashMap<u64, u32> = HashMap::new();
   let mut mod_names = Vec::new();
+  let mut mod_ids = Vec::new();
   let rows = servers
     .values()
     .map(|server| {
@@ -213,6 +216,7 @@ fn build_list(servers: &HashMap<String, StoredServer>) -> ServerList {
         .map(|m| {
           *positions.entry(m.steam_workshop_id).or_insert_with(|| {
             mod_names.push(m.name.clone());
+            mod_ids.push(m.steam_workshop_id);
             (mod_names.len() - 1) as u32
           })
         })
@@ -220,7 +224,7 @@ fn build_list(servers: &HashMap<String, StoredServer>) -> ServerList {
       row
     })
     .collect();
-  ServerList { servers: rows, mod_names }
+  ServerList { servers: rows, mod_names, mod_ids }
 }
 
 #[tauri::command]
@@ -287,6 +291,8 @@ mod tests {
     ]}"#;
     let list = build_list(&parse_list(body).unwrap());
     assert_eq!(list.mod_names.len(), 3);
+    let cf = list.mod_names.iter().position(|name| name == "CF").unwrap();
+    assert_eq!(list.mod_ids[cf], 1);
 
     let names = |server: &str| -> Vec<&str> {
       let row = list.servers.iter().find(|r| r.name == server).unwrap();

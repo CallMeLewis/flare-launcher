@@ -6,6 +6,8 @@ export type ServersState = {
   rows: ServerRow[];
   /** Names that `ServerRow.mods` point into. */
   modNames: string[];
+  /** Workshop ids that `ServerRow.mods` point into. */
+  modIds: number[];
   /** `loading` and `error` only describe the first load; later failures keep the old list. */
   status: "loading" | "ready" | "error";
   error: string;
@@ -14,7 +16,7 @@ export type ServersState = {
 };
 
 export function useServers(onRefreshFailed: (message: string) => void): ServersState {
-  const [list, setList] = useState<ServerList>({ servers: [], modNames: [] });
+  const [list, setList] = useState<ServerList>({ servers: [], modNames: [], modIds: [] });
   const [status, setStatus] = useState<ServersState["status"]>("loading");
   const [error, setError] = useState("");
   const [refreshing, setRefreshing] = useState(false);
@@ -49,5 +51,5 @@ export function useServers(onRefreshFailed: (message: string) => void): ServersS
     void refresh();
   }, [refresh]);
 
-  return { rows: list.servers, modNames: list.modNames, status, error, refreshing, refresh };
+  return { rows: list.servers, modNames: list.modNames, modIds: list.modIds, status, error, refreshing, refresh };
 }

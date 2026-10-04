@@ -5,19 +5,23 @@ import { AppSidebar, type View } from "@/components/app-sidebar";
 import { FirstRunDialog } from "@/components/first-run-dialog";
 import { GameStartDialog, type GameStart } from "@/components/game-start-dialog";
 import { JoinAddressDialog } from "@/components/join-address-dialog";
+import { ModsPage } from "@/components/mods-page";
 import { ServerDetail } from "@/components/server-detail";
 import { ServerTable } from "@/components/server-table";
 import { ServerToolbar } from "@/components/server-toolbar";
 import { SettingsDialog } from "@/components/settings-dialog";
 import { TitleBar } from "@/components/title-bar";
+import { Message } from "@/components/message";
 import { Button } from "@/components/ui/button";
 import { useLan } from "@/hooks/use-lan";
 import { usePings } from "@/hooks/use-pings";
 import { useServers } from "@/hooks/use-servers";
 import { useAppMenuOffer } from "@/hooks/use-app-menu-offer";
 import { useStoredState } from "@/hooks/use-stored-state";
+import { useSubscribedMods } from "@/hooks/use-subscribed-mods";
 import { backend, errorMessage } from "@/lib/backend";
 import { launchArgs } from "@/lib/launch-options";
+import { serverCounts, type ModJob } from "@/lib/mods";
 import { followTheme } from "@/lib/theme";
 import {
   DEFAULT_FILTERS,
@@ -54,6 +58,7 @@ const GAME_START_TIMEOUT_SECS = 90;
 
 const onRefreshFailed = (message: string) => toast.error("Couldn't refresh the server list", { description: message });
 const onLanSearchFailed = (message: string) => toast.error("Couldn't search the network", { description: message });
+const onModsRefreshFailed = (message: string) => toast.error("Couldn't check your mods", { description: message });
 
 /** Adds rows to a list, replacing any with the same id. */
 const withRows = (rows: ServerRow[], added: ServerRow[]) => {
@@ -122,6 +127,14 @@ export function App() {
   }, [settings.uiScale]);
 
   useEffect(() => followTheme(settings.theme), [settings.theme]);
+
+  const subscribed = useSubscribedMods(install, settings.dayzDir, onModsRefreshFailed);
+  // Mods unsubscribed from this session. Steam can take a moment to update its record, so they're hidden until then.
+  const [unsubscribedIds, setUnsubscribedIds] = useState<ReadonlySet<number>>(new Set());
+  const subscribedMods = useMemo(
+    () => subscribed.mods && subscribed.mods.filter((mod) => !unsubscribedIds.has(mod.id)),
+    [subscribed.mods, unsubscribedIds],
+  );
   useAppMenuOffer(setupDone);
 
   const favourites = useMemo(() => new Set(favouriteIds), [favouriteIds]);
@@ -193,6 +206,7 @@ export function App() {
       favourites: [...known.filter((row) => favourites.has(row.id)), ...unlistedFavourites],
       recent: [...known.filter((row) => recents.has(row.id)), ...unlistedRows.filter((row) => recents.has(row.id))],
       lan: lan.rows,
+      mods: [],
     };
   }, [servers.rows, extraRows, lan.rows, unlistedRows, favourites, recents]);
   const inView = lists[view];
@@ -201,7 +215,32 @@ export function App() {
     favourites: lists.favourites.length,
     recent: lists.recent.length,
     lan: lists.lan.length,
+    mods: subscribedMods?.length ?? null,
   };
+
+  // Opening the mods page reads them again, to pick up mods subscribed to since.
+  const { refresh: refreshMods } = subscribed;
+  const installKnown = install !== undefined;
+  useEffect(() => {
+    if (view === "mods" && installKnown) void refreshMods();
+  }, [view, installKnown, refreshMods]);
+
+  const modServers = useMemo(
+    () => (view === "mods" && servers.status === "ready" ? serverCounts(servers.rows, servers.modIds) : null),
+    [view, servers.status, servers.rows, servers.modIds],
+  );
+  // The favourite servers running each mod, so unsubscribing from one they need comes with a warning.
+  const favouritesUsing = useMemo(() => {
+    const using = new Map<number, string[]>();
+    if (view !== "mods") return using;
+    for (const row of lists.favourites) {
+      for (const position of row.mods) {
+        const id = servers.modIds[position];
+        if (id !== undefined) using.set(id, [...(using.get(id) ?? []), row.name]);
+      }
+    }
+    return using;
+  }, [view, lists.favourites, servers.modIds]);
 
   // Saved lists show every server in them; only the search box narrows them.
   const search = useDeferredValue(filters.search);
@@ -310,6 +349,8 @@ export function App() {
         }
 
         if (missing.length > 0) {
+          // Downloading subscribes to them again.
+          setUnsubscribedIds((ids) => new Set([...ids].filter((id) => !missing.includes(id))));
           const queued = missing.map((id) => ({ id, status: "queued" as const, downloaded: 0, total: 0 }));
           setJob({ serverId: server.id, phase: "downloading", startsGame: startGame, progress: queued });
           const finished = await backend.downloadMods(missing, (progress) =>
@@ -373,6 +414,62 @@ export function App() {
     [install, settings, setRecentIds, unlisted, showGameStart],
   );
 
+  // Updates or verifies mods from the mods page. Both are the same request to Steam, which checks an installed mod's
+  // files before downloading what's missing. Shares the lock with joining, as both talk to Steam.
+  const [modJob, setModJob] = useState<ModJob | null>(null);
+  const runModJob = useCallback(
+    async (kind: ModJob["kind"], ids: number[]) => {
+      if (playing.current || ids.length === 0) return;
+      playing.current = true;
+      const mods = `${ids.length} ${ids.length === 1 ? "mod" : "mods"}`;
+      setModJob({ kind, progress: ids.map((id) => ({ id, status: "queued" as const, downloaded: 0, total: 0 })) });
+      try {
+        const finished = await backend.downloadMods(ids, (progress) => setModJob({ kind, progress }));
+        if (kind === "verify") {
+          if (finished) {
+            toast.success("Mods verified", {
+              description: `Steam checked ${mods} and downloaded again any files that were missing or incomplete.`,
+            });
+          } else {
+            toast.info("Verify cancelled", { description: "Steam will finish any repairs it had started." });
+          }
+        } else if (finished) {
+          toast.success("Mods up to date", { description: `${mods} downloaded.` });
+        } else {
+          toast.info("Update cancelled", {
+            description: "Steam will finish downloading these mods in the background.",
+          });
+        }
+      } catch (e) {
+        toast.error(kind === "verify" ? "Couldn't verify the mods" : "Couldn't update the mods", {
+          description: errorMessage(e),
+        });
+      } finally {
+        playing.current = false;
+        setModJob(null);
+        setInstallVersion((version) => version + 1);
+        void refreshMods();
+      }
+    },
+    [refreshMods],
+  );
+
+  const unsubscribeMods = useCallback(
+    async (ids: number[]) => {
+      if (playing.current) throw new Error("Wait for the mods to finish downloading, then try again.");
+      playing.current = true;
+      try {
+        await backend.unsubscribeMods(ids);
+        setUnsubscribedIds((current) => new Set([...current, ...ids]));
+      } finally {
+        playing.current = false;
+        setInstallVersion((version) => version + 1);
+      }
+      void refreshMods();
+    },
+    [refreshMods],
+  );
+
   const selected = selectedId ? (byId.get(selectedId) ?? unlistedRows.find((row) => row.id === selectedId)) : undefined;
   const selectedPing = selected && pings.get(selected.id);
 
@@ -382,140 +479,159 @@ export function App() {
       <div className="flex min-h-0 flex-1">
         <AppSidebar view={view} onViewChange={setView} counts={counts} onOpenSettings={() => setSettingsOpen(true)} />
 
-        <main className="flex min-w-0 flex-1 flex-col">
-          {/* The LAN list doesn't need the server list, so it still works without the internet. */}
-          {servers.status === "error" && view !== "lan" ? (
-            <Message
-              icon={<ServerCrash className="size-6" aria-hidden />}
-              title="The server list couldn't be loaded"
-              description={servers.error}
-              action={
-                <Button onClick={servers.refresh} disabled={servers.refreshing}>
-                  {servers.refreshing ? (
-                    <>
-                      <LoaderCircle className="animate-spin motion-reduce:animate-none" aria-hidden />
-                      Trying again…
-                    </>
-                  ) : (
-                    "Try again"
-                  )}
-                </Button>
-              }
-            />
-          ) : (
-            <>
-              <ServerToolbar
-                filters={filters}
-                onChange={setFilters}
-                filtersEnabled={view === "all"}
-                maps={maps}
-                versions={versions}
-                mods={mods}
-                shown={listed.length}
-                total={inView.length}
-                refreshing={view === "lan" ? lan.searching : servers.refreshing}
-                onRefresh={view === "lan" ? lan.search : servers.refresh}
-                refreshLabel={view === "lan" ? "Search the network again" : "Refresh server list"}
-                onAddServer={() => setJoinOpen(true)}
-              />
-              <ServerTable
-                rows={listed}
-                loading={view === "lan" ? !lan.searched : servers.status === "loading"}
-                sort={sort}
-                onSort={setSort}
-                selectedId={selectedId}
-                onSelect={setSelectedId}
-                onPlay={play}
-                favourites={favourites}
-                unlisted={unlisted}
-                onToggleFavourite={toggleFavourite}
-                pings={pings}
-                search={search}
-                modNames={servers.modNames}
-                empty={
-                  inView.length === 0 && view === "lan" ? (
-                    <Message
-                      icon={<Network className="size-6" aria-hidden />}
-                      title="No servers found on your network"
-                      description="A server shows here when it's on the same network and answers on a query port from 27015 to 27020. For any other server, use Add server."
-                      action={
-                        <div className="flex gap-2">
-                          <Button variant="secondary" onClick={lan.search} disabled={lan.searching}>
-                            {lan.searching ? (
-                              <>
-                                <LoaderCircle className="animate-spin motion-reduce:animate-none" aria-hidden />
-                                Searching…
-                              </>
-                            ) : (
-                              "Search again"
-                            )}
-                          </Button>
-                          <Button variant="secondary" onClick={() => setJoinOpen(true)}>
-                            Add server
-                          </Button>
-                        </div>
-                      }
-                    />
-                  ) : inView.length === 0 && view !== "all" ? (
-                    <Message
-                      icon={<Star className="size-6" aria-hidden />}
-                      title={view === "favourites" ? "No favourites yet" : "No recent servers"}
-                      description={
-                        view === "favourites"
-                          ? "Star a server to keep it here."
-                          : "Servers you join from the launcher show up here."
-                      }
-                      action={
-                        <Button variant="secondary" onClick={() => setView("all")}>
-                          Browse all servers
-                        </Button>
-                      }
-                    />
-                  ) : (
-                    <Message
-                      icon={<SearchX className="size-6" aria-hidden />}
-                      title="No servers match"
-                      description="Try a different search or fewer filters."
-                      action={
-                        activeFilterCount(applied) > 0 && (
-                          <Button variant="secondary" onClick={() => setFilters({ ...NO_FILTERS })}>
-                            Clear filters
-                          </Button>
-                        )
-                      }
-                    />
-                  )
-                }
-              />
-            </>
-          )}
-        </main>
-
-        {selected ? (
-          <ServerDetail
-            server={selected}
-            ping={selectedPing}
-            offline={unlisted.has(selected.id) ? "unlisted" : selectedPing?.offline ? "not-answering" : null}
-            install={install ?? null}
-            dayzDir={settings.dayzDir}
-            favourite={favourites.has(selected.id)}
-            onToggleFavourite={toggleFavourite}
-            job={job?.serverId === selected.id ? job : null}
-            busy={job !== null}
-            installVersion={installVersion}
-            onPlay={play}
-            onLoad={(server) => void play(server, "", false)}
-            onCancelDownload={() => void backend.cancelModDownload()}
+        {view === "mods" ? (
+          <ModsPage
+            state={{ ...subscribed, mods: subscribedMods }}
+            searchingForDayz={install === undefined}
+            servers={modServers}
+            favouritesUsing={favouritesUsing}
+            job={modJob}
+            busy={job !== null || modJob !== null}
+            onUpdate={(ids) => void runModJob("update", ids)}
+            onVerify={(ids) => void runModJob("verify", ids)}
+            onCancelUpdate={() => void backend.cancelModDownload()}
+            onUnsubscribe={unsubscribeMods}
             onOpenSettings={() => setSettingsOpen(true)}
+            onBrowseServers={() => setView("all")}
           />
         ) : (
-          <aside className="flex w-[300px] shrink-0 lg:w-[340px] xl:w-[400px] border-l bg-card">
-            <Message
-              icon={<MousePointerClick className="size-6" aria-hidden />}
-              title="Pick a server"
-              description="Select one to see its mods. Double-click to join straight away."
-            />
-          </aside>
+          <>
+            <main className="flex min-w-0 flex-1 flex-col">
+              {/* The LAN list doesn't need the server list, so it still works without the internet. */}
+              {servers.status === "error" && view !== "lan" ? (
+                <Message
+                  icon={<ServerCrash className="size-6" aria-hidden />}
+                  title="The server list couldn't be loaded"
+                  description={servers.error}
+                  action={
+                    <Button onClick={servers.refresh} disabled={servers.refreshing}>
+                      {servers.refreshing ? (
+                        <>
+                          <LoaderCircle className="animate-spin motion-reduce:animate-none" aria-hidden />
+                          Trying again…
+                        </>
+                      ) : (
+                        "Try again"
+                      )}
+                    </Button>
+                  }
+                />
+              ) : (
+                <>
+                  <ServerToolbar
+                    filters={filters}
+                    onChange={setFilters}
+                    filtersEnabled={view === "all"}
+                    maps={maps}
+                    versions={versions}
+                    mods={mods}
+                    shown={listed.length}
+                    total={inView.length}
+                    refreshing={view === "lan" ? lan.searching : servers.refreshing}
+                    onRefresh={view === "lan" ? lan.search : servers.refresh}
+                    refreshLabel={view === "lan" ? "Search the network again" : "Refresh server list"}
+                    onAddServer={() => setJoinOpen(true)}
+                  />
+                  <ServerTable
+                    rows={listed}
+                    loading={view === "lan" ? !lan.searched : servers.status === "loading"}
+                    sort={sort}
+                    onSort={setSort}
+                    selectedId={selectedId}
+                    onSelect={setSelectedId}
+                    onPlay={play}
+                    favourites={favourites}
+                    unlisted={unlisted}
+                    onToggleFavourite={toggleFavourite}
+                    pings={pings}
+                    search={search}
+                    modNames={servers.modNames}
+                    empty={
+                      inView.length === 0 && view === "lan" ? (
+                        <Message
+                          icon={<Network className="size-6" aria-hidden />}
+                          title="No servers found on your network"
+                          description="A server shows here when it's on the same network and answers on a query port from 27015 to 27020. For any other server, use Add server."
+                          action={
+                            <div className="flex gap-2">
+                              <Button variant="secondary" onClick={lan.search} disabled={lan.searching}>
+                                {lan.searching ? (
+                                  <>
+                                    <LoaderCircle className="animate-spin motion-reduce:animate-none" aria-hidden />
+                                    Searching…
+                                  </>
+                                ) : (
+                                  "Search again"
+                                )}
+                              </Button>
+                              <Button variant="secondary" onClick={() => setJoinOpen(true)}>
+                                Add server
+                              </Button>
+                            </div>
+                          }
+                        />
+                      ) : inView.length === 0 && view !== "all" ? (
+                        <Message
+                          icon={<Star className="size-6" aria-hidden />}
+                          title={view === "favourites" ? "No favourites yet" : "No recent servers"}
+                          description={
+                            view === "favourites"
+                              ? "Star a server to keep it here."
+                              : "Servers you join from the launcher show up here."
+                          }
+                          action={
+                            <Button variant="secondary" onClick={() => setView("all")}>
+                              Browse all servers
+                            </Button>
+                          }
+                        />
+                      ) : (
+                        <Message
+                          icon={<SearchX className="size-6" aria-hidden />}
+                          title="No servers match"
+                          description="Try a different search or fewer filters."
+                          action={
+                            activeFilterCount(applied) > 0 && (
+                              <Button variant="secondary" onClick={() => setFilters({ ...NO_FILTERS })}>
+                                Clear filters
+                              </Button>
+                            )
+                          }
+                        />
+                      )
+                    }
+                  />
+                </>
+              )}
+            </main>
+
+            {selected ? (
+              <ServerDetail
+                server={selected}
+                ping={selectedPing}
+                offline={unlisted.has(selected.id) ? "unlisted" : selectedPing?.offline ? "not-answering" : null}
+                install={install ?? null}
+                dayzDir={settings.dayzDir}
+                favourite={favourites.has(selected.id)}
+                onToggleFavourite={toggleFavourite}
+                job={job?.serverId === selected.id ? job : null}
+                busy={job !== null || modJob !== null}
+                installVersion={installVersion}
+                onPlay={play}
+                onLoad={(server) => void play(server, "", false)}
+                onCancelDownload={() => void backend.cancelModDownload()}
+                onOpenSettings={() => setSettingsOpen(true)}
+              />
+            ) : (
+              <aside className="flex w-[300px] shrink-0 lg:w-[340px] xl:w-[400px] border-l bg-card">
+                <Message
+                  icon={<MousePointerClick className="size-6" aria-hidden />}
+                  title="Pick a server"
+                  description="Select one to see its mods. Double-click to join straight away."
+                />
+              </aside>
+            )}
+          </>
         )}
       </div>
 
@@ -554,29 +670,6 @@ export function App() {
           setSetupOpen(true);
         }}
       />
-    </div>
-  );
-}
-
-function Message({
-  icon,
-  title,
-  description,
-  action,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-  action?: React.ReactNode;
-}) {
-  return (
-    <div className="flex flex-1 flex-col items-center justify-center gap-3 p-8 text-center">
-      <span className="text-muted-foreground">{icon}</span>
-      <div className="flex flex-col gap-1">
-        <p className="text-sm font-medium">{title}</p>
-        <p className="max-w-xs text-[13px] text-muted-foreground">{description}</p>
-      </div>
-      {action}
     </div>
   );
 }

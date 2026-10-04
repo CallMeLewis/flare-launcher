@@ -97,9 +97,9 @@ installed.
   sorting, `lib/backend.ts` every call into Rust.
 - `src-tauri/src/servers.rs`: downloads and caches the server list.
 - `src-tauri/src/query.rs`: ICMP ping for latency and Steam A2S_INFO queries for player counts.
-- `src-tauri/src/steam.rs`: finds Steam, DayZ and the Workshop folder.
+- `src-tauri/src/steam.rs`: finds Steam, DayZ and the Workshop folder, and reads which mods the player is subscribed to.
 - `src-tauri/src/launch.rs`: links mods into `<DayZ>/!dzsl` and starts the game.
-- `src-tauri/src/workshop.rs`: subscribes to and downloads mods through Steamworks.
+- `src-tauri/src/workshop.rs`: subscribes to, downloads and unsubscribes from mods through Steamworks.
 - `src-tauri/src/updater.rs`: checks for, downloads and installs launcher updates.
 - `src-tauri/src/app_menu.rs`: on Linux, moves the AppImage to `~/Applications` and adds it to the app menu.
 - `src-tauri/windows/installer-hooks.nsh`: removes an install made under the launcher's old name.

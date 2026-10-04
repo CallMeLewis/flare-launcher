@@ -12,6 +12,7 @@ import type {
   Ping,
   ServerList,
   ServerRow,
+  SubscribedMod,
   UpdateChannel,
   UpdateSettings,
   UpdateStatus,
@@ -56,6 +57,14 @@ export const backend = {
 
   installedMods: (dayzDir: string, ids: number[]): Promise<number[]> =>
     isPreview ? Promise.resolve([]) : invoke("installed_mods", { dayzDir: dayzDir || null, ids }),
+
+  /** The mods the player is subscribed to. Resolves to `null` when DayZ isn't found. */
+  subscribedMods: (dayzDir: string): Promise<SubscribedMod[] | null> =>
+    isPreview ? preview().then((p) => p.subscribedMods()) : invoke("subscribed_mods", { dayzDir: dayzDir || null }),
+
+  /** Unsubscribes from the mods in Steam, which then removes them from this computer. */
+  unsubscribeMods: (ids: number[]): Promise<void> =>
+    isPreview ? preview().then((p) => p.unsubscribeMods(ids)) : invoke("unsubscribe_mods", { ids }),
 
   launch: (request: LaunchRequest): Promise<void> =>
     isPreview ? Promise.reject("Launching only works in the desktop app.") : invoke("launch", { request }),
