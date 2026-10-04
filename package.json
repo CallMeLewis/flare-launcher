@@ -18,6 +18,7 @@
     "format": "prettier --write . && cargo fmt --manifest-path src-tauri/Cargo.toml",
     "format:check": "prettier --check . && cargo fmt --check --manifest-path src-tauri/Cargo.toml",
     "changelog": "node scripts/check-changelog.mjs",
+    "bump": "node scripts/bump-version.mjs",
     "dist": "pnpm changelog && tauri build --bundles nsis",
     "dist:cross": "pnpm changelog && tauri build --runner cargo-xwin --target x86_64-pc-windows-msvc --bundles nsis",
     "dist:linux": "pnpm changelog && node scripts/build-linux.mjs",

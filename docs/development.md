@@ -106,9 +106,10 @@ when it is newer than the latest beta. Builds are signed with the update signing
 repository secret `TAURI_SIGNING_PRIVATE_KEY`. The launcher refuses an update whose signature or signed version doesn't
 match the public key in `src-tauri/tauri.conf.json`.
 
-1. Set the new version in `package.json` (`tauri.conf.json` reads it from there). `1.2.0` is stable, `1.2.0-beta.1` is
+1. `pnpm bump <version>` sets the version in `package.json` (which `tauri.conf.json` reads), `Cargo.toml` and
+   `Cargo.lock`, and adds a dated section for it at the top of `CHANGELOG.md`. `1.2.0` is stable, `1.2.0-beta.1` is
    beta.
-2. Add a section for the version at the top of `CHANGELOG.md`, following [release-notes.md](release-notes.md).
+2. Write the release notes in that section, following [release-notes.md](release-notes.md).
 3. Commit and push, then `pnpm release`. It checks the release notes, tags the commit `v<version>` and pushes the tag,
    which starts the workflow, then redeploys the download page so its changelog shows the new version once it is out.
    It refuses to run with uncommitted or unpushed changes. Follow the build with `gh run watch`.
