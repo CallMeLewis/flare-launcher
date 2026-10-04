@@ -26,7 +26,7 @@ tauri-plugin-log = "2"
 tauri-plugin-opener = "2.7.0"
 thiserror = "2.0.21"
 futures = "0.3.34"
-tokio = { version = "1.53.1", features = ["net", "time", "sync", "macros", "rt-multi-thread"] }
+tokio = { version = "1.53.1", features = ["net", "io-util", "time", "sync", "macros", "rt-multi-thread"] }
 reqwest = { version = "0.13.5", default-features = false, features = ["json", "form", "gzip", "brotli", "native-tls"] }
 ping-async = "1.0.2"
 steamworks = "0.13.1"

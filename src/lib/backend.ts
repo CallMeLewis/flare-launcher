@@ -107,6 +107,11 @@ export const backend = {
     if (!isPreview) await invoke("set_window_theme", { theme });
   },
 
+  /** Turns the Discord status on or off. It shows the launcher and whether the player is in game, never the server. */
+  setDiscordStatus: async (enabled: boolean): Promise<void> => {
+    if (!isPreview) await invoke("set_discord_presence", { enabled });
+  },
+
   setInterfaceScale: async (scale: number): Promise<void> => {
     if (!isPreview) await getCurrentWebview().setZoom(scale);
   },

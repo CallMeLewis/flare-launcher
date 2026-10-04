@@ -111,6 +111,8 @@ export type Settings = {
   windowed: boolean;
   /** What the launcher does once DayZ has started. */
   afterLaunch: "keep" | "minimise" | "close";
+  /** Whether Discord shows the player using the launcher and in game, never which server. */
+  discordStatus: boolean;
 };
 
 export type UpdateChannel = "stable" | "beta";

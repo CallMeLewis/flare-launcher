@@ -89,7 +89,8 @@ What hasn't been tried for real yet: finding Steam through the registry, junctio
 ping path and mod downloads compile for Windows but haven't been run on a Windows PC with Steam and DayZ installed. The
 download screens have only been exercised against a simulated Steam. On Linux, the AppImage starts, loads the server
 list and pings servers, but joining, mod downloads and launching through Proton haven't been tried with Steam and DayZ
-installed.
+installed. The Discord status has been tried against Discord on Windows, but not on Linux, including its Flatpak and
+Snap packages.
 
 ## Layout
 
@@ -100,6 +101,8 @@ installed.
 - `src-tauri/src/steam.rs`: finds Steam, DayZ and the Workshop folder, and reads which mods the player is subscribed to.
 - `src-tauri/src/launch.rs`: links mods into `<DayZ>/!dzsl` and starts the game.
 - `src-tauri/src/workshop.rs`: subscribes to, downloads and unsubscribes from mods through Steamworks.
+- `src-tauri/src/discord.rs`: shows the Discord status, the launcher and whether DayZ is running, never the server.
+  Its art comes from the Flare Launcher application in Discord's developer portal, as the asset `logo`.
 - `src-tauri/src/updater.rs`: checks for, downloads and installs launcher updates.
 - `src-tauri/src/app_menu.rs`: on Linux, moves the AppImage to `~/Applications` and adds it to the app menu.
 - `src-tauri/windows/installer-hooks.nsh`: removes an install made under the launcher's old name.

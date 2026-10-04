@@ -13,6 +13,7 @@ const base: Settings = {
   noPause: false,
   windowed: false,
   afterLaunch: "keep",
+  discordStatus: true,
 };
 
 describe("launchArgs", () => {

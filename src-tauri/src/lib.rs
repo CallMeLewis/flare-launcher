@@ -2,6 +2,7 @@ mod app_menu;
 mod credentials;
 #[cfg(target_os = "linux")]
 mod desktop;
+mod discord;
 mod error;
 mod lan;
 mod launch;
@@ -14,6 +15,7 @@ mod workshop;
 use std::sync::Arc;
 use std::time::Duration;
 
+use tauri::Manager;
 use tauri_plugin_window_state::StateFlags;
 
 /// Sets whether the window looks light or dark: its title bar, and what the page's `prefers-color-scheme` reports.
@@ -94,6 +96,7 @@ pub fn run() {
       credentials::saved_password,
       credentials::save_password,
       credentials::forget_password,
+      discord::set_discord_presence,
     ])
     .setup(|app| {
       // The window is built here rather than from the config alone so Linux can keep the system title bar: Linux
@@ -111,6 +114,7 @@ pub fn run() {
         .initialization_script(format!("window.__systemTitleBar = {};", cfg!(target_os = "linux")))
         .build()?;
       updater::Updater::start(app.handle());
+      app.manage(discord::Presence::start());
       if cfg!(debug_assertions) {
         app.handle().plugin(tauri_plugin_log::Builder::default().level(log::LevelFilter::Info).build())?;
       }

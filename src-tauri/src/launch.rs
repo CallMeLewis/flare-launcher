@@ -163,7 +163,7 @@ fn is_game(name: &OsStr, program: Option<&OsStr>) -> bool {
   name == GAME_PROCESS || program.is_some_and(file_name)
 }
 
-fn game_running(system: &mut System) -> bool {
+pub(crate) fn game_running(system: &mut System) -> bool {
   let refresh = ProcessRefreshKind::nothing().with_cmd(UpdateKind::OnlyIfNotSet);
   system.refresh_processes_specifics(ProcessesToUpdate::All, true, refresh);
   system.processes().values().any(|process| is_game(process.name(), process.cmd().first().map(|arg| arg.as_os_str())))

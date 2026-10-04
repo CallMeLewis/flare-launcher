@@ -242,6 +242,22 @@ export function SettingsDialog({ open, onOpenChange, settings, onChange, install
                     </SelectContent>
                   </Select>
                 </SettingRow>
+                <SettingRow
+                  id="discord-status"
+                  label="Discord activity"
+                  description={
+                    settings.afterLaunch === "close"
+                      ? "Lets your Discord friends see you're using Flare Launcher. It closes when DayZ starts, so they won't see when you're in game."
+                      : "Lets your Discord friends see you're using Flare Launcher and when you're in game. Never which server you're on."
+                  }
+                >
+                  <Switch
+                    id="discord-status"
+                    aria-describedby="discord-status-description"
+                    checked={settings.discordStatus}
+                    onCheckedChange={(checked) => set({ discordStatus: checked })}
+                  />
+                </SettingRow>
                 <AppMenuRow />
               </SettingsGroup>
               <SettingsGroup title="Setup">

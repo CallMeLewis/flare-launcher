@@ -52,6 +52,7 @@ const DEFAULT_SETTINGS: Settings = {
   noPause: false,
   windowed: false,
   afterLaunch: "keep",
+  discordStatus: true,
 };
 const MAX_RECENT = 30;
 const GAME_START_TIMEOUT_SECS = 90;
@@ -127,6 +128,10 @@ export function App() {
   }, [settings.uiScale]);
 
   useEffect(() => followTheme(settings.theme), [settings.theme]);
+
+  useEffect(() => {
+    backend.setDiscordStatus(settings.discordStatus).catch(() => {});
+  }, [settings.discordStatus]);
 
   const subscribed = useSubscribedMods(install, settings.dayzDir, onModsRefreshFailed);
   // Mods unsubscribed from this session. Steam can take a moment to update its record, so they're hidden until then.
