@@ -4,7 +4,7 @@ The visual rules the launcher follows. It's a dense utility, not a marketing sit
 
 ## Style
 
-Dark Mode (OLED) with Data-Dense Dashboard layout, plus a matching light theme. Settings > General picks Light, Dark or System (the default, following the computer). Flat surfaces separated by 1px borders, no shadows, gradients or glow.
+Dark Mode (OLED) with Data-Dense Dashboard layout, plus a matching light theme. Settings > Launcher picks Light, Dark or System (the default, following the computer). Flat surfaces separated by 1px borders, no shadows, gradients or glow.
 
 ## Colour
 

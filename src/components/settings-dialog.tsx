@@ -9,7 +9,7 @@ import {
   Monitor,
   Moon,
   RefreshCw,
-  Rocket,
+  Gamepad2,
   RotateCcw,
   SlidersHorizontal,
   Sun,
@@ -45,8 +45,9 @@ export const THEMES: { value: Theme; label: string; icon: LucideIcon }[] = [
 const count = new Intl.NumberFormat();
 
 const SECTIONS: { value: string; label: string; icon: LucideIcon; pinned?: boolean }[] = [
-  { value: "general", label: "General", icon: SlidersHorizontal },
-  { value: "launch", label: "Launch options", icon: Rocket },
+  // Sorted by one question: does it change DayZ, or the launcher?
+  { value: "game", label: "Game", icon: Gamepad2 },
+  { value: "launcher", label: "Launcher", icon: SlidersHorizontal },
   { value: "folders", label: "Folders", icon: FolderOpen },
   // Pinned to the bottom of the menu.
   { value: "about", label: "About", icon: Info, pinned: true },
@@ -69,7 +70,7 @@ export function SettingsDialog({ open, onOpenChange, settings, onChange, install
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="h-[min(760px,calc(100vh-4rem))] gap-0 overflow-hidden p-0 sm:max-w-[60rem]">
-        <Tabs defaultValue="general" orientation="vertical" className="h-full min-h-0 gap-0">
+        <Tabs defaultValue="game" orientation="vertical" className="h-full min-h-0 gap-0">
           <div className="flex w-52 shrink-0 flex-col border-r bg-background/40 p-3">
             <div className="px-2 pt-2 pb-4">
               <DialogTitle className="text-base">Settings</DialogTitle>
@@ -93,11 +94,8 @@ export function SettingsDialog({ open, onOpenChange, settings, onChange, install
           </div>
 
           <div className="min-w-0 flex-1 overflow-y-auto">
-            <TabsContent value="general" className="flex flex-col gap-6 p-6 pr-14">
-              <SectionHeading
-                title="General"
-                description="Your name in game, and how the launcher looks and behaves."
-              />
+            <TabsContent value="game" className="flex flex-col gap-6 p-6 pr-14">
+              <SectionHeading title="Game" description="How DayZ starts when you join a server." />
               <SettingsGroup title="In game">
                 <SettingRow
                   id="profile-name"
@@ -116,7 +114,57 @@ export function SettingsDialog({ open, onOpenChange, settings, onChange, install
                   />
                 </SettingRow>
               </SettingsGroup>
-              <SettingsGroup title="Launcher">
+              <SettingsGroup title="Startup">
+                {LAUNCH_OPTIONS.map((option) => (
+                  <SettingRow
+                    key={option.key}
+                    id={`option-${option.key}`}
+                    label={option.label}
+                    description={
+                      <>
+                        {option.description}{" "}
+                        <code className="data whitespace-nowrap text-foreground/70">{option.flag}</code>
+                      </>
+                    }
+                  >
+                    <Switch
+                      id={`option-${option.key}`}
+                      aria-describedby={`option-${option.key}-description`}
+                      checked={settings[option.key]}
+                      onCheckedChange={(checked) => set({ [option.key]: checked })}
+                    />
+                  </SettingRow>
+                ))}
+              </SettingsGroup>
+              <Field
+                id="extra-args"
+                label="Extra parameters"
+                hint="Any other DayZ startup parameters, separated by spaces."
+              >
+                <Input
+                  id="extra-args"
+                  placeholder="-cpuCount=8"
+                  autoComplete="off"
+                  spellCheck={false}
+                  value={settings.extraArgs}
+                  onChange={(event) => set({ extraArgs: event.target.value })}
+                  className="data text-xs"
+                />
+              </Field>
+              <div className="flex flex-col gap-1.5">
+                <p className="text-xs font-medium text-muted-foreground">Added to the command line</p>
+                <code className="data selectable rounded-md border bg-background/60 px-3 py-2 text-xs break-all text-foreground/85">
+                  {launchArgs(settings) || <span className="text-muted-foreground">Nothing extra</span>}
+                </code>
+                <p className="text-xs text-muted-foreground">
+                  The server address, its mods and your character name are added automatically.
+                </p>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="launcher" className="flex flex-col gap-6 p-6 pr-14">
+              <SectionHeading title="Launcher" description="How the launcher looks and behaves on this computer." />
+              <SettingsGroup title="Appearance">
                 <SettingRow id="theme" label="Theme" description="Light or dark, or System to match this computer.">
                   <ToggleGroup
                     type="single"
@@ -169,6 +217,8 @@ export function SettingsDialog({ open, onOpenChange, settings, onChange, install
                     ))}
                   </ToggleGroup>
                 </SettingRow>
+              </SettingsGroup>
+              <SettingsGroup title="Behaviour">
                 <SettingRow
                   id="after-launch"
                   label="When DayZ starts"
@@ -193,6 +243,8 @@ export function SettingsDialog({ open, onOpenChange, settings, onChange, install
                   </Select>
                 </SettingRow>
                 <AppMenuRow />
+              </SettingsGroup>
+              <SettingsGroup title="Setup">
                 <SettingRow
                   id="run-setup"
                   label="First-time setup"
@@ -209,56 +261,6 @@ export function SettingsDialog({ open, onOpenChange, settings, onChange, install
                   </Button>
                 </SettingRow>
               </SettingsGroup>
-            </TabsContent>
-
-            <TabsContent value="launch" className="flex flex-col gap-6 p-6 pr-14">
-              <SectionHeading title="Launch options" description="Applied every time the launcher starts DayZ." />
-              <div className="flex flex-col divide-y rounded-lg border bg-card">
-                {LAUNCH_OPTIONS.map((option) => (
-                  <SettingRow
-                    key={option.key}
-                    id={`option-${option.key}`}
-                    label={option.label}
-                    description={
-                      <>
-                        {option.description}{" "}
-                        <code className="data whitespace-nowrap text-foreground/70">{option.flag}</code>
-                      </>
-                    }
-                  >
-                    <Switch
-                      id={`option-${option.key}`}
-                      aria-describedby={`option-${option.key}-description`}
-                      checked={settings[option.key]}
-                      onCheckedChange={(checked) => set({ [option.key]: checked })}
-                    />
-                  </SettingRow>
-                ))}
-              </div>
-              <Field
-                id="extra-args"
-                label="Extra parameters"
-                hint="Any other DayZ startup parameters, separated by spaces."
-              >
-                <Input
-                  id="extra-args"
-                  placeholder="-cpuCount=8"
-                  autoComplete="off"
-                  spellCheck={false}
-                  value={settings.extraArgs}
-                  onChange={(event) => set({ extraArgs: event.target.value })}
-                  className="data text-xs"
-                />
-              </Field>
-              <div className="flex flex-col gap-1.5">
-                <p className="text-xs font-medium text-muted-foreground">Added to the command line</p>
-                <code className="data selectable rounded-md border bg-background/60 px-3 py-2 text-xs break-all text-foreground/85">
-                  {launchArgs(settings) || <span className="text-muted-foreground">Nothing extra</span>}
-                </code>
-                <p className="text-xs text-muted-foreground">
-                  The server address, its mods and your character name are added automatically.
-                </p>
-              </div>
             </TabsContent>
 
             <TabsContent value="folders" className="flex flex-col gap-6 p-6 pr-14">

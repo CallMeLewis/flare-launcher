@@ -38,7 +38,7 @@ Release notes are for players using the launcher, not for the people developing 
   problem is gone. Lead with the result, not how it was built.
   Prefer "Mods a server needs now download while you watch, then the game starts on its own." over "Added Steamworks
   UGC subscription and polling of item download state."
-- Use plain language and the launcher's own words (button labels, filter names, Settings > Launch options). No
+- Use plain language and the launcher's own words (button labels, filter names, Settings > Game). No
   developer terms, internal names, error codes, ticket numbers or file, class or variable names.
 - Don't name other launchers or services, including where the server list comes from.
 - When a change only affects one platform, say so: "On Linux, ...".
