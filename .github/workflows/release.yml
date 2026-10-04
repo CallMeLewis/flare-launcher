@@ -29,7 +29,7 @@ concurrency:
 jobs:
   version:
     name: Check the version
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
         with:
@@ -60,7 +60,7 @@ jobs:
   publish:
     name: Publish
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: write
     env:
@@ -71,18 +71,18 @@ jobs:
       - uses: actions/checkout@v5
         with:
           ref: ${{ env.TAG }}
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
       - uses: actions/setup-node@v5
         with:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       # Back where the builds would be on a desktop, which is where the release script looks for them.
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: windows
           path: src-tauri/target/release/bundle/nsis
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: linux
           path: src-tauri/target/linux/release/bundle
