@@ -1,0 +1,21 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "react", "unicorn", "oxc", "import", "vitest"],
+  "categories": {
+    "correctness": "error"
+  },
+  "env": {
+    "browser": true,
+    "node": true
+  },
+  "rules": {
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "error",
+    // Written for the React Compiler, which the launcher doesn't use. Resetting a panel's state in an effect when the
+    // server changes, and TanStack Virtual's virtualizer, are both fine without it.
+    "react/set-state-in-effect": "off",
+    "react/incompatible-library": "off",
+    // The automatic JSX runtime doesn't need React in scope.
+    "react/react-in-jsx-scope": "off"
+  }
+}

@@ -23,6 +23,7 @@ only work in the desktop app.
 pnpm test                                   # frontend unit tests
 cd src-tauri && cargo test                  # backend unit tests
 cd src-tauri && cargo test -- --ignored     # live checks against the real server list and Workshop
+pnpm lint                                   # lint the frontend and scripts (cargo clippy covers the backend)
 pnpm format                                 # format the frontend and backend; CI fails on unformatted code
 ```
 

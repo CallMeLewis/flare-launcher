@@ -34,6 +34,8 @@ jobs:
         run: pnpm changelog
       - name: Formatted
         run: pnpm exec prettier --check .
+      - name: Lint
+        run: pnpm lint
       - name: Type check and build
         run: pnpm build
       - name: Test

@@ -123,6 +123,7 @@ export function ServerDetail({
     setCheckFailed(!ids);
     if (ids) setInstalled(new Set(ids));
     // installVersion is a dependency so a finished download triggers a re-check.
+    // oxlint-disable-next-line react-hooks/exhaustive-deps
   }, [mods, canCheckMods, dayzDir, installVersion]);
 
   // Also re-check when the window regains focus, in case mods changed in Steam.

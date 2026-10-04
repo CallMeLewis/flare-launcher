@@ -39,15 +39,7 @@ export function usePings(): Pings {
   // Whether any server has answered a status request, so a network that blocks them doesn't mark every server offline.
   const anyAnswered = useRef(false);
 
-  const enqueue = useRef((ids: string[], urgent: boolean) => {
-    const wanted = ids.filter((id) => !queued.current.has(id));
-    if (wanted.length === 0) return;
-    for (const id of wanted) queued.current.add(id);
-    queue.current = urgent ? [...wanted, ...queue.current] : [...queue.current, ...wanted];
-    pump();
-  });
-
-  const pump = useCallback(() => {
+  const pump = useCallback(function pump() {
     while (chunksInFlight.current < MAX_CHUNKS_IN_FLIGHT && queue.current.length > 0) {
       const chunk = queue.current.splice(0, CHUNK_SIZE);
       chunksInFlight.current += 1;
@@ -74,6 +66,14 @@ export function usePings(): Pings {
         });
     }
   }, []);
+
+  const enqueue = useRef((ids: string[], urgent: boolean) => {
+    const wanted = ids.filter((id) => !queued.current.has(id));
+    if (wanted.length === 0) return;
+    for (const id of wanted) queued.current.add(id);
+    queue.current = urgent ? [...wanted, ...queue.current] : [...queue.current, ...wanted];
+    pump();
+  });
 
   const request = useCallback((ids: string[], urgent = false) => {
     const now = Date.now();

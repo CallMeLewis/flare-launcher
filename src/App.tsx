@@ -175,9 +175,10 @@ export function App() {
       .catch(() => {});
   }, [servers.status, servers.rows, unlisted]);
 
+  const { search: searchLan } = lan;
   useEffect(() => {
-    if (view === "lan") lan.search();
-  }, [view, lan.search]);
+    if (view === "lan") searchLan();
+  }, [view, searchLan]);
 
   const lists = useMemo<Record<View, ServerRow[]>>(() => {
     const unlistedFavourites = unlistedRows.filter((row) => favourites.has(row.id));
@@ -225,6 +226,7 @@ export function App() {
       ),
     ];
     // filterPingVersion is a dependency so ping filters update as results arrive.
+    // oxlint-disable-next-line react-hooks/exhaustive-deps
   }, [view, inView, applied, search, favourites, servers.modNames, getPing, filterPingVersion]);
 
   const sortingByPing = sort.key === "ping";
@@ -232,6 +234,7 @@ export function App() {
   const sorted = useMemo(
     () => sortServers(filtered, sort, (id) => getPing(id)?.pingMs),
     // pingVersion is a dependency so the order updates as results arrive.
+    // oxlint-disable-next-line react-hooks/exhaustive-deps
     [filtered, sort, getPing, pingVersion],
   );
   // On the full list, favourites sit at the top in the chosen order.
