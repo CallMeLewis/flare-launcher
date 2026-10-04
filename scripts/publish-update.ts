@@ -226,7 +226,7 @@ async function publishRelease(release: Release): Promise<void> {
     return file;
   });
   const notesFile = join(staging, "notes.md");
-  writeFileSync(notesFile, `${release.notes}\n`);
+  writeFileSync(notesFile, `${githubNotes(release)}\n`);
 
   if (gh(["release", "view", tag, "--json", "tagName"], true)) {
     gh(["release", "upload", tag, ...files, "--clobber"]);
@@ -238,6 +238,26 @@ async function publishRelease(release: Release): Promise<void> {
   const channel = release.prerelease ? ["--prerelease", "--latest=false"] : ["--prerelease=false", "--latest"];
   gh(["release", "edit", tag, "--draft=false", ...channel]);
   console.log(`Published the release ${tag}`);
+}
+
+/**
+ * The GitHub release's notes: the players' notes, then a link to every commit since the previous release, for
+ * developers. The launcher and the download page show only the players' notes. A stable release links from the last
+ * stable one, so the link spans the betas between them.
+ */
+function githubNotes(release: Release): string {
+  const tagged = capture("git", ["ls-remote", "--tags", "--refs", "origin", "refs/tags/v*"], true)
+    .split("\n")
+    .map((line) => line.match(/refs\/tags\/v(.+)$/)?.[1])
+    .filter((version) => version !== undefined);
+  const previous = tagged
+    .filter(
+      (version) => compareVersions(version, release.version) < 0 && (release.prerelease || !version.includes("-")),
+    )
+    .sort((a, b) => compareVersions(b, a))[0];
+  if (!previous) return release.notes;
+  const compare = `https://github.com/${repo}/compare/v${previous}...v${release.version}`;
+  return `${release.notes}\n\nEvery change since ${previous}: ${compare}`;
 }
 
 /**
