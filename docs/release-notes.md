@@ -4,7 +4,9 @@ Follow these when writing or editing release notes, which every version bump nee
 
 ## Where they live
 
-Every version's notes are a section of [`CHANGELOG.md`](../CHANGELOG.md), newest at the top:
+Every version's notes are a section of [`CHANGELOG.md`](../CHANGELOG.md), newest at the top. Despite its name, it
+holds release notes for players, not a record of every change: that record is the git history, written following
+[commit-messages.md](commit-messages.md).
 
 ```
 ## 1.2.0 - 2026-11-14
@@ -17,6 +19,8 @@ Every version's notes are a section of [`CHANGELOG.md`](../CHANGELOG.md), newest
 - The build stops if the version in `package.json` has no section, or the section has no bullets.
 - The launcher shows the running version's section in Settings > About, and the release puts it in the update
   feed so the launcher can show it when the update is offered. The download page's changelog lists every section.
+- The GitHub release shows the same notes, followed by a link to every commit since the previous release, added by
+  the release script for developers.
 - A beta gets its own section (`## 1.2.0-beta.1`) while it is current. When the stable version ships, write its
   section fresh for someone coming from the last stable version, and delete the beta sections: each beta build
   already carries its own notes.
@@ -32,12 +36,15 @@ The app only shows the lines that start with `- `, as plain text in a bulleted l
 
 ## Writing them
 
-Release notes are for players using the launcher, not for the people developing it.
+Release notes are for players using the launcher, not for the people developing it. They are not commit messages,
+which describe every change for developers: see [commit-messages.md](commit-messages.md).
 
 - Describe what changed from the player's point of view: what they can now do, what behaves differently, or what
   problem is gone. Lead with the result, not how it was built.
   Prefer "Mods a server needs now download while you watch, then the game starts on its own." over "Added Steamworks
   UGC subscription and polling of item download state."
+- Say where to find anything new: in the sidebar, next to Play, in Settings > Launcher. Players don't use what they
+  can't find.
 - Use plain language and the launcher's own words (button labels, filter names, Settings > Game). No
   developer terms, internal names, error codes, ticket numbers or file, class or variable names.
 - Don't name other launchers or services, including where the server list comes from.
@@ -81,6 +88,7 @@ where it helps ("New ...", "Fixed ...", "Removed ..."):
 ## Final check
 
 - Is every bullet something a player can notice, written without technical wording?
+- Does every new feature say where to find it?
 - Does any feature name (Play, Load mods, Settings...) appear in more than one bullet? Merge them.
 - Is any other launcher or service named? Remove it.
 - Are the bullets in category order, with any "Action needed:" first?

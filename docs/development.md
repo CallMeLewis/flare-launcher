@@ -105,6 +105,7 @@ installed.
 - `src-tauri/windows/installer-hooks.nsh`: removes an install made under the launcher's old name.
 - `scripts/`: the release tooling. `CHANGELOG.md` holds every version's notes, read through `scripts/changelog.ts`.
 - `docs/design.md`: the visual rules the launcher follows.
+- `docs/commit-messages.md`: how commit messages are written.
 - `src-tauri/icons/source.svg`: the icon artwork. Regenerate the icon set with `pnpm tauri icon src-tauri/icons/source.svg`.
 
 ## Releasing
