@@ -15,7 +15,9 @@ RUN curl -fsSL "https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-l
     && corepack enable
 
 ENV RUSTUP_HOME=/usr/local/rustup CARGO_HOME=/usr/local/cargo PATH=/usr/local/cargo/bin:$PATH
-RUN curl -fsSL https://sh.rustup.rs | sh -s -- -y --profile minimal --default-toolchain stable
+# Rust itself is installed on the first build, from the repo's rust-toolchain.toml, into a volume (see
+# scripts/build-linux.mjs), so the container uses the same version as everywhere else.
+RUN curl -fsSL https://sh.rustup.rs | sh -s -- -y --profile minimal --default-toolchain none
 
 # pnpm's store lives in a volume (see scripts/build-linux.mjs). Left alone, pnpm puts it beside the project, which here is
 # the repo itself. Set in the global config, so pnpm runs started by other tools, such as Tauri's frontend build, use it.

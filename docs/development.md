@@ -5,7 +5,8 @@ Linux: see [platforms.md](platforms.md) for how the two differ.
 
 ## Run it
 
-Needs Node.js 24, pnpm 11 and a stable Rust toolchain. On Linux, Tauri also needs the WebKitGTK development packages.
+Needs Node.js 24, pnpm 11 and rustup, which installs the Rust version pinned in `rust-toolchain.toml` the first time
+it's used. On Linux, Tauri also needs the WebKitGTK development packages.
 
 ```sh
 pnpm install
@@ -32,8 +33,9 @@ pnpm dist:cross   # Windows installer, cross-built from Linux
 pnpm dist         # Windows installer, on Windows
 ```
 
-Cross-building for Windows needs `nsis`, `lld`, `llvm` and `clang`, the `x86_64-pc-windows-msvc` Rust target and
-`cargo-xwin`. The installer lands in `src-tauri/target/x86_64-pc-windows-msvc/release/bundle/nsis/`.
+Cross-building for Windows needs `nsis`, `lld`, `llvm`, `clang`, `cargo-xwin` and the `x86_64-pc-windows-msvc` Rust
+target (`rustup target add x86_64-pc-windows-msvc`, again after each Rust version bump). The installer lands in
+`src-tauri/target/x86_64-pc-windows-msvc/release/bundle/nsis/`.
 `cargo check --target x86_64-pc-windows-msvc` type-checks the Windows-only code without a full build.
 
 `pnpm dist:linux` needs podman. It builds inside Ubuntu 22.04 (`scripts/linux-build.Containerfile`), because Linux

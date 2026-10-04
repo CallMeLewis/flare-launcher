@@ -1,0 +1,5 @@
+# The Rust version used on every machine and in CI. Bump it on purpose, in its own commit.
+[toolchain]
+channel = "1.99.0"
+profile = "minimal"
+components = ["clippy"]

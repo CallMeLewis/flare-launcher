@@ -1,0 +1,9 @@
+# Keep LF line endings on both Windows and Linux, whatever Git's autocrlf setting is on the machine.
+* text=auto eol=lf
+
+*.png binary
+*.ico binary
+*.icns binary
+*.woff2 binary
+*.dll binary
+*.so binary

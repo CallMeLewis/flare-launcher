@@ -28,11 +28,12 @@ try {
     "--volume", `${root}:/src`,
     "--volume", "flare-launcher-node-modules:/src/node_modules",
     "--volume", "flare-launcher-cargo-registry:/usr/local/cargo/registry",
+    "--volume", "flare-launcher-rustup:/usr/local/rustup",
     "--volume", "flare-launcher-pnpm-store:/pnpm-store",
     "--env", "CARGO_TARGET_DIR=/src/src-tauri/target/linux",
     "--env", "COREPACK_ENABLE_DOWNLOAD_PROMPT=0",
     image,
-    "bash", "-c", "pnpm install --frozen-lockfile && pnpm tauri build --bundles appimage,deb,rpm",
+    "bash", "-c", "rustup toolchain install && pnpm install --frozen-lockfile && pnpm tauri build --bundles appimage,deb,rpm",
   ]);
   // Tauri's frontend build, a pnpm run inside another, leaves an empty pnpm index beside the project whatever the store
   // setting. Nothing outside the container uses it.
