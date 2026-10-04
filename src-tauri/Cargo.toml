@@ -1,6 +1,6 @@
 [package]
 name = "flare-launcher"
-version = "1.1.2"
+version = "1.1.3"
 description = "Flare Launcher: a server browser and mod launcher for DayZ"
 authors = ["CallMeLewis"]
 license = "GPL-3.0-or-later"

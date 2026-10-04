@@ -3,6 +3,13 @@
 What changed in each version of Flare Launcher, newest first. Versions before 1.1.0 were released as DayZ Server
 Launcher.
 
+## 1.1.3 - 2026-10-04
+
+- New first-time setup for your character name, intro screens, theme and what happens when DayZ starts; run it again from Settings > General.
+- Servers that need a password can now remember it, show what you've typed, and join when you press Enter.
+- Improved joining a server: a window now shows DayZ starting until the game opens.
+- The Has players and Not full filters are now called Hide empty servers and Hide full servers.
+
 ## 1.1.2 - 2026-10-04
 
 - Join by address is now the Add server button, with a plus icon, beside the refresh button, so it's easier to find.
