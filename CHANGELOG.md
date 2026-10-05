@@ -3,6 +3,10 @@
 What changed in each version of Flare Launcher, newest first. Versions before 1.1.0 were released as DayZ Server
 Launcher.
 
+## 1.1.6-beta.1 - 2026-10-05
+
+- Fixed Refresh not updating servers you added by address, which kept showing their old player count and mods until the launcher was restarted.
+
 ## 1.1.5 - 2026-10-05
 
 - The launcher now comes in English (UK), English (US), French and German, and follows your computer's language; choose another in Settings > Launcher > Language.
