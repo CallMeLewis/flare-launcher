@@ -3,6 +3,13 @@
 What changed in each version of Flare Launcher, newest first. Versions before 1.1.0 were released as DayZ Server
 Launcher.
 
+## 1.1.5 - 2026-10-05
+
+- The launcher now comes in English (UK), English (US), French and German, and follows your computer's language; choose another in Settings > Launcher > Language.
+- New Discord activity: your Discord friends see that you're using Flare Launcher and when you're in game, but never which server you're on; turn it off in Settings > Launcher.
+- The toolbar above the server list no longer runs out of room: Add server shows just its icon until the window is wide enough for its name.
+- Fixed the warning about mods your favourite servers use ending in "and 2 mores" when unsubscribing.
+
 ## 1.1.4 - 2026-10-04
 
 - New Mods page in the sidebar, listing every Workshop mod you're subscribed to with its size, when it was last updated and how many servers use it; search and sort them, update outdated mods, verify them to fix missing or incomplete files, or unsubscribe from the ones you no longer need.
