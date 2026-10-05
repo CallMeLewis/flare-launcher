@@ -797,7 +797,7 @@ function UnsubscribeDialog({
                 ? "Your favourite servers use it"
                 : `Your favourite servers use ${count.format(needed.length)} of these`}
               : {favouriteServers.slice(0, 3).join(", ")}
-              {favouriteServers.length > 3 && ` and ${plural(favouriteServers.length - 3, "more")}`}.
+              {favouriteServers.length > 3 && ` and ${plural(favouriteServers.length - 3, "more", "more")}`}.
             </span>
           </p>
         )}
