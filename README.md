@@ -1,6 +1,12 @@
-# Flare Launcher
-
-Find a server. Get the mods. Jump straight in.
+<div align="center">
+  <img src="src-tauri/icons/128x128@2x.png" width="112" alt="Flare Launcher icon">
+  <h1>Flare Launcher</h1>
+  <p>Find a server. Get the mods. Jump straight in.</p>
+  <p>
+    <a href="https://github.com/CallMeLewis/flare-launcher/releases/latest"><img src="https://img.shields.io/github/v/release/CallMeLewis/flare-launcher?display_name=tag&amp;sort=semver" alt="Latest release"></a>
+    <a href="https://github.com/CallMeLewis/flare-launcher/actions/workflows/ci.yml"><img src="https://github.com/CallMeLewis/flare-launcher/actions/workflows/ci.yml/badge.svg" alt="CI status"></a>
+  </p>
+</div>
 
 Flare Launcher is a server browser and mod launcher for DayZ, for Windows and Linux. Pick a server and press Play: it
 downloads the mods that server needs through Steam, then starts the game and joins.
