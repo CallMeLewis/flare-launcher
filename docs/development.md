@@ -168,5 +168,5 @@ check for updates.
 
 ## The download page
 
-The download page at [flare.darkzone.dev](https://flare.darkzone.dev) is kept separately. It reads the update feed for
+The download page at [flarelauncher.app](https://flarelauncher.app) is kept separately. It reads the update feed for
 its downloads and this repo's `CHANGELOG.md` for its changelog, both when visited, so a release needs nothing from it.

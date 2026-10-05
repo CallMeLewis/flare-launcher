@@ -9,7 +9,7 @@ downloads the mods that server needs through Steam, then starts the game and joi
 
 ## Download
 
-Get the latest version from **[flare.darkzone.dev](https://flare.darkzone.dev)**. It picks
+Get the latest version from **[flarelauncher.app](https://flarelauncher.app)**. It picks
 the right download for your computer. The launcher keeps itself up to date after that. See what changed in each
 version in [CHANGELOG.md](CHANGELOG.md).
 
