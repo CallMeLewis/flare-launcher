@@ -99,6 +99,7 @@ export function ServerDetail({
   const unlisted = offline === "unlisted";
   const canCheckMods = install !== null && !unlisted;
 
+  // Runs again when a refresh replaces the row, not just when another server is selected, so updated mods show.
   useEffect(() => {
     let cancelled = false;
     setMods(null);
@@ -118,7 +119,7 @@ export function ServerDetail({
     return () => {
       cancelled = true;
     };
-  }, [server.id, modsAttempt, unlisted]);
+  }, [server, modsAttempt, unlisted]);
 
   useEffect(() => {
     backend

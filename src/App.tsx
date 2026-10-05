@@ -159,10 +159,11 @@ export function App() {
   const versions = useMemo(() => versionCounts(servers.rows), [servers.rows]);
   const mods = useMemo(() => modCounts(servers.rows, servers.modNames), [servers.rows, servers.modNames]);
   // Servers found by asking them directly that the server list doesn't have.
-  const extraRows = useMemo(() => {
-    const listed = new Set(servers.rows.map((row) => row.id));
-    return withRows(askedRows, lan.rows).filter((row) => !listed.has(row.id));
-  }, [servers.rows, askedRows, lan.rows]);
+  const listedIds = useMemo(() => new Set(servers.rows.map((row) => row.id)), [servers.rows]);
+  const extraRows = useMemo(
+    () => withRows(askedRows, lan.rows).filter((row) => !listedIds.has(row.id)),
+    [listedIds, askedRows, lan.rows],
+  );
   const byId = useMemo(
     () => new Map([...servers.rows, ...extraRows].map((row) => [row.id, row])),
     [servers.rows, extraRows],
@@ -195,19 +196,21 @@ export function App() {
   const unlisted = useMemo(() => new Set(unlistedRows.map((row) => row.id)), [unlistedRows]);
 
   // A saved server missing from the list may be on the local network or one added by address, so it's asked
-  // directly, once per server list.
+  // directly, once per server list. Servers already asked are asked again, so a refresh updates their players and mods.
   const asked = useRef<{ rows: ServerRow[]; ids: Set<string> }>({ rows: [], ids: new Set() });
   useEffect(() => {
     if (servers.status !== "ready") return;
     if (asked.current.rows !== servers.rows) asked.current = { rows: servers.rows, ids: new Set() };
-    const ids = [...unlisted].filter((id) => !asked.current.ids.has(id));
+    const ids = [...new Set([...favouriteIds, ...recentIds])].filter(
+      (id) => !listedIds.has(id) && !asked.current.ids.has(id),
+    );
     if (ids.length === 0) return;
     for (const id of ids) asked.current.ids.add(id);
     backend
       .queryServers(ids)
       .then((found) => setAskedRows((rows) => withRows(rows, found)))
       .catch(() => {});
-  }, [servers.status, servers.rows, unlisted]);
+  }, [servers.status, servers.rows, listedIds, favouriteIds, recentIds]);
 
   const { search: searchLan } = lan;
   useEffect(() => {
