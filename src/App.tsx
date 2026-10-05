@@ -1,6 +1,8 @@
 import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { LoaderCircle, MousePointerClick, Network, SearchX, ServerCrash, Star } from "lucide-react";
 import { toast } from "sonner";
+import { plural, t as translate } from "@lingui/core/macro";
+import { Trans, useLingui } from "@lingui/react/macro";
 import { AppSidebar, type View } from "@/components/app-sidebar";
 import { FirstRunDialog } from "@/components/first-run-dialog";
 import { GameStartDialog, type GameStart } from "@/components/game-start-dialog";
@@ -20,6 +22,7 @@ import { useAppMenuOffer } from "@/hooks/use-app-menu-offer";
 import { useStoredState } from "@/hooks/use-stored-state";
 import { useSubscribedMods } from "@/hooks/use-subscribed-mods";
 import { backend, errorMessage } from "@/lib/backend";
+import { followLanguage } from "@/lib/i18n";
 import { launchArgs } from "@/lib/launch-options";
 import { serverCounts, type ModJob } from "@/lib/mods";
 import { followTheme } from "@/lib/theme";
@@ -47,6 +50,7 @@ const DEFAULT_SETTINGS: Settings = {
   extraArgs: "",
   uiScale: 1,
   theme: "system",
+  language: "system",
   skipIntro: true,
   noSplash: true,
   noPause: false,
@@ -57,9 +61,13 @@ const DEFAULT_SETTINGS: Settings = {
 const MAX_RECENT = 30;
 const GAME_START_TIMEOUT_SECS = 90;
 
-const onRefreshFailed = (message: string) => toast.error("Couldn't refresh the server list", { description: message });
-const onLanSearchFailed = (message: string) => toast.error("Couldn't search the network", { description: message });
-const onModsRefreshFailed = (message: string) => toast.error("Couldn't check your mods", { description: message });
+// Worded when they fire, in the language active then.
+const onRefreshFailed = (message: string) =>
+  toast.error(translate`Couldn't refresh the server list`, { description: message });
+const onLanSearchFailed = (message: string) =>
+  toast.error(translate`Couldn't search the network`, { description: message });
+const onModsRefreshFailed = (message: string) =>
+  toast.error(translate`Couldn't check your mods`, { description: message });
 
 /** Adds rows to a list, replacing any with the same id. */
 const withRows = (rows: ServerRow[], added: ServerRow[]) => {
@@ -68,6 +76,7 @@ const withRows = (rows: ServerRow[], added: ServerRow[]) => {
 };
 
 export function App() {
+  const { t } = useLingui();
   const servers = useServers(onRefreshFailed);
   const pings = usePings();
   const lan = useLan(onLanSearchFailed);
@@ -128,6 +137,8 @@ export function App() {
   }, [settings.uiScale]);
 
   useEffect(() => followTheme(settings.theme), [settings.theme]);
+
+  useEffect(() => followLanguage(settings.language), [settings.language]);
 
   useEffect(() => {
     backend.setDiscordStatus(settings.discordStatus).catch(() => {});
@@ -319,8 +330,8 @@ export function App() {
       if (playing.current) return;
       setSelectedId(server.id);
       if (unlisted.has(server.id)) {
-        toast.info("This server is offline", {
-          description: "It isn't in the server list right now. It comes back once the server is up again.",
+        toast.info(t`This server is offline`, {
+          description: t`It isn't in the server list right now. It comes back once the server is up again.`,
         });
         return;
       }
@@ -330,14 +341,14 @@ export function App() {
       }
       // Without its password the server turns the player away only after the mods download and DayZ starts.
       if (startGame && server.password && !password) {
-        toast.info("This server needs a password", {
-          description: "Enter it in the panel on the right, then select Play.",
+        toast.info(t`This server needs a password`, {
+          description: t`Enter it in the panel on the right, then select Play.`,
         });
         requestAnimationFrame(() => document.getElementById("server-password")?.focus());
         return;
       }
       if (!install) {
-        toast.error("DayZ wasn't found", { description: "Set the DayZ folder in Settings." });
+        toast.error(t`DayZ wasn't found`, { description: t`Set the DayZ folder in Settings.` });
         return;
       }
       playing.current = true;
@@ -349,7 +360,7 @@ export function App() {
         const missing = ids.filter((id) => !installed.has(id));
 
         if (!startGame && missing.length === 0) {
-          toast.info("Every mod is already up to date", { description: server.name });
+          toast.info(t`Every mod is already up to date`, { description: server.name });
           return;
         }
 
@@ -363,14 +374,17 @@ export function App() {
           );
           setInstallVersion((version) => version + 1);
           if (!finished) {
-            toast.info("Download cancelled", {
-              description: "Steam will finish downloading these mods in the background.",
+            toast.info(t`Download cancelled`, {
+              description: t`Steam will finish downloading these mods in the background.`,
             });
             return;
           }
           if (!startGame) {
-            const noun = missing.length === 1 ? "mod" : "mods";
-            toast.success("Mods ready", { description: `${missing.length} ${noun} downloaded for ${server.name}` });
+            const name = server.name;
+            const count = missing.length;
+            toast.success(t`Mods ready`, {
+              description: t`${plural(count, { one: "# mod", other: "# mods" })} downloaded for ${name}`,
+            });
             return;
           }
         }
@@ -391,8 +405,8 @@ export function App() {
         if (!started) {
           if (gameStartShown.current) showGameStart({ ...start, stage: "slow" });
           else
-            toast.info("DayZ hasn't started yet", {
-              description: "It may still be loading. If it doesn't open, check Steam for a message.",
+            toast.info(t`DayZ hasn't started yet`, {
+              description: t`It may still be loading. If it doesn't open, check Steam for a message.`,
             });
         } else if (settings.afterLaunch === "keep") {
           if (gameStartShown.current) showGameStart({ ...start, stage: "running" });
@@ -407,7 +421,7 @@ export function App() {
         if (gameStartShown.current) {
           setGameStart((current) => current && { ...current, stage: "failed", error: errorMessage(e) });
         } else {
-          toast.error(startGame ? "Couldn't start DayZ" : "Couldn't download the mods", {
+          toast.error(startGame ? t`Couldn't start DayZ` : t`Couldn't download the mods`, {
             description: errorMessage(e),
           });
         }
@@ -416,7 +430,7 @@ export function App() {
         setJob(null);
       }
     },
-    [install, settings, setRecentIds, unlisted, showGameStart],
+    [install, settings, setRecentIds, unlisted, showGameStart, t],
   );
 
   // Updates or verifies mods from the mods page. Both are the same request to Steam, which checks an installed mod's
@@ -426,27 +440,29 @@ export function App() {
     async (kind: ModJob["kind"], ids: number[]) => {
       if (playing.current || ids.length === 0) return;
       playing.current = true;
-      const mods = `${ids.length} ${ids.length === 1 ? "mod" : "mods"}`;
+      const count = ids.length;
       setModJob({ kind, progress: ids.map((id) => ({ id, status: "queued" as const, downloaded: 0, total: 0 })) });
       try {
         const finished = await backend.downloadMods(ids, (progress) => setModJob({ kind, progress }));
         if (kind === "verify") {
           if (finished) {
-            toast.success("Mods verified", {
-              description: `Steam checked ${mods} and downloaded again any files that were missing or incomplete.`,
+            toast.success(t`Mods verified`, {
+              description: t`Steam checked ${plural(count, { one: "# mod", other: "# mods" })} and downloaded again any files that were missing or incomplete.`,
             });
           } else {
-            toast.info("Verify cancelled", { description: "Steam will finish any repairs it had started." });
+            toast.info(t`Verify cancelled`, { description: t`Steam will finish any repairs it had started.` });
           }
         } else if (finished) {
-          toast.success("Mods up to date", { description: `${mods} downloaded.` });
+          toast.success(t`Mods up to date`, {
+            description: t`${plural(count, { one: "# mod", other: "# mods" })} downloaded.`,
+          });
         } else {
-          toast.info("Update cancelled", {
-            description: "Steam will finish downloading these mods in the background.",
+          toast.info(t`Update cancelled`, {
+            description: t`Steam will finish downloading these mods in the background.`,
           });
         }
       } catch (e) {
-        toast.error(kind === "verify" ? "Couldn't verify the mods" : "Couldn't update the mods", {
+        toast.error(kind === "verify" ? t`Couldn't verify the mods` : t`Couldn't update the mods`, {
           description: errorMessage(e),
         });
       } finally {
@@ -456,12 +472,12 @@ export function App() {
         void refreshMods();
       }
     },
-    [refreshMods],
+    [refreshMods, t],
   );
 
   const unsubscribeMods = useCallback(
     async (ids: number[]) => {
-      if (playing.current) throw new Error("Wait for the mods to finish downloading, then try again.");
+      if (playing.current) throw new Error(t`Wait for the mods to finish downloading, then try again.`);
       playing.current = true;
       try {
         await backend.unsubscribeMods(ids);
@@ -472,7 +488,7 @@ export function App() {
       }
       void refreshMods();
     },
-    [refreshMods],
+    [refreshMods, t],
   );
 
   const selected = selectedId ? (byId.get(selectedId) ?? unlistedRows.find((row) => row.id === selectedId)) : undefined;
@@ -506,17 +522,17 @@ export function App() {
               {servers.status === "error" && view !== "lan" ? (
                 <Message
                   icon={<ServerCrash className="size-6" aria-hidden />}
-                  title="The server list couldn't be loaded"
+                  title={t`The server list couldn't be loaded`}
                   description={servers.error}
                   action={
                     <Button onClick={servers.refresh} disabled={servers.refreshing}>
                       {servers.refreshing ? (
                         <>
                           <LoaderCircle className="animate-spin motion-reduce:animate-none" aria-hidden />
-                          Trying again…
+                          <Trans>Trying again…</Trans>
                         </>
                       ) : (
-                        "Try again"
+                        <Trans>Try again</Trans>
                       )}
                     </Button>
                   }
@@ -534,7 +550,7 @@ export function App() {
                     total={inView.length}
                     refreshing={view === "lan" ? lan.searching : servers.refreshing}
                     onRefresh={view === "lan" ? lan.search : servers.refresh}
-                    refreshLabel={view === "lan" ? "Search the network again" : "Refresh server list"}
+                    refreshLabel={view === "lan" ? t`Search the network again` : t`Refresh server list`}
                     onAddServer={() => setJoinOpen(true)}
                   />
                   <ServerTable
@@ -555,22 +571,22 @@ export function App() {
                       inView.length === 0 && view === "lan" ? (
                         <Message
                           icon={<Network className="size-6" aria-hidden />}
-                          title="No servers found on your network"
-                          description="A server shows here when it's on the same network and answers on a query port from 27015 to 27020. For any other server, use Add server."
+                          title={t`No servers found on your network`}
+                          description={t`A server shows here when it's on the same network and answers on a query port from 27015 to 27020. For any other server, use Add server.`}
                           action={
                             <div className="flex gap-2">
                               <Button variant="secondary" onClick={lan.search} disabled={lan.searching}>
                                 {lan.searching ? (
                                   <>
                                     <LoaderCircle className="animate-spin motion-reduce:animate-none" aria-hidden />
-                                    Searching…
+                                    <Trans>Searching…</Trans>
                                   </>
                                 ) : (
-                                  "Search again"
+                                  <Trans>Search again</Trans>
                                 )}
                               </Button>
                               <Button variant="secondary" onClick={() => setJoinOpen(true)}>
-                                Add server
+                                <Trans>Add server</Trans>
                               </Button>
                             </div>
                           }
@@ -578,27 +594,27 @@ export function App() {
                       ) : inView.length === 0 && view !== "all" ? (
                         <Message
                           icon={<Star className="size-6" aria-hidden />}
-                          title={view === "favourites" ? "No favourites yet" : "No recent servers"}
+                          title={view === "favourites" ? t`No favourites yet` : t`No recent servers`}
                           description={
                             view === "favourites"
-                              ? "Star a server to keep it here."
-                              : "Servers you join from the launcher show up here."
+                              ? t`Star a server to keep it here.`
+                              : t`Servers you join from the launcher show up here.`
                           }
                           action={
                             <Button variant="secondary" onClick={() => setView("all")}>
-                              Browse all servers
+                              <Trans>Browse all servers</Trans>
                             </Button>
                           }
                         />
                       ) : (
                         <Message
                           icon={<SearchX className="size-6" aria-hidden />}
-                          title="No servers match"
-                          description="Try a different search or fewer filters."
+                          title={t`No servers match`}
+                          description={t`Try a different search or fewer filters.`}
                           action={
                             activeFilterCount(applied) > 0 && (
                               <Button variant="secondary" onClick={() => setFilters({ ...NO_FILTERS })}>
-                                Clear filters
+                                <Trans>Clear filters</Trans>
                               </Button>
                             )
                           }
@@ -631,8 +647,8 @@ export function App() {
               <aside className="flex w-[300px] shrink-0 lg:w-[340px] xl:w-[400px] border-l bg-card">
                 <Message
                   icon={<MousePointerClick className="size-6" aria-hidden />}
-                  title="Pick a server"
-                  description="Select one to see its mods. Double-click to join straight away."
+                  title={t`Pick a server`}
+                  description={t`Select one to see its mods. Double-click to join straight away.`}
                 />
               </aside>
             )}
@@ -658,8 +674,9 @@ export function App() {
         onFound={(server) => {
           setAskedRows((rows) => withRows(rows, [server]));
           setSelectedId(server.id);
-          toast.success("Server found", {
-            description: `${server.name}. Select Play in the panel on the right to join.`,
+          const name = server.name;
+          toast.success(t`Server found`, {
+            description: t`${name}. Select Play in the panel on the right to join.`,
           });
         }}
       />

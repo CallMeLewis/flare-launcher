@@ -1,3 +1,5 @@
+import type { MessageDescriptor } from "@lingui/core";
+import { msg } from "@lingui/core/macro";
 import { mapName } from "./maps";
 import type { ServerRow } from "./types";
 
@@ -234,48 +236,65 @@ export function versionCounts(rows: ServerRow[]): Option[] {
   );
 }
 
-/** A filter that is on, as a chip the player can remove. */
-export type FilterChip = { key: string; label: string; prefix?: string; clear: Partial<Filters> };
+/**
+ * A filter that is on, as a chip the player can remove. A label that is a plain string is a value such as a map, mod
+ * or version name, shown as it is; descriptors are translated where the chip is shown.
+ */
+export type FilterChip = {
+  key: string;
+  label: MessageDescriptor | string;
+  prefix?: MessageDescriptor;
+  clear: Partial<Filters>;
+};
 
-const PERSPECTIVE_LABELS: Record<Perspective, string> = { any: "", first: "1PP only", third: "3PP allowed" };
+const PERSPECTIVE_LABELS: Record<Exclude<Perspective, "any">, MessageDescriptor> = {
+  first: msg`1PP only`,
+  third: msg`3PP allowed`,
+};
 
 /** The filters that narrow the list, the search aside, in the order the Filters menu shows them. */
 export function filterChips(filters: Filters): FilterChip[] {
   const chips: FilterChip[] = [];
-  if (filters.map) chips.push({ key: "map", prefix: "Map", label: filters.map, clear: { map: "" } });
+  if (filters.map) chips.push({ key: "map", prefix: msg`Map`, label: filters.map, clear: { map: "" } });
   if (filters.version)
-    chips.push({ key: "version", prefix: "Version", label: filters.version, clear: { version: "" } });
+    chips.push({ key: "version", prefix: msg`Version`, label: filters.version, clear: { version: "" } });
   if (filters.serverType !== "any")
     chips.push({
       key: "serverType",
-      label: filters.serverType === "official" ? "Official" : "Community",
+      label: filters.serverType === "official" ? msg`Official` : msg`Community`,
       clear: { serverType: "any" },
     });
-  if (filters.hasPlayers) chips.push({ key: "hasPlayers", label: "Hide empty", clear: { hasPlayers: false } });
-  if (filters.notFull) chips.push({ key: "notFull", label: "Hide full", clear: { notFull: false } });
-  if (filters.maxPing !== null)
-    chips.push({ key: "maxPing", prefix: "Ping", label: `under ${filters.maxPing} ms`, clear: { maxPing: null } });
-  if (filters.hideOffline) chips.push({ key: "hideOffline", label: "Hide offline", clear: { hideOffline: false } });
+  if (filters.hasPlayers) chips.push({ key: "hasPlayers", label: msg`Hide empty`, clear: { hasPlayers: false } });
+  if (filters.notFull) chips.push({ key: "notFull", label: msg`Hide full`, clear: { notFull: false } });
+  if (filters.maxPing !== null) {
+    const maxPing = filters.maxPing;
+    chips.push({ key: "maxPing", prefix: msg`Ping`, label: msg`under ${maxPing} ms`, clear: { maxPing: null } });
+  }
+  if (filters.hideOffline) chips.push({ key: "hideOffline", label: msg`Hide offline`, clear: { hideOffline: false } });
   if (filters.perspective !== "any")
     chips.push({ key: "perspective", label: PERSPECTIVE_LABELS[filters.perspective], clear: { perspective: "any" } });
   if (filters.timeOfDay !== "any")
     chips.push({
       key: "timeOfDay",
-      prefix: "Time",
-      label: filters.timeOfDay === "day" ? "Day" : "Night",
+      prefix: msg`Time`,
+      label: filters.timeOfDay === "day" ? msg`Day` : msg`Night`,
       clear: { timeOfDay: "any" },
     });
   if (filters.mods !== "any")
-    chips.push({ key: "mods", label: filters.mods === "vanilla" ? "Vanilla" : "Modded", clear: { mods: "any" } });
+    chips.push({
+      key: "mods",
+      label: filters.mods === "vanilla" ? msg`Vanilla` : msg`Modded`,
+      clear: { mods: "any" },
+    });
   for (const name of filters.requiredMods)
     chips.push({
       key: `mod:${name}`,
-      prefix: "Mod",
+      prefix: msg`Mod`,
       label: name,
       clear: { requiredMods: filters.requiredMods.filter((other) => other !== name) },
     });
-  if (filters.noPassword) chips.push({ key: "noPassword", label: "No password", clear: { noPassword: false } });
-  if (filters.battlEye) chips.push({ key: "battlEye", label: "BattlEye on", clear: { battlEye: false } });
+  if (filters.noPassword) chips.push({ key: "noPassword", label: msg`No password`, clear: { noPassword: false } });
+  if (filters.battlEye) chips.push({ key: "battlEye", label: msg`BattlEye on`, clear: { battlEye: false } });
   return chips;
 }
 

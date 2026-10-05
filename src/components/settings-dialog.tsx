@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useId, useState, type ReactNode } from "react";
 import {
   CircleAlert,
   CircleCheck,
@@ -15,6 +15,9 @@ import {
   Sun,
   type LucideIcon,
 } from "lucide-react";
+import type { I18n, MessageDescriptor } from "@lingui/core";
+import { msg } from "@lingui/core/macro";
+import { Plural, Trans, useLingui } from "@lingui/react/macro";
 import { toast } from "sonner";
 import { InstallUpdateDialog } from "@/components/install-update-dialog";
 import { ReleaseNotesLink } from "@/components/release-notes";
@@ -28,29 +31,39 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { backend, errorMessage, isPreview } from "@/lib/backend";
+import { backendText } from "@/lib/backend-messages";
 import { addToAppMenu } from "@/hooks/use-app-menu-offer";
 import { useUpdateStatus } from "@/hooks/use-update-status";
+import { LOCALES } from "@/lib/i18n";
 import { LAUNCH_OPTIONS, launchArgs } from "@/lib/launch-options";
 import { releaseNoteItems, runningVersionNotes } from "@/lib/release-notes";
-import type { AppMenu, Install, Settings, Theme, UpdateChannel, UpdateSettings, UpdateStatus } from "@/lib/types";
+import type {
+  AppMenu,
+  Install,
+  Language,
+  Settings,
+  Theme,
+  UpdateChannel,
+  UpdateSettings,
+  UpdateStatus,
+} from "@/lib/types";
 import { cn } from "@/lib/utils";
 import appIcon from "../../src-tauri/icons/128x128@2x.png";
 
 const SCALES = [0.9, 1, 1.1, 1.25, 1.5];
-export const THEMES: { value: Theme; label: string; icon: LucideIcon }[] = [
-  { value: "light", label: "Light", icon: Sun },
-  { value: "dark", label: "Dark", icon: Moon },
-  { value: "system", label: "System", icon: Monitor },
+export const THEMES: { value: Theme; label: MessageDescriptor; icon: LucideIcon }[] = [
+  { value: "light", label: msg`Light`, icon: Sun },
+  { value: "dark", label: msg`Dark`, icon: Moon },
+  { value: "system", label: msg`System`, icon: Monitor },
 ];
-const count = new Intl.NumberFormat();
 
-const SECTIONS: { value: string; label: string; icon: LucideIcon; pinned?: boolean }[] = [
+const SECTIONS: { value: string; label: MessageDescriptor; icon: LucideIcon; pinned?: boolean }[] = [
   // Sorted by one question: does it change DayZ, or the launcher?
-  { value: "game", label: "Game", icon: Gamepad2 },
-  { value: "launcher", label: "Launcher", icon: SlidersHorizontal },
-  { value: "folders", label: "Folders", icon: FolderOpen },
+  { value: "game", label: msg`Game`, icon: Gamepad2 },
+  { value: "launcher", label: msg`Launcher`, icon: SlidersHorizontal },
+  { value: "folders", label: msg`Folders`, icon: FolderOpen },
   // Pinned to the bottom of the menu.
-  { value: "about", label: "About", icon: Info, pinned: true },
+  { value: "about", label: msg`About`, icon: Info, pinned: true },
 ];
 
 type Props = {
@@ -65,6 +78,7 @@ type Props = {
 };
 
 export function SettingsDialog({ open, onOpenChange, settings, onChange, install, onRunSetup }: Props) {
+  const { t, i18n } = useLingui();
   const set = (patch: Partial<Settings>) => onChange({ ...settings, ...patch });
 
   return (
@@ -73,8 +87,12 @@ export function SettingsDialog({ open, onOpenChange, settings, onChange, install
         <Tabs defaultValue="game" orientation="vertical" className="h-full min-h-0 gap-0">
           <div className="flex w-52 shrink-0 flex-col border-r bg-background/40 p-3">
             <div className="px-2 pt-2 pb-4">
-              <DialogTitle className="text-base">Settings</DialogTitle>
-              <DialogDescription className="mt-0.5 text-xs">Changes save as you make them.</DialogDescription>
+              <DialogTitle className="text-base">
+                <Trans>Settings</Trans>
+              </DialogTitle>
+              <DialogDescription className="mt-0.5 text-xs">
+                <Trans>Changes save as you make them.</Trans>
+              </DialogDescription>
             </div>
             <TabsList className="h-auto w-full flex-1 flex-col items-stretch justify-start gap-0.5 bg-transparent p-0">
               {SECTIONS.map(({ value, label, icon: Icon, pinned }) => (
@@ -87,7 +105,7 @@ export function SettingsDialog({ open, onOpenChange, settings, onChange, install
                   )}
                 >
                   <Icon className="size-4" aria-hidden />
-                  {label}
+                  {i18n._(label)}
                 </TabsTrigger>
               ))}
             </TabsList>
@@ -95,17 +113,17 @@ export function SettingsDialog({ open, onOpenChange, settings, onChange, install
 
           <div className="min-w-0 flex-1 overflow-y-auto">
             <TabsContent value="game" className="flex flex-col gap-6 p-6 pr-14">
-              <SectionHeading title="Game" description="How DayZ starts when you join a server." />
-              <SettingsGroup title="In game">
+              <SectionHeading title={t`Game`} description={t`How DayZ starts when you join a server.`} />
+              <SettingsGroup title={t`In game`}>
                 <SettingRow
                   id="profile-name"
-                  label="Character name"
-                  description="The name other players see. Leave it empty to keep the one set in DayZ."
+                  label={t`Character name`}
+                  description={t`The name other players see. Leave it empty to keep the one set in DayZ.`}
                 >
                   <Input
                     id="profile-name"
                     aria-describedby="profile-name-description"
-                    placeholder="Name set in DayZ"
+                    placeholder={t`Name set in DayZ`}
                     autoComplete="off"
                     spellCheck={false}
                     value={settings.profileName}
@@ -114,15 +132,15 @@ export function SettingsDialog({ open, onOpenChange, settings, onChange, install
                   />
                 </SettingRow>
               </SettingsGroup>
-              <SettingsGroup title="Startup">
+              <SettingsGroup title={t`Startup`}>
                 {LAUNCH_OPTIONS.map((option) => (
                   <SettingRow
                     key={option.key}
                     id={`option-${option.key}`}
-                    label={option.label}
+                    label={i18n._(option.label)}
                     description={
                       <>
-                        {option.description}{" "}
+                        {i18n._(option.description)}{" "}
                         <code className="data whitespace-nowrap text-foreground/70">{option.flag}</code>
                       </>
                     }
@@ -138,8 +156,8 @@ export function SettingsDialog({ open, onOpenChange, settings, onChange, install
               </SettingsGroup>
               <Field
                 id="extra-args"
-                label="Extra parameters"
-                hint="Any other DayZ startup parameters, separated by spaces."
+                label={t`Extra parameters`}
+                hint={t`Any other DayZ startup parameters, separated by spaces.`}
               >
                 <Input
                   id="extra-args"
@@ -152,20 +170,50 @@ export function SettingsDialog({ open, onOpenChange, settings, onChange, install
                 />
               </Field>
               <div className="flex flex-col gap-1.5">
-                <p className="text-xs font-medium text-muted-foreground">Added to the command line</p>
+                <p className="text-xs font-medium text-muted-foreground">
+                  <Trans>Added to the command line</Trans>
+                </p>
                 <code className="data selectable rounded-md border bg-background/60 px-3 py-2 text-xs break-all text-foreground/85">
-                  {launchArgs(settings) || <span className="text-muted-foreground">Nothing extra</span>}
+                  {launchArgs(settings) || (
+                    <span className="text-muted-foreground">
+                      <Trans>Nothing extra</Trans>
+                    </span>
+                  )}
                 </code>
                 <p className="text-xs text-muted-foreground">
-                  The server address, its mods and your character name are added automatically.
+                  <Trans>The server address, its mods and your character name are added automatically.</Trans>
                 </p>
               </div>
             </TabsContent>
 
             <TabsContent value="launcher" className="flex flex-col gap-6 p-6 pr-14">
-              <SectionHeading title="Launcher" description="How the launcher looks and behaves on this computer." />
-              <SettingsGroup title="Appearance">
-                <SettingRow id="theme" label="Theme" description="Light or dark, or System to match this computer.">
+              <SectionHeading
+                title={t`Launcher`}
+                description={t`How the launcher looks and behaves on this computer.`}
+              />
+              <SettingsGroup title={t`Appearance`}>
+                <SettingRow id="language" label={t`Language`} description={t`The language the launcher is shown in.`}>
+                  <Select value={settings.language} onValueChange={(value) => set({ language: value as Language })}>
+                    <SelectTrigger id="language" aria-describedby="language-description" className="w-60 shrink-0">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="system">
+                        <Trans>Match this computer</Trans>
+                      </SelectItem>
+                      {LOCALES.map(({ value, name }) => (
+                        <SelectItem key={value} value={value}>
+                          {name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </SettingRow>
+                <SettingRow
+                  id="theme"
+                  label={t`Theme`}
+                  description={t`Light or dark, or System to match this computer.`}
+                >
                   <ToggleGroup
                     type="single"
                     aria-labelledby="theme-label"
@@ -184,15 +232,15 @@ export function SettingsDialog({ open, onOpenChange, settings, onChange, install
                         className="gap-1.5"
                       >
                         <Icon className="size-3.5" aria-hidden />
-                        {label}
+                        {i18n._(label)}
                       </ToggleGroupItem>
                     ))}
                   </ToggleGroup>
                 </SettingRow>
                 <SettingRow
                   id="ui-scale"
-                  label="Interface size"
-                  description="Makes text and controls larger or smaller."
+                  label={t`Interface size`}
+                  description={t`Makes text and controls larger or smaller.`}
                 >
                   {/* Every size on show, so the current one is clear and any other is one click away. */}
                   <ToggleGroup
@@ -218,11 +266,11 @@ export function SettingsDialog({ open, onOpenChange, settings, onChange, install
                   </ToggleGroup>
                 </SettingRow>
               </SettingsGroup>
-              <SettingsGroup title="Behaviour">
+              <SettingsGroup title={t`Behaviour`}>
                 <SettingRow
                   id="after-launch"
-                  label="When DayZ starts"
-                  description="What the launcher does once the game is running."
+                  label={t`When DayZ starts`}
+                  description={t`What the launcher does once the game is running.`}
                 >
                   <Select
                     value={settings.afterLaunch}
@@ -236,19 +284,25 @@ export function SettingsDialog({ open, onOpenChange, settings, onChange, install
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="keep">Keep the launcher open</SelectItem>
-                      <SelectItem value="minimise">Minimise the launcher</SelectItem>
-                      <SelectItem value="close">Close the launcher</SelectItem>
+                      <SelectItem value="keep">
+                        <Trans>Keep the launcher open</Trans>
+                      </SelectItem>
+                      <SelectItem value="minimise">
+                        <Trans>Minimise the launcher</Trans>
+                      </SelectItem>
+                      <SelectItem value="close">
+                        <Trans>Close the launcher</Trans>
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </SettingRow>
                 <SettingRow
                   id="discord-status"
-                  label="Discord activity"
+                  label={t`Discord activity`}
                   description={
                     settings.afterLaunch === "close"
-                      ? "Lets your Discord friends see you're using Flare Launcher. It closes when DayZ starts, so they won't see when you're in game."
-                      : "Lets your Discord friends see you're using Flare Launcher and when you're in game. Never which server you're on."
+                      ? t`Lets your Discord friends see you're using Flare Launcher. It closes when DayZ starts, so they won't see when you're in game.`
+                      : t`Lets your Discord friends see you're using Flare Launcher and when you're in game. Never which server you're on.`
                   }
                 >
                   <Switch
@@ -260,11 +314,11 @@ export function SettingsDialog({ open, onOpenChange, settings, onChange, install
                 </SettingRow>
                 <AppMenuRow />
               </SettingsGroup>
-              <SettingsGroup title="Setup">
+              <SettingsGroup title={t`Setup`}>
                 <SettingRow
                   id="run-setup"
-                  label="First-time setup"
-                  description="Go through the choices offered when the launcher was first opened."
+                  label={t`First-time setup`}
+                  description={t`Go through the choices offered when the launcher was first opened.`}
                 >
                   <Button
                     id="run-setup"
@@ -273,19 +327,19 @@ export function SettingsDialog({ open, onOpenChange, settings, onChange, install
                     aria-describedby="run-setup-description"
                     onClick={onRunSetup}
                   >
-                    Run setup again
+                    <Trans>Run setup again</Trans>
                   </Button>
                 </SettingRow>
               </SettingsGroup>
             </TabsContent>
 
             <TabsContent value="folders" className="flex flex-col gap-6 p-6 pr-14">
-              <SectionHeading title="Folders" description="Where DayZ and its mods live on this computer." />
+              <SectionHeading title={t`Folders`} description={t`Where DayZ and its mods live on this computer.`} />
               <FoldersSection open={open} settings={settings} onChange={set} install={install} />
             </TabsContent>
 
             <TabsContent value="about" className="flex flex-col gap-6 p-6 pr-14">
-              <SectionHeading title="About" description="Version, updates and release notes." />
+              <SectionHeading title={t`About`} description={t`Version, updates and release notes.`} />
               <AboutSection />
             </TabsContent>
           </div>
@@ -306,6 +360,7 @@ function FoldersSection({
   onChange: (patch: Partial<Settings>) => void;
   install: Install | null | undefined;
 }) {
+  const { t } = useLingui();
   const [modCount, setModCount] = useState<number | null>(null);
 
   useEffect(() => {
@@ -325,26 +380,26 @@ function FoldersSection({
 
   async function browse() {
     try {
-      const chosen = await backend.pickFolder("Choose the DayZ folder", install?.dayzDir ?? settings.dayzDir);
+      const chosen = await backend.pickFolder(t`Choose the DayZ folder`, install?.dayzDir ?? settings.dayzDir);
       if (chosen) onChange({ dayzDir: chosen });
     } catch (e) {
-      toast.error("Couldn't open the folder picker", { description: errorMessage(e) });
+      toast.error(t`Couldn't open the folder picker`, { description: errorMessage(e) });
     }
   }
 
   function reveal(folder: "game" | "workshop") {
     backend
       .openFolder(settings.dayzDir, folder)
-      .catch((e) => toast.error("Couldn't open the folder", { description: errorMessage(e) }));
+      .catch((e) => toast.error(t`Couldn't open the folder`, { description: errorMessage(e) }));
   }
 
   return (
     <>
-      <Field id="dayz-dir" label="DayZ folder">
+      <Field id="dayz-dir" label={t`DayZ folder`}>
         <div className="flex gap-2">
           <Input
             id="dayz-dir"
-            placeholder="Found automatically from Steam"
+            placeholder={t`Found automatically from Steam`}
             autoComplete="off"
             spellCheck={false}
             value={settings.dayzDir}
@@ -353,7 +408,7 @@ function FoldersSection({
           />
           {!isPreview && (
             <Button variant="secondary" onClick={browse} className="shrink-0">
-              Browse
+              <Trans>Browse</Trans>
             </Button>
           )}
         </div>
@@ -361,7 +416,7 @@ function FoldersSection({
           <p className="flex items-start gap-1.5 text-xs text-muted-foreground">
             <CircleCheck className="mt-0.5 size-3.5 shrink-0 text-success" aria-hidden />
             <span className="selectable break-all">
-              {settings.dayzDir ? "Using this folder." : `Found through Steam at ${install.dayzDir}`}
+              {settings.dayzDir ? t`Using this folder.` : t`Found through Steam at ${{ folder: install.dayzDir }}`}
             </span>
           </p>
         ) : (
@@ -369,8 +424,8 @@ function FoldersSection({
             <p className="flex items-start gap-1.5 text-xs text-warning">
               <CircleAlert className="mt-0.5 size-3.5 shrink-0" aria-hidden />
               {settings.dayzDir
-                ? "DayZ_x64.exe isn't in that folder. Choose the folder DayZ is installed in."
-                : "DayZ wasn't found through Steam. Choose the folder it is installed in."}
+                ? t`DayZ_x64.exe isn't in that folder. Choose the folder DayZ is installed in.`
+                : t`DayZ wasn't found through Steam. Choose the folder it is installed in.`}
             </p>
           )
         )}
@@ -380,32 +435,47 @@ function FoldersSection({
             onClick={() => onChange({ dayzDir: "" })}
             className="self-start text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground"
           >
-            Find it through Steam instead
+            <Trans>Find it through Steam instead</Trans>
           </button>
         )}
       </Field>
 
       {install && (
         <>
-          <Field id="workshop-dir" label="Workshop mods">
+          <Field id="workshop-dir" label={t`Workshop mods`}>
             <code id="workshop-dir" className="data selectable text-xs break-all text-muted-foreground">
               {install.workshopDir}
             </code>
             {modCount !== null && (
               <p className="text-xs text-muted-foreground">
-                <span className="data text-foreground">{count.format(modCount)}</span> {modCount === 1 ? "mod" : "mods"}{" "}
-                downloaded. Steam keeps the ones you're subscribed to up to date.
+                {/* Plain outer spans: Lingui only keeps a plural form's words translatable inside an element. */}
+                <Trans>
+                  <Plural
+                    value={modCount}
+                    one={
+                      <span>
+                        <span className="data text-foreground">#</span> mod
+                      </span>
+                    }
+                    other={
+                      <span>
+                        <span className="data text-foreground">#</span> mods
+                      </span>
+                    }
+                  />{" "}
+                  downloaded. Steam keeps the ones you're subscribed to up to date.
+                </Trans>
               </p>
             )}
           </Field>
           <div className="flex gap-2">
             <Button variant="secondary" size="sm" onClick={() => reveal("game")}>
               <FolderOpen aria-hidden />
-              Open DayZ folder
+              <Trans>Open DayZ folder</Trans>
             </Button>
             <Button variant="secondary" size="sm" onClick={() => reveal("workshop")}>
               <FolderOpen aria-hidden />
-              Open mods folder
+              <Trans>Open mods folder</Trans>
             </Button>
           </div>
         </>
@@ -415,24 +485,33 @@ function FoldersSection({
 }
 
 /** The line under the version: plain unless there is an update to act on or something went wrong. */
-function describeUpdate(status: UpdateStatus): string {
+function describeUpdate(status: UpdateStatus, i18n: I18n): string {
   switch (status.state) {
     case "unsupported":
-      return "The version you're running. This copy can't update itself.";
+      return i18n._(msg`The version you're running. This copy can't update itself.`);
     case "idle":
-      return "The version you're running.";
+      return i18n._(msg`The version you're running.`);
     case "checking":
-      return "Checking for updates…";
-    case "upToDate":
-      return `You have the latest version. Last checked at ${new Date(status.checkedAt).toLocaleTimeString([], { timeStyle: "short" })}.`;
-    case "available":
-      return `Version ${status.version} is available.`;
-    case "downloading":
-      return `Downloading version ${status.version}… ${Math.floor(status.percent)}%`;
-    case "ready":
-      return `Version ${status.version} is ready to install. The launcher restarts to finish.`;
+      return i18n._(msg`Checking for updates…`);
+    case "upToDate": {
+      const time = i18n.date(new Date(status.checkedAt), { timeStyle: "short" });
+      return i18n._(msg`You have the latest version. Last checked at ${time}.`);
+    }
+    case "available": {
+      const { version } = status;
+      return i18n._(msg`Version ${version} is available.`);
+    }
+    case "downloading": {
+      const { version } = status;
+      const percent = Math.floor(status.percent);
+      return i18n._(msg`Downloading version ${version}… ${percent}%`);
+    }
+    case "ready": {
+      const { version } = status;
+      return i18n._(msg`Version ${version} is ready to install. The launcher restarts to finish.`);
+    }
     case "error":
-      return status.message;
+      return backendText(status.message);
   }
 }
 
@@ -441,9 +520,10 @@ function describeUpdate(status: UpdateStatus): string {
  * busy rather than disabled, so keyboard focus stays on it while it checks or downloads.
  */
 function UpdateAction({ status, onRestart }: { status: UpdateStatus; onRestart: () => void }) {
+  const { t } = useLingui();
   const busy = status.state === "checking" || status.state === "downloading";
   let icon = <RefreshCw aria-hidden />;
-  let text = "Check for updates";
+  let text = t`Check for updates`;
   let action: () => void = () => void backend.checkForUpdates();
   let primary = false;
   switch (status.state) {
@@ -451,29 +531,29 @@ function UpdateAction({ status, onRestart }: { status: UpdateStatus; onRestart: 
       return null;
     case "checking":
       icon = <LoaderCircle className="animate-spin motion-reduce:animate-none" aria-hidden />;
-      text = "Checking…";
+      text = t`Checking…`;
       break;
     case "upToDate":
       // Still checks again when selected.
       icon = <CircleCheck aria-hidden />;
-      text = "Up to date";
+      text = t`Up to date`;
       break;
     case "error":
-      text = "Try again";
+      text = t`Try again`;
       break;
     case "available":
       icon = <Download aria-hidden />;
-      text = `Download version ${status.version}`;
+      text = t`Download version ${{ version: status.version }}`;
       action = () => void backend.downloadUpdate();
       primary = true;
       break;
     case "downloading":
       icon = <LoaderCircle className="animate-spin motion-reduce:animate-none" aria-hidden />;
-      text = "Downloading…";
+      text = t`Downloading…`;
       break;
     case "ready":
       icon = <RotateCcw aria-hidden />;
-      text = "Restart to update";
+      text = t`Restart to update`;
       action = onRestart;
       primary = true;
       break;
@@ -494,6 +574,7 @@ function UpdateAction({ status, onRestart }: { status: UpdateStatus; onRestart: 
 }
 
 function AboutSection() {
+  const { t, i18n } = useLingui();
   const status = useUpdateStatus();
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [updateSettings, setUpdateSettings] = useState<UpdateSettings | null>(null);
@@ -511,7 +592,7 @@ function AboutSection() {
     // Saving also checks the new channel; the result shows in the status row.
     backend.setUpdateChannel(channel).catch((e) => {
       setUpdateSettings(previous);
-      toast.error("Couldn't change the update channel", { description: errorMessage(e) });
+      toast.error(t`Couldn't change the update channel`, { description: errorMessage(e) });
     });
   }
 
@@ -520,7 +601,7 @@ function AboutSection() {
     setUpdateSettings((current) => current && { ...current, autoCheck });
     backend.setAutoUpdateCheck(autoCheck).catch((e) => {
       setUpdateSettings(previous);
-      toast.error("Couldn't save the setting", { description: errorMessage(e) });
+      toast.error(t`Couldn't save the setting`, { description: errorMessage(e) });
     });
   }
 
@@ -530,15 +611,17 @@ function AboutSection() {
         <img src={appIcon} alt="" className="size-14 shrink-0" />
         <div className="min-w-0">
           <p className="text-base font-semibold">Flare Launcher</p>
-          <p className="text-[13px] text-muted-foreground">Find a DayZ server, get its mods and play.</p>
+          <p className="text-[13px] text-muted-foreground">
+            <Trans>Find a DayZ server, get its mods and play.</Trans>
+          </p>
         </div>
       </div>
 
-      <SettingsGroup title="Updates">
+      <SettingsGroup title={t`Updates`}>
         <SettingRow
           id="auto-update-check"
-          label="Check for updates automatically"
-          description="When the launcher starts and every few hours."
+          label={t`Check for updates automatically`}
+          description={t`When the launcher starts and every few hours.`}
         >
           <Switch
             id="auto-update-check"
@@ -553,13 +636,13 @@ function AboutSection() {
           <div className="flex items-center justify-between gap-6">
             <div className="min-w-0">
               <p className="flex flex-wrap items-baseline gap-x-2 text-[13px] font-medium">
-                Version
+                <Trans>Version</Trans>
                 <span className="data selectable text-xs font-normal text-muted-foreground">{__APP_VERSION__}</span>
                 {runningVersionNotes.length > 0 && (
                   <ReleaseNotesLink
                     version={__APP_VERSION__}
                     items={runningVersionNotes}
-                    description="The changes in the version you are running."
+                    description={t`The changes in the version you are running.`}
                   />
                 )}
               </p>
@@ -568,15 +651,15 @@ function AboutSection() {
                 aria-live="polite"
               >
                 {status.state === "error" && <CircleAlert className="mr-1 inline size-3.5 align-[-2px]" aria-hidden />}
-                {describeUpdate(status)}
+                {describeUpdate(status, i18n)}
                 {updateVersion && updateNotes.length > 0 && (
                   <>
                     {" "}
                     <ReleaseNotesLink
-                      label="See what's new"
+                      label={t`See what's new`}
                       version={updateVersion}
                       items={updateNotes}
-                      description="The changes in the update waiting for you."
+                      description={t`The changes in the update waiting for you.`}
                     />
                   </>
                 )}
@@ -593,23 +676,27 @@ function AboutSection() {
             <Progress
               value={status.percent}
               className="h-2 [&>*]:duration-1000 [&>*]:ease-linear motion-reduce:[&>*]:transition-none"
-              aria-label="Update download progress"
+              aria-label={t`Update download progress`}
             />
           )}
         </div>
 
         <SettingRow
           id="update-channel"
-          label="Update channel"
-          description="Stable releases, or beta builds with newer changes."
+          label={t`Update channel`}
+          description={t`Stable releases, or beta builds with newer changes.`}
         >
           <Select value={updateSettings?.channel} disabled={!updateSettings} onValueChange={changeChannel}>
             <SelectTrigger id="update-channel" aria-describedby="update-channel-description" className="w-32 shrink-0">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="stable">Stable</SelectItem>
-              <SelectItem value="beta">Beta</SelectItem>
+              <SelectItem value="stable">
+                <Trans>Stable</Trans>
+              </SelectItem>
+              <SelectItem value="beta">
+                <Trans>Beta</Trans>
+              </SelectItem>
             </SelectContent>
           </Select>
         </SettingRow>
@@ -620,6 +707,7 @@ function AboutSection() {
 
 /** Linux only: whether the launcher is in the app menu, with a button to add or remove it. Hidden elsewhere. */
 function AppMenuRow() {
+  const { t } = useLingui();
   const [menu, setMenu] = useState<AppMenu | null>(null);
   const [busy, setBusy] = useState(false);
   const refresh = () =>
@@ -641,21 +729,23 @@ function AppMenuRow() {
     setBusy(true);
     try {
       await backend.removeFromAppMenu();
-      toast.success("Removed from the app menu", { description: "The launcher stays in your Applications folder." });
+      toast.success(t`Removed from the app menu`, {
+        description: t`The launcher stays in your Applications folder.`,
+      });
     } catch (error) {
-      toast.error("Couldn't remove Flare Launcher from the app menu", { description: errorMessage(error) });
+      toast.error(t`Couldn't remove Flare Launcher from the app menu`, { description: errorMessage(error) });
     }
     await refresh();
     setBusy(false);
   }
 
   const description = !menu.added
-    ? "Open Flare Launcher from your app menu like any other app. The file moves to your Applications folder."
+    ? t`Open Flare Launcher from your app menu like any other app. The file moves to your Applications folder.`
     : menu.ours
-      ? "Flare Launcher is in your app menu."
-      : "Flare Launcher is in your app menu, added by another app. Remove it there.";
+      ? t`Flare Launcher is in your app menu.`
+      : t`Flare Launcher is in your app menu, added by another app. Remove it there.`;
   return (
-    <SettingRow id="app-menu" label="App menu" description={description}>
+    <SettingRow id="app-menu" label={t`App menu`} description={description}>
       {!menu.added ? (
         <Button
           id="app-menu"
@@ -665,7 +755,7 @@ function AppMenuRow() {
           disabled={busy}
           onClick={add}
         >
-          Add to app menu
+          <Trans>Add to app menu</Trans>
         </Button>
       ) : menu.ours ? (
         <Button
@@ -676,7 +766,7 @@ function AppMenuRow() {
           disabled={busy}
           onClick={remove}
         >
-          Remove
+          <Trans>Remove</Trans>
         </Button>
       ) : null}
     </SettingRow>
@@ -694,7 +784,7 @@ function SectionHeading({ title, description }: { title: string; description: st
 
 /** A titled card of setting rows. */
 export function SettingsGroup({ title, children }: { title: string; children: ReactNode }) {
-  const id = `group-${title.toLowerCase().replace(/\W+/g, "-")}`;
+  const id = useId();
   return (
     <section aria-labelledby={id} className="flex flex-col gap-2">
       <h4 id={id} className="text-sm font-semibold">

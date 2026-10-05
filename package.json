@@ -15,6 +15,7 @@
     "app": "tauri dev",
     "app:build": "tauri build",
     "test": "vitest run",
+    "i18n": "lingui extract --clean",
     "lint": "oxlint --deny-warnings",
     "format": "prettier --write . && cargo fmt --manifest-path src-tauri/Cargo.toml",
     "format:check": "prettier --check . && cargo fmt --check --manifest-path src-tauri/Cargo.toml",
@@ -29,6 +30,9 @@
   "dependencies": {
     "@fontsource-variable/fira-code": "5.3.0",
     "@fontsource/fira-sans": "5.3.0",
+    "@lingui/core": "6.9.0",
+    "@lingui/message-utils": "6.9.0",
+    "@lingui/react": "6.9.0",
     "@tanstack/react-virtual": "3.14.13",
     "@tauri-apps/api": "2.12.1",
     "@tauri-apps/plugin-dialog": "2.8.1",
@@ -41,6 +45,10 @@
     "sonner": "2.0.8"
   },
   "devDependencies": {
+    "@lingui/cli": "6.9.0",
+    "@lingui/conf": "6.9.0",
+    "@lingui/format-po": "6.9.0",
+    "@lingui/vite-plugin": "6.9.0",
     "@tailwindcss/vite": "4.3.3",
     "@tauri-apps/cli": "2.12.1",
     "@types/node": "26.5.1",

@@ -1,4 +1,7 @@
 import { memo, useEffect, useRef, type KeyboardEvent, type ReactNode } from "react";
+import type { MessageDescriptor } from "@lingui/core";
+import { msg } from "@lingui/core/macro";
+import { Trans, useLingui } from "@lingui/react/macro";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { ArrowDown, ArrowUp, Lock, Moon, Puzzle, Star, Sun } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -14,16 +17,22 @@ const COLUMNS =
   "grid grid-cols-[36px_minmax(0,1fr)_104px_116px_72px] lg:grid-cols-[36px_minmax(0,1fr)_112px_124px_76px_76px] 2xl:grid-cols-[36px_minmax(0,1fr)_168px_148px_96px_96px] items-center";
 const TIME_COLUMN = "max-lg:hidden";
 
-const HEADERS: { key: SortKey; label: string; numeric?: boolean; descendingFirst?: boolean; hint?: string }[] = [
-  { key: "name", label: "Server" },
-  { key: "map", label: "Map" },
-  { key: "players", label: "Players", descendingFirst: true },
-  { key: "time", label: "Time" },
+const HEADERS: {
+  key: SortKey;
+  label: MessageDescriptor;
+  numeric?: boolean;
+  descendingFirst?: boolean;
+  hint?: MessageDescriptor;
+}[] = [
+  { key: "name", label: msg`Server` },
+  { key: "map", label: msg`Map` },
+  { key: "players", label: msg`Players`, descendingFirst: true },
+  { key: "time", label: msg`Time` },
   {
     key: "ping",
-    label: "Ping",
+    label: msg`Ping`,
     numeric: true,
-    hint: "How long it takes to reach the server and back. Values marked ~ are estimates.",
+    hint: msg`How long it takes to reach the server and back. Values marked ~ are estimates.`,
   },
 ];
 
@@ -68,6 +77,7 @@ export function ServerTable({
   modNames,
   empty,
 }: Props) {
+  const { t, i18n } = useLingui();
   const scroller = useRef<HTMLDivElement>(null);
   const virtualizer = useVirtualizer({
     count: rows.length,
@@ -125,7 +135,7 @@ export function ServerTable({
     // A grid, so the selected row is announced. It takes focus as a whole and arrow keys move the selection.
     <div
       role="grid"
-      aria-label="Servers"
+      aria-label={t`Servers`}
       aria-readonly
       aria-rowcount={rows.length + 1}
       tabIndex={0}
@@ -135,7 +145,7 @@ export function ServerTable({
     >
       <div role="rowgroup" className="overflow-y-hidden border-b bg-card/60 [scrollbar-gutter:stable]">
         <div role="row" className={cn(COLUMNS, "h-8 text-xs font-medium text-muted-foreground")}>
-          <div role="columnheader" aria-label="Favourite" />
+          <div role="columnheader" aria-label={t`Favourite`} />
           {HEADERS.map((header) => {
             const active = sort.key === header.key;
             const Arrow = sort.descending ? ArrowDown : ArrowUp;
@@ -148,7 +158,7 @@ export function ServerTable({
               >
                 <button
                   type="button"
-                  title={header.hint}
+                  title={header.hint && i18n._(header.hint)}
                   onClick={() =>
                     onSort({
                       key: header.key,
@@ -160,7 +170,7 @@ export function ServerTable({
                     active && "text-foreground",
                   )}
                 >
-                  {header.label}
+                  {i18n._(header.label)}
                   {active && <Arrow className="size-3" aria-hidden />}
                 </button>
               </div>
@@ -171,7 +181,7 @@ export function ServerTable({
 
       <div ref={scroller} role="rowgroup" className="min-h-0 flex-1 overflow-y-auto [scrollbar-gutter:stable]">
         {loading ? (
-          <div aria-busy="true" aria-label="Loading servers">
+          <div aria-busy="true" aria-label={t`Loading servers`}>
             {Array.from({ length: 18 }, (_, i) => (
               <div key={i} className={cn(COLUMNS, "h-9 border-b border-border/50")}>
                 <span />
@@ -240,6 +250,9 @@ const Row = memo(function Row({
   onPlay,
   onToggleFavourite,
 }: RowProps) {
+  // Also re-renders the memoised row when the language changes.
+  const { t } = useLingui();
+  const name = row.name;
   const offline = unlisted || ping?.offline === true;
   const full = row.maxPlayers > 0 && row.players >= row.maxPlayers;
   const fill = row.maxPlayers > 0 ? Math.min(row.players / row.maxPlayers, 1) : 0;
@@ -269,7 +282,7 @@ const Row = memo(function Row({
         <button
           type="button"
           tabIndex={-1}
-          aria-label={favourite ? `Remove ${row.name} from favourites` : `Add ${row.name} to favourites`}
+          aria-label={favourite ? t`Remove ${name} from favourites` : t`Add ${name} to favourites`}
           aria-pressed={favourite}
           onClick={(event) => {
             event.stopPropagation();
@@ -292,15 +305,23 @@ const Row = memo(function Row({
           {row.name}
         </span>
         {row.password && (
-          <span className="shrink-0 text-warning" title="Password protected">
-            <Lock className="size-3" aria-label="Password protected" />
+          <span className="shrink-0 text-warning" title={t`Password protected`}>
+            <Lock className="size-3" aria-label={t`Password protected`} />
           </span>
         )}
-        {row.firstPersonOnly && <Tag title="First person only">1PP</Tag>}
-        {row.official && <Tag title="Official server">Official</Tag>}
+        {row.firstPersonOnly && (
+          <Tag title={t`First person only`}>
+            <Trans>1PP</Trans>
+          </Tag>
+        )}
+        {row.official && (
+          <Tag title={t`Official server`}>
+            <Trans>Official</Trans>
+          </Tag>
+        )}
         {modMatch && (
           <span
-            title={`Runs the mod ${modMatch}`}
+            title={t`Runs the mod ${modMatch}`}
             className="flex max-w-[45%] min-w-0 shrink-0 items-center gap-1 rounded border border-primary/30 bg-primary/10 px-1.5 text-xs leading-4 text-foreground/85"
           >
             <Puzzle className="size-3 shrink-0 text-primary" aria-hidden />
@@ -333,7 +354,7 @@ const Row = memo(function Row({
       <div role="gridcell" className={cn("flex items-center gap-1.5 text-muted-foreground", TIME_COLUMN)}>
         {row.time && !unlisted && (
           <>
-            <TimeIcon className="size-3" aria-label={isNight(row.time) ? "Night" : "Day"} />
+            <TimeIcon className="size-3" aria-label={isNight(row.time) ? t`Night` : t`Day`} />
             <span className="data text-xs">{row.time}</span>
           </>
         )}
@@ -357,20 +378,22 @@ function Tag({ title, children }: { title: string; children: ReactNode }) {
   );
 }
 
-const OFFLINE_HINT = "This server isn't answering, so it's probably offline or restarting.";
-
 export function PingValue({ ping, offline = false }: { ping: PingResult | undefined; offline?: boolean }) {
+  const { t } = useLingui();
   if (offline) {
     return (
-      <span className="font-sans text-muted-foreground" title={OFFLINE_HINT}>
-        Offline
+      <span
+        className="font-sans text-muted-foreground"
+        title={t`This server isn't answering, so it's probably offline or restarting.`}
+      >
+        <Trans>Offline</Trans>
       </span>
     );
   }
   if (!ping) return <span className="text-muted-foreground/50">···</span>;
   if (ping.pingMs === null) {
     return (
-      <span className="text-muted-foreground" title="No response">
+      <span className="text-muted-foreground" title={t`No response`}>
         –
       </span>
     );
@@ -380,7 +403,7 @@ export function PingValue({ ping, offline = false }: { ping: PingResult | undefi
       className={pingTone(ping.pingMs)}
       title={
         ping.estimated
-          ? "This server doesn't answer pings, so this is how long it took to answer a status request. That's usually a little higher than the real ping."
+          ? t`This server doesn't answer pings, so this is how long it took to answer a status request. That's usually a little higher than the real ping.`
           : undefined
       }
     >

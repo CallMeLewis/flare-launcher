@@ -17,6 +17,7 @@ use tokio::time::Instant;
 use crate::error::{Error, Result};
 use crate::query::{self, HEADER, INFO_REQUEST};
 use crate::servers::{self, ServerCache, ServerRow, StoredServer};
+use crate::text;
 
 /// The query ports a search covers. DayZ uses 27016 unless the server sets another.
 const SEARCH_PORTS: [u16; 6] = [27016, 27015, 27017, 27018, 27019, 27020];
@@ -140,13 +141,13 @@ fn split_address(address: &str) -> Result<(&str, Option<u16>)> {
   let address = address.trim();
   let (host, port) = match address.rsplit_once(':') {
     Some((host, port)) => {
-      let port = port.trim().parse().map_err(|_| Error::msg("The port after the colon has to be a number."))?;
+      let port = port.trim().parse().map_err(|_| Error::from(text!("The port after the colon has to be a number.")))?;
       (host.trim(), Some(port))
     }
     None => (address, None),
   };
   if host.is_empty() {
-    return Err(Error::msg("Enter the server's address, such as 192.168.1.20:2302."));
+    return Err(text!("Enter the server's address, such as {example}.", example = "192.168.1.20:2302").into());
   }
   Ok((host, port))
 }
@@ -155,7 +156,7 @@ async fn resolve(host: &str) -> Result<Ipv4Addr> {
   if let Ok(ip) = host.parse() {
     return Ok(ip);
   }
-  let not_found = || Error::msg(format!("Couldn't find {host}. Check the address and try again."));
+  let not_found = || Error::from(text!("Couldn't find {host}. Check the address and try again.", host = host));
   tokio::net::lookup_host((host, 0))
     .await
     .map_err(|_| not_found())?
@@ -211,9 +212,8 @@ pub async fn find(address: &str) -> Result<StoredServer> {
   let answers: Vec<(u16, Option<u16>)> = replies.into_iter().flatten().collect();
 
   let query_port = pick(port, &answers).ok_or_else(|| {
-    Error::msg(
-      "No DayZ server answered at that address. Check it's running, or enter the server's query port \
-       instead of its game port.",
+    text!(
+      "No DayZ server answered at that address. Check it's running, or enter the server's query port instead of its game port."
     )
   })?;
   let addr = SocketAddr::from((ip, query_port));
@@ -221,7 +221,7 @@ pub async fn find(address: &str) -> Result<StoredServer> {
     return Ok(server);
   }
   tokio::time::sleep(RETRY_AFTER).await;
-  ask(addr).await.ok_or_else(|| Error::msg("The server answered but didn't send its details. Try again in a moment."))
+  ask(addr).await.ok_or_else(|| text!("The server answered but didn't send its details. Try again in a moment.").into())
 }
 
 #[cfg(test)]

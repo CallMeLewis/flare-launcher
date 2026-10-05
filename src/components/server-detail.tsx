@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
+import { plural } from "@lingui/core/macro";
+import { Trans, useLingui } from "@lingui/react/macro";
 import {
   ChevronDown,
   CircleAlert,
@@ -79,6 +81,7 @@ export function ServerDetail({
   onCancelDownload,
   onOpenSettings,
 }: Props) {
+  const { t, i18n } = useLingui();
   const [mods, setMods] = useState<Mod[] | null>(null);
   const [installed, setInstalled] = useState<ReadonlySet<number> | null>(null);
   const [password, setPassword] = useState("");
@@ -154,7 +157,7 @@ export function ServerDetail({
     backend
       .forgetPassword(server.id)
       .then(() => setSaved(false))
-      .catch((e) => toast.error("Couldn't forget the password", { description: errorMessage(e) }));
+      .catch((e) => toast.error(t`Couldn't forget the password`, { description: errorMessage(e) }));
   };
 
   const checkMods = useCallback(async () => {
@@ -187,6 +190,7 @@ export function ServerDetail({
   const players = ping?.players ?? server.players;
   const maxPlayers = ping?.maxPlayers ?? server.maxPlayers;
   const canPlay = canCheckMods && !checking && !busy;
+  const speed = server.timeAcceleration ? i18n.number(server.timeAcceleration) : "";
 
   /** Play, from the button or Enter in the password field. Saves the password first when Remember is ticked. */
   function join() {
@@ -195,7 +199,7 @@ export function ServerDetail({
       backend
         .savePassword(server.id, password)
         .then(() => setSaved(true))
-        .catch((e) => toast.error("Couldn't remember the password", { description: errorMessage(e) }));
+        .catch((e) => toast.error(t`Couldn't remember the password`, { description: errorMessage(e) }));
     }
     onPlay(server, password);
   }
@@ -203,15 +207,15 @@ export function ServerDetail({
   async function copyAddress() {
     try {
       await navigator.clipboard.writeText(address);
-      toast.success("Address copied");
+      toast.success(t`Address copied`);
     } catch {
-      toast.error("Couldn't copy the address");
+      toast.error(t`Couldn't copy the address`);
     }
   }
 
   return (
     <aside
-      aria-label="Server details"
+      aria-label={t`Server details`}
       className="flex w-[300px] shrink-0 lg:w-[340px] xl:w-[400px] flex-col border-l bg-card"
     >
       <header className="flex flex-col gap-3 border-b p-4">
@@ -225,7 +229,7 @@ export function ServerDetail({
           <Button
             variant="ghost"
             size="icon-sm"
-            aria-label={favourite ? "Remove from favourites" : "Add to favourites"}
+            aria-label={favourite ? t`Remove from favourites` : t`Add to favourites`}
             aria-pressed={favourite}
             onClick={() => onToggleFavourite(server.id)}
             className={cn("-mt-1 -mr-1 shrink-0", favourite && "text-warning hover:text-warning")}
@@ -235,14 +239,14 @@ export function ServerDetail({
         </div>
         <div className="flex items-center gap-1">
           <code className="data selectable text-xs text-muted-foreground">{address}</code>
-          <Button variant="ghost" size="icon-xs" aria-label="Copy address" onClick={copyAddress}>
+          <Button variant="ghost" size="icon-xs" aria-label={t`Copy address`} onClick={copyAddress}>
             <Copy aria-hidden />
           </Button>
         </div>
       </header>
 
       <dl className="grid grid-cols-2 gap-x-4 gap-y-3 border-b p-4">
-        <Stat label="Players">
+        <Stat label={t`Players`}>
           {unlisted ? (
             <span className="data">–</span>
           ) : (
@@ -252,24 +256,24 @@ export function ServerDetail({
             </span>
           )}
         </Stat>
-        <Stat label="Ping">
+        <Stat label={t`Ping`}>
           <span className="data">
             <PingValue ping={ping} offline={offline !== null} />
           </span>
         </Stat>
-        <Stat label="Map">{mapName(server.map)}</Stat>
-        <Stat label="In-game time">
+        <Stat label={t`Map`}>{mapName(server.map)}</Stat>
+        <Stat label={t`In-game time`}>
           {/* What an unlisted server last reported is long out of date. */}
           <span className="data">{(!unlisted && server.time) || "–"}</span>
           {server.time && !unlisted && (
             <span className="ml-1.5 text-xs text-muted-foreground">
-              {isNight(server.time) ? "Night" : "Day"}
-              {server.timeAcceleration ? ` · ${server.timeAcceleration}× speed` : ""}
+              {isNight(server.time) ? t`Night` : t`Day`}
+              {server.timeAcceleration ? ` · ${t`${speed}× speed`}` : ""}
             </span>
           )}
         </Stat>
-        <Stat label="Perspective">{server.firstPersonOnly ? "First person only" : "First and third person"}</Stat>
-        <Stat label="Version">
+        <Stat label={t`Perspective`}>{server.firstPersonOnly ? t`First person only` : t`First and third person`}</Stat>
+        <Stat label={t`Version`}>
           <span className="data">{server.version || "–"}</span>
         </Stat>
       </dl>
@@ -277,12 +281,14 @@ export function ServerDetail({
       <section aria-labelledby="mods-heading" className="flex min-h-0 flex-1 flex-col">
         <div className="flex items-baseline justify-between px-4 pt-4 pb-2">
           <h3 id="mods-heading" className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-            Mods
+            <Trans>Mods</Trans>
             {mods && mods.length > 0 && <span className="data ml-1.5">{mods.length}</span>}
           </h3>
           {mods && mods.length > 0 && installed && !downloading && (
             <p className={cn("text-xs", missing > 0 ? "text-warning" : "text-success")} aria-live="polite">
-              {missing > 0 ? `${missing} to download` : "All up to date"}
+              {missing > 0
+                ? t`${plural(missing, { one: "# to download", other: "# to download" })}`
+                : t`All up to date`}
             </p>
           )}
         </div>
@@ -290,7 +296,7 @@ export function ServerDetail({
         <div className="min-h-0 flex-1 overflow-y-auto px-2 pb-2">
           {unlisted ? (
             <p className="px-2 py-1 text-[13px] text-muted-foreground">
-              The mods show again once the server is back in the list.
+              <Trans>The mods show again once the server is back in the list.</Trans>
             </p>
           ) : mods === null ? (
             <div className="flex flex-col gap-2 px-2 py-1" aria-busy="true">
@@ -300,13 +306,17 @@ export function ServerDetail({
             </div>
           ) : modsFailed ? (
             <div className="flex flex-col items-start gap-2 px-2 py-1">
-              <p className="text-[13px] text-muted-foreground">Couldn't load this server's mods.</p>
+              <p className="text-[13px] text-muted-foreground">
+                <Trans>Couldn't load this server's mods.</Trans>
+              </p>
               <Button variant="secondary" size="sm" onClick={() => setModsAttempt((n) => n + 1)}>
-                Try again
+                <Trans>Try again</Trans>
               </Button>
             </div>
           ) : mods.length === 0 ? (
-            <p className="px-2 py-1 text-[13px] text-muted-foreground">This is a vanilla server. No mods needed.</p>
+            <p className="px-2 py-1 text-[13px] text-muted-foreground">
+              <Trans>This is a vanilla server. No mods needed.</Trans>
+            </p>
           ) : (
             <ul className="flex flex-col">
               {mods.map((mod) => (
@@ -326,21 +336,23 @@ export function ServerDetail({
         {offline && (
           <Notice>
             {unlisted
-              ? "This server isn't in the server list right now, so it's probably offline. It comes back once the server is up again."
-              : "This server isn't answering, so it's probably offline or restarting. You can still try to join."}
+              ? t`This server isn't in the server list right now, so it's probably offline. It comes back once the server is up again.`
+              : t`This server isn't answering, so it's probably offline or restarting. You can still try to join.`}
           </Notice>
         )}
         {install === null && (
           <Notice>
-            DayZ wasn't found on this computer.{" "}
-            <button
-              type="button"
-              onClick={onOpenSettings}
-              className="font-medium text-foreground underline underline-offset-2"
-            >
-              Set the DayZ folder
-            </button>{" "}
-            to play.
+            <Trans>
+              DayZ wasn't found on this computer.{" "}
+              <button
+                type="button"
+                onClick={onOpenSettings}
+                className="font-medium text-foreground underline underline-offset-2"
+              >
+                Set the DayZ folder
+              </button>{" "}
+              to play.
+            </Trans>
           </Notice>
         )}
 
@@ -349,7 +361,7 @@ export function ServerDetail({
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="server-password" className="text-xs text-muted-foreground">
                 <Lock className="size-3" aria-hidden />
-                Server password
+                <Trans>Server password</Trans>
               </Label>
               <div className="relative">
                 <Input
@@ -372,15 +384,15 @@ export function ServerDetail({
                   variant="ghost"
                   size="icon-xs"
                   onClick={() => setShowPassword((shown) => !shown)}
-                  aria-label={showPassword ? "Hide password" : "Show password"}
-                  title={showPassword ? "Hide password" : "Show password"}
+                  aria-label={showPassword ? t`Hide password` : t`Show password`}
+                  title={showPassword ? t`Hide password` : t`Show password`}
                   className="absolute top-1 right-1 text-muted-foreground"
                 >
                   {showPassword ? <EyeOff aria-hidden /> : <Eye aria-hidden />}
                 </Button>
               </div>
               <span id="server-password-hint" className="text-xs text-muted-foreground">
-                If it&rsquo;s wrong, the server turns you away once DayZ has loaded.
+                <Trans>If it&rsquo;s wrong, the server turns you away once DayZ has loaded.</Trans>
               </span>
             </div>
             <div className="flex items-start gap-2.5">
@@ -394,11 +406,11 @@ export function ServerDetail({
               />
               <div className="flex flex-col gap-0.5">
                 <Label htmlFor="remember-password" className="text-[13px] leading-4 font-normal">
-                  Remember password
+                  <Trans>Remember password</Trans>
                 </Label>
                 {!storeAvailable && (
                   <span id="remember-password-hint" className="text-xs text-muted-foreground">
-                    Needs a password store on this computer, such as GNOME Keyring or KWallet.
+                    <Trans>Needs a password store on this computer, such as GNOME Keyring or KWallet.</Trans>
                   </span>
                 )}
               </div>
@@ -425,18 +437,18 @@ export function ServerDetail({
                 <Play fill="currentColor" aria-hidden />
               )}
               {job?.phase === "starting"
-                ? "Starting DayZ…"
+                ? t`Starting DayZ…`
                 : job || checking
-                  ? "Checking mods"
+                  ? t`Checking mods`
                   : missing > 0
-                    ? `Download ${missing} ${missing === 1 ? "mod" : "mods"} and play`
-                    : "Play"}
+                    ? t`${plural(missing, { one: "Download # mod and play", other: "Download # mods and play" })}`
+                    : t`Play`}
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
                   size="lg"
-                  aria-label="More options"
+                  aria-label={t`More options`}
                   disabled={!canCheckMods || checking || busy}
                   className="rounded-l-none border-l border-primary-foreground/25 px-3"
                 >
@@ -451,11 +463,16 @@ export function ServerDetail({
                 >
                   <Download className="mt-0.5" aria-hidden />
                   <span className="flex flex-col gap-0.5">
-                    <span className="text-[13px] font-medium">Load mods</span>
+                    <span className="text-[13px] font-medium">
+                      <Trans>Load mods</Trans>
+                    </span>
                     <span className="text-xs text-muted-foreground">
                       {missing > 0
-                        ? `Download the ${missing} missing or out-of-date ${missing === 1 ? "mod" : "mods"} without starting DayZ.`
-                        : "Every mod for this server is installed and up to date."}
+                        ? t`${plural(missing, {
+                            one: "Download the # missing or out-of-date mod without starting DayZ.",
+                            other: "Download the # missing or out-of-date mods without starting DayZ.",
+                          })}`
+                        : t`Every mod for this server is installed and up to date.`}
                     </span>
                   </span>
                 </DropdownMenuItem>
@@ -478,24 +495,26 @@ function ModRow({
   installed: boolean | null;
   progress: ModProgress | undefined;
 }) {
+  const { t } = useLingui();
+  const name = mod.name;
   const status = progress?.status ?? (installed === null ? null : installed ? "installed" : "missing");
   const percent = progress && progress.total > 0 ? Math.floor((progress.downloaded / progress.total) * 100) : null;
 
   return (
     <li className="group flex h-8 items-center gap-2 rounded-md px-2 text-[13px] hover:bg-accent/50">
       {status === "installed" ? (
-        <CircleCheck className="size-3.5 shrink-0 text-success" aria-label="Installed" />
+        <CircleCheck className="size-3.5 shrink-0 text-success" aria-label={t`Installed`} />
       ) : status === "missing" ? (
-        <CircleAlert className="size-3.5 shrink-0 text-warning" aria-label="Missing or out of date" />
+        <CircleAlert className="size-3.5 shrink-0 text-warning" aria-label={t`Missing or out of date`} />
       ) : status === "downloading" ? (
         <Loader2
           className="size-3.5 shrink-0 animate-spin text-primary motion-reduce:animate-none"
-          aria-label="Downloading"
+          aria-label={t`Downloading`}
         />
       ) : status === "queued" ? (
-        <Clock className="size-3.5 shrink-0 text-muted-foreground" aria-label="Waiting to download" />
+        <Clock className="size-3.5 shrink-0 text-muted-foreground" aria-label={t`Waiting to download`} />
       ) : status === "failed" ? (
-        <CircleX className="size-3.5 shrink-0 text-danger" aria-label="Download failed" />
+        <CircleX className="size-3.5 shrink-0 text-danger" aria-label={t`Download failed`} />
       ) : (
         <span className="size-3.5 shrink-0" />
       )}
@@ -504,17 +523,17 @@ function ModRow({
       </span>
       {status === "downloading" || status === "queued" ? (
         <span className="data shrink-0 text-xs text-muted-foreground">
-          {status === "queued" ? "Waiting" : percent === null ? "Starting" : `${percent}%`}
+          {status === "queued" ? t`Waiting` : percent === null ? t`Starting` : `${percent}%`}
         </span>
       ) : (
         <Button
           variant="ghost"
           size="xs"
-          aria-label={`Open ${mod.name} in the Steam Workshop`}
+          aria-label={t`Open ${name} in the Steam Workshop`}
           onClick={() =>
             backend
               .openWorkshopPage(mod.steamWorkshopId)
-              .catch((e) => toast.error("Couldn't open the Workshop page", { description: errorMessage(e) }))
+              .catch((e) => toast.error(t`Couldn't open the Workshop page`, { description: errorMessage(e) }))
           }
           className="shrink-0 text-muted-foreground opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
         >
@@ -535,30 +554,36 @@ function DownloadStatus({
   startsGame: boolean;
   onCancel: () => void;
 }) {
+  const { t } = useLingui();
   const done = progress.filter((p) => p.status === "installed").length;
   // Steam only reports sizes for the mods it is downloading right now.
   const active = progress.filter((p) => p.status === "downloading");
   const downloaded = active.reduce((sum, p) => sum + p.downloaded, 0);
   const total = active.reduce((sum, p) => sum + p.total, 0);
+  const count = progress.length;
+  const downloadedSize = formatBytes(downloaded);
+  const totalSize = formatBytes(total);
 
   return (
     <div className="flex flex-col gap-3">
       <div className="flex flex-col gap-1.5">
         <div className="flex items-baseline justify-between text-[13px]">
           <span className="font-medium">
-            {startsGame ? "Downloading mods, then starting DayZ" : "Downloading mods"}
+            {startsGame ? t`Downloading mods, then starting DayZ` : t`Downloading mods`}
           </span>
           <span className="data text-xs text-muted-foreground" aria-live="polite">
-            {done} of {progress.length}
+            <Trans>
+              {done} of {count}
+            </Trans>
           </span>
         </div>
-        <Progress value={downloadFraction(progress) * 100} aria-label="Mod download progress" />
+        <Progress value={downloadFraction(progress) * 100} aria-label={t`Mod download progress`} />
         <p className="data text-xs text-muted-foreground">
-          {total > 0 ? `${formatBytes(downloaded)} of ${formatBytes(total)}` : "Waiting for Steam"}
+          {total > 0 ? t`${downloadedSize} of ${totalSize}` : t`Waiting for Steam`}
         </p>
       </div>
       <Button variant="secondary" onClick={onCancel} className="w-full">
-        Cancel
+        <Trans>Cancel</Trans>
       </Button>
     </div>
   );

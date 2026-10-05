@@ -25,6 +25,9 @@ use serde::{Deserialize, Serialize};
 use tauri::{AppHandle, Emitter, Manager, State};
 use tauri_plugin_updater::{Update, UpdaterExt};
 
+use crate::error::Text;
+use crate::text;
+
 /// Must match `feedUrl` in scripts/publish-update.ts. Keeps the launcher's first name, DayZ Server Launcher: every
 /// installed copy checks this address, so moving it would strand them.
 const FEED_URL: &str = "https://updates.darkzone.dev/dayz-server-launcher/";
@@ -65,7 +68,7 @@ pub enum UpdateStatus {
     notes: Option<String>,
   },
   Error {
-    message: String,
+    message: Text,
   },
 }
 
@@ -330,13 +333,13 @@ impl Updater {
   /// background and reopens the launcher; the launcher closes straight away.
   pub fn install(&self, app: &AppHandle) -> crate::error::Result<()> {
     let Some((update, bytes)) = self.inner.lock().unwrap().downloaded.take() else {
-      return Err(crate::error::Error::msg("There is no downloaded update to install."));
+      return Err(text!("There is no downloaded update to install.").into());
     };
     if let Err(error) = update.install(&bytes) {
       // Shows on the update icon, where trying again checks and downloads afresh.
       let message = friendly_error(&error, self.channel(app));
       self.set(app, UpdateStatus::Error { message: message.clone() });
-      return Err(crate::error::Error::msg(message));
+      return Err(message.into());
     }
     // Windows never gets here: the installer takes over and the process exits.
     app.restart();
@@ -361,18 +364,18 @@ fn now_millis() -> u64 {
   SystemTime::now().duration_since(UNIX_EPOCH).map(|d| d.as_millis() as u64).unwrap_or(0)
 }
 
-fn friendly_error(error: &tauri_plugin_updater::Error, channel: UpdateChannel) -> String {
+fn friendly_error(error: &tauri_plugin_updater::Error, channel: UpdateChannel) -> Text {
   use tauri_plugin_updater::Error as E;
   match error {
-    E::Reqwest(_) | E::Network(_) => "Couldn't reach the update server.".into(),
+    E::Reqwest(_) | E::Network(_) => text!("Couldn't reach the update server."),
     E::ReleaseNotFound | E::TargetNotFound(_) | E::TargetsNotFound(_) => match channel {
-      UpdateChannel::Beta => "No beta release has been published yet.".into(),
-      UpdateChannel::Stable => "No release has been published yet.".into(),
+      UpdateChannel::Beta => text!("No beta release has been published yet."),
+      UpdateChannel::Stable => text!("No release has been published yet."),
     },
     E::Minisign(_) | E::SignedVersionMismatch { .. } | E::MissingSignedVersion => {
-      "The update failed a security check, so it wasn't installed.".into()
+      text!("The update failed a security check, so it wasn't installed.")
     }
-    other => other.to_string().lines().next().unwrap_or_default().to_string(),
+    other => text!("The update failed: {error}", error = other.to_string().lines().next().unwrap_or_default()),
   }
 }
 
@@ -410,7 +413,8 @@ fn settings_path(app: &AppHandle) -> Option<std::path::PathBuf> {
 }
 
 fn save_settings(app: &AppHandle, settings: UpdateSettings) -> crate::error::Result<()> {
-  let path = settings_path(app).ok_or_else(|| crate::error::Error::msg("The settings folder couldn't be found."))?;
+  let path =
+    settings_path(app).ok_or_else(|| crate::error::Error::from(text!("The settings folder couldn't be found.")))?;
   if let Some(dir) = path.parent() {
     std::fs::create_dir_all(dir)?;
   }
@@ -508,11 +512,14 @@ mod tests {
   fn explains_errors_in_plain_words() {
     use tauri_plugin_updater::Error as E;
     assert_eq!(
-      friendly_error(&E::Network("timeout".into()), UpdateChannel::Stable),
+      friendly_error(&E::Network("timeout".into()), UpdateChannel::Stable).to_string(),
       "Couldn't reach the update server."
     );
-    assert_eq!(friendly_error(&E::ReleaseNotFound, UpdateChannel::Beta), "No beta release has been published yet.");
-    assert!(friendly_error(&E::MissingSignedVersion, UpdateChannel::Stable).contains("security check"));
+    assert_eq!(
+      friendly_error(&E::ReleaseNotFound, UpdateChannel::Beta).to_string(),
+      "No beta release has been published yet."
+    );
+    assert!(friendly_error(&E::MissingSignedVersion, UpdateChannel::Stable).message.contains("security check"));
   }
 
   #[test]

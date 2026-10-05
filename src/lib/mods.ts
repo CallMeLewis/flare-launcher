@@ -1,3 +1,4 @@
+import { t } from "@lingui/core/macro";
 import type { ModProgress, ServerRow, SubscribedMod } from "./types";
 
 /** Where a subscribed mod stands: on this computer and current, needing a download, or gone from the Workshop. */
@@ -23,7 +24,9 @@ export const canVerify = (mod: SubscribedMod) => mod.installed && !mod.removed;
 export type ModJob = { kind: "update" | "verify"; progress: ModProgress[] };
 
 export function modName(mod: SubscribedMod): string {
-  return mod.name ?? `Mod ${mod.id}`;
+  if (mod.name !== null) return mod.name;
+  const id = mod.id;
+  return t`Mod ${id}`;
 }
 
 /** How many servers run each mod, by Workshop id. */

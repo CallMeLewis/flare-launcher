@@ -1,8 +1,9 @@
+import { i18n } from "@lingui/core";
 import type { ModProgress } from "./types";
 
 const UNITS = ["B", "KB", "MB", "GB", "TB"];
 
-/** Formats a byte count the way Steam does, e.g. `1.4 GB`. */
+/** Formats a byte count the way Steam does, e.g. `1.4 GB`, with the interface language's decimal mark. */
 export function formatBytes(bytes: number): string {
   let value = bytes;
   let unit = 0;
@@ -10,7 +11,13 @@ export function formatBytes(bytes: number): string {
     value /= 1024;
     unit += 1;
   }
-  return `${unit < 2 ? Math.round(value) : value.toFixed(1)} ${UNITS[unit]}`;
+  const decimals = unit < 2 ? 0 : 1;
+  const number = i18n.number(value, {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+    useGrouping: false,
+  });
+  return `${number} ${UNITS[unit]}`;
 }
 
 /**

@@ -1,3 +1,4 @@
+import { Trans, useLingui } from "@lingui/react/macro";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -27,23 +28,26 @@ export function ReleaseNotesLink({
   version,
   items,
   description,
-  label = "What's new",
+  label,
 }: {
   version: string;
   items: string[];
   description?: string;
   label?: string;
 }) {
+  const { t } = useLingui();
   return (
     <Dialog>
       <DialogTrigger asChild>
         <Button variant="link" className="h-auto p-0 text-xs font-normal">
-          {label}
+          {label ?? t`What's new`}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>What's new in version {version}</DialogTitle>
+          <DialogTitle>
+            <Trans>What's new in version {version}</Trans>
+          </DialogTitle>
           {description && <DialogDescription>{description}</DialogDescription>}
         </DialogHeader>
         <div className="max-h-[60vh] overflow-y-auto pr-1">
@@ -51,7 +55,9 @@ export function ReleaseNotesLink({
         </div>
         <DialogFooter>
           <DialogClose asChild>
-            <Button variant="secondary">Close</Button>
+            <Button variant="secondary">
+              <Trans>Close</Trans>
+            </Button>
           </DialogClose>
         </DialogFooter>
       </DialogContent>

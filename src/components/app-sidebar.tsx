@@ -1,12 +1,13 @@
 import { Clock, List, Network, Package, Settings as SettingsIcon, Star, type LucideIcon } from "lucide-react";
+import type { MessageDescriptor } from "@lingui/core";
+import { msg } from "@lingui/core/macro";
+import { Trans, useLingui } from "@lingui/react/macro";
 import { UpdateButton } from "@/components/update-button";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
 export type View = "all" | "favourites" | "recent" | "lan" | "mods";
-
-const count = new Intl.NumberFormat();
 
 type Props = {
   view: View;
@@ -16,18 +17,20 @@ type Props = {
   onOpenSettings: () => void;
 };
 
-type Item = { view: View; label: string; icon: LucideIcon };
+type Item = { view: View; label: MessageDescriptor; icon: LucideIcon };
 
 const SERVER_LISTS: Item[] = [
-  { view: "all", label: "All servers", icon: List },
-  { view: "favourites", label: "Favourites", icon: Star },
-  { view: "recent", label: "Recent", icon: Clock },
-  { view: "lan", label: "LAN", icon: Network },
+  { view: "all", label: msg`All servers`, icon: List },
+  { view: "favourites", label: msg`Favourites`, icon: Star },
+  { view: "recent", label: msg`Recent`, icon: Clock },
+  { view: "lan", label: msg`LAN`, icon: Network },
 ];
-const LIBRARY: Item[] = [{ view: "mods", label: "Mods", icon: Package }];
+const LIBRARY: Item[] = [{ view: "mods", label: msg`Mods`, icon: Package }];
 
 export function AppSidebar({ view, onViewChange, counts, onOpenSettings }: Props) {
-  const link = ({ view: item, label, icon: Icon }: Item) => {
+  const { i18n, t } = useLingui();
+  const link = ({ view: item, label: descriptor, icon: Icon }: Item) => {
+    const label = i18n._(descriptor);
     const active = item === view;
     const itemCount = counts[item];
     return (
@@ -45,9 +48,9 @@ export function AppSidebar({ view, onViewChange, counts, onOpenSettings }: Props
         )}
       >
         <Icon className={cn("size-4", active && "text-primary")} aria-hidden />
-        <span className="max-xl:sr-only">{label}</span>
+        <span className="min-w-0 truncate max-xl:sr-only">{label}</span>
         {itemCount !== null && (
-          <span className="data ml-auto text-xs text-muted-foreground max-xl:hidden">{count.format(itemCount)}</span>
+          <span className="data ml-auto text-xs text-muted-foreground max-xl:hidden">{i18n.number(itemCount)}</span>
         )}
       </button>
     );
@@ -56,10 +59,10 @@ export function AppSidebar({ view, onViewChange, counts, onOpenSettings }: Props
   return (
     <aside className="flex w-14 shrink-0 flex-col border-r bg-card xl:w-48">
       {/* The app's name and logo sit in the title bar above. */}
-      <nav aria-label="Server lists" className="flex flex-col gap-0.5 px-2 pt-3">
+      <nav aria-label={t`Server lists`} className="flex flex-col gap-0.5 px-2 pt-3">
         {SERVER_LISTS.map(link)}
       </nav>
-      <nav aria-label="Your library" className="mx-2 mt-3 flex flex-col gap-0.5 border-t pt-3">
+      <nav aria-label={t`Your library`} className="mx-2 mt-3 flex flex-col gap-0.5 border-t pt-3">
         {LIBRARY.map(link)}
       </nav>
 
@@ -70,14 +73,16 @@ export function AppSidebar({ view, onViewChange, counts, onOpenSettings }: Props
             <Button
               variant="ghost"
               size="icon"
-              aria-label="Settings"
+              aria-label={t`Settings`}
               onClick={onOpenSettings}
               className="text-muted-foreground hover:text-foreground"
             >
               <SettingsIcon className="size-5" aria-hidden />
             </Button>
           </TooltipTrigger>
-          <TooltipContent side="right">Settings</TooltipContent>
+          <TooltipContent side="right">
+            <Trans>Settings</Trans>
+          </TooltipContent>
         </Tooltip>
         <UpdateButton />
       </div>

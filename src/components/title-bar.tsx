@@ -1,4 +1,5 @@
 import { useEffect, useState, type ReactNode } from "react";
+import { useLingui } from "@lingui/react/macro";
 import { backend, hasSystemTitleBar } from "@/lib/backend";
 import { cn } from "@/lib/utils";
 
@@ -8,6 +9,7 @@ import { cn } from "@/lib/utils";
  * Hidden when the window has the system title bar instead, as it does on Linux.
  */
 export function TitleBar() {
+  const { t } = useLingui();
   const maximised = useMaximised();
   if (hasSystemTitleBar) return null;
 
@@ -22,11 +24,11 @@ export function TitleBar() {
       </div>
 
       <div className="flex h-full">
-        <CaptionButton label="Minimise" onClick={() => void backend.minimiseWindow()}>
+        <CaptionButton label={t`Minimise`} onClick={() => void backend.minimiseWindow()}>
           <path d="M0 5.5 H10" />
         </CaptionButton>
         <CaptionButton
-          label={maximised ? "Restore down" : "Maximise"}
+          label={maximised ? t`Restore down` : t`Maximise`}
           onClick={() => void backend.toggleMaximiseWindow()}
         >
           {maximised ? (
@@ -38,7 +40,7 @@ export function TitleBar() {
             <rect x={0.5} y={0.5} width={9} height={9} rx={1} />
           )}
         </CaptionButton>
-        <CaptionButton label="Close" close onClick={() => void backend.closeWindow()}>
+        <CaptionButton label={t`Close`} close onClick={() => void backend.closeWindow()}>
           <path d="M0.5 0.5 L9.5 9.5 M9.5 0.5 L0.5 9.5" />
         </CaptionButton>
       </div>

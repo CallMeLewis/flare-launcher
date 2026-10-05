@@ -98,6 +98,11 @@ export type LaunchRequest = {
 /** Light or dark, or whichever the system is set to. */
 export type Theme = "light" | "dark" | "system";
 
+/** A language the launcher comes in. */
+export type Locale = "en-GB" | "en-US" | "fr" | "de";
+/** A language, or System to follow the computer's. */
+export type Language = Locale | "system";
+
 export type Settings = {
   profileName: string;
   dayzDir: string;
@@ -105,6 +110,7 @@ export type Settings = {
   /** Interface zoom, 1 being 100%. */
   uiScale: number;
   theme: Theme;
+  language: Language;
   skipIntro: boolean;
   noSplash: boolean;
   noPause: boolean;
@@ -133,7 +139,12 @@ export type UpdateStatus =
   | { state: "available"; version: string; releaseDate?: string | null; notes?: string | null }
   | { state: "downloading"; version: string; percent: number; notes?: string | null }
   | { state: "ready"; version: string; notes?: string | null }
-  | { state: "error"; message: string };
+  | { state: "error"; message: BackendText };
+
+/**
+ * Text from the backend: its English template and the values for its placeholders, translated with `backendText`.
+ */
+export type BackendText = { message: string; values: Record<string, string | number> };
 
 /** Whether the launcher is in the Linux app menu. Only an AppImage can add itself; elsewhere `supported` is false. */
 export interface AppMenu {

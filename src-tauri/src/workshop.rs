@@ -18,6 +18,7 @@ use tauri::ipc::Channel;
 
 use crate::error::{Error, Result};
 use crate::steam::DAYZ_APP_ID;
+use crate::text;
 
 const POLL_INTERVAL: Duration = Duration::from_millis(250);
 /// Public, and needs no key.
@@ -127,9 +128,11 @@ fn connect() -> Result<Client> {
     | SteamAPIInitError::NoSteamClient(detail)
     | SteamAPIInitError::VersionMismatch(detail)) = &e;
     log::warn!("could not connect to Steam: {e} ({detail})");
-    Error::msg(match e {
-      SteamAPIInitError::VersionMismatch(_) => "Steam is out of date. Restart Steam so it can update, then try again.",
-      _ => "Steam couldn't be reached. Make sure Steam is running and you're signed in, then try again.",
+    Error::from(match e {
+      SteamAPIInitError::VersionMismatch(_) => {
+        text!("Steam is out of date. Restart Steam so it can update, then try again.")
+      }
+      _ => text!("Steam couldn't be reached. Make sure Steam is running and you're signed in, then try again."),
     })
   })
 }
@@ -208,10 +211,13 @@ fn download(ids: &[u64], cancelled: &AtomicBool, mut report: impl FnMut(&[ModPro
 
     let failures = last.iter().filter(|p| p.status == ModStatus::Failed).count();
     if failures > 0 {
-      let noun = if failures == 1 { "mod" } else { "mods" };
-      return Err(Error::msg(format!(
-        "Steam couldn't download {failures} {noun}. Check your connection and disk space, then try again."
-      )));
+      return Err(
+        text!(
+          "Steam couldn't download {failures, plural, one {# mod} other {# mods}}. Check your connection and disk space, then try again.",
+          failures = failures
+        )
+        .into(),
+      );
     }
     if last.iter().all(|p| p.status == ModStatus::Installed) {
       return Ok(true);
@@ -250,14 +256,19 @@ fn unsubscribe(ids: &[u64]) -> Result<()> {
       if failures == 0 {
         return Ok(());
       }
-      let noun = if failures == 1 { "mod" } else { "mods" };
-      return Err(Error::msg(format!("Steam couldn't unsubscribe you from {failures} {noun}. Try again.")));
+      return Err(
+        text!(
+          "Steam couldn't unsubscribe you from {failures, plural, one {# mod} other {# mods}}. Try again.",
+          failures = failures
+        )
+        .into(),
+      );
     }
     drop(answers);
     if std::time::Instant::now() > deadline {
-      return Err(Error::msg(
-        "Steam didn't answer in time. Make sure Steam is running and you're signed in, then try again.",
-      ));
+      return Err(
+        text!("Steam didn't answer in time. Make sure Steam is running and you're signed in, then try again.").into(),
+      );
     }
     std::thread::sleep(POLL_INTERVAL);
   }
@@ -276,7 +287,8 @@ pub mod helper {
   use serde::{Deserialize, Serialize};
 
   use super::{ModProgress, POLL_INTERVAL};
-  use crate::error::{Error, Result};
+  use crate::error::{Error, Result, Text};
+  use crate::text;
 
   /// Starts the launcher as the download helper, followed by the mod ids.
   pub const HELPER_ARG: &str = "--download-mods";
@@ -290,7 +302,15 @@ pub mod helper {
     Progress(Vec<ModProgress>),
     /// `true` once every mod is installed, `false` if cancelled.
     Done(bool),
-    Failed(String),
+    Failed(Text),
+  }
+
+  /// The launcher's own text passes back as it is, to be translated; anything else as a value in a template.
+  fn helper_failure(error: Error) -> Text {
+    match error {
+      Error::Text(text) => text,
+      other => text!("{error}", error = other),
+    }
   }
 
   fn send(out: &mut impl Write, message: &HelperMessage) {
@@ -311,7 +331,7 @@ pub mod helper {
     if arg == UNSUBSCRIBE_ARG {
       let (message, code) = match super::unsubscribe(&ids) {
         Ok(()) => (HelperMessage::Done(true), 0),
-        Err(e) => (HelperMessage::Failed(e.to_string()), 1),
+        Err(e) => (HelperMessage::Failed(helper_failure(e)), 1),
       };
       send(&mut out, &message);
       return Some(code);
@@ -329,7 +349,7 @@ pub mod helper {
       super::download(&ids, &cancelled, |progress| send(&mut out, &HelperMessage::Progress(progress.to_vec())));
     let (message, code) = match outcome {
       Ok(finished) => (HelperMessage::Done(finished), 0),
-      Err(e) => (HelperMessage::Failed(e.to_string()), 1),
+      Err(e) => (HelperMessage::Failed(helper_failure(e)), 1),
     };
     send(&mut out, &message);
     Some(code)
@@ -341,19 +361,19 @@ pub mod helper {
       match serde_json::from_str(&line?) {
         Ok(HelperMessage::Progress(progress)) => report(&progress),
         Ok(HelperMessage::Done(finished)) => return Ok(finished),
-        Ok(HelperMessage::Failed(message)) => return Err(Error::msg(message)),
+        Ok(HelperMessage::Failed(text)) => return Err(text.into()),
         // Anything Steam printed.
         Err(_) => {}
       }
     }
-    Err(Error::msg("The download stopped unexpectedly. Try again."))
+    Err(text!("The download stopped unexpectedly. Try again.").into())
   }
 
   /// Runs [`super::download`] in the helper, closing its stdin to cancel.
   pub fn download(ids: &[u64], cancelled: &AtomicBool, report: impl FnMut(&[ModProgress])) -> Result<bool> {
     let mut command = Command::new(std::env::current_exe()?);
     command.arg(HELPER_ARG).args(ids.iter().map(u64::to_string)).stdin(Stdio::piped()).stdout(Stdio::piped());
-    let mut child = command.spawn().map_err(|e| Error::msg(format!("The download couldn't be started: {e}")))?;
+    let mut child = command.spawn().map_err(|e| text!("The download couldn't be started: {error}", error = e))?;
     let stdout = child.stdout.take().expect("piped stdout");
 
     let outcome = std::thread::scope(|scope| {
@@ -380,7 +400,7 @@ pub mod helper {
   pub fn unsubscribe(ids: &[u64]) -> Result<()> {
     let mut command = Command::new(std::env::current_exe()?);
     command.arg(UNSUBSCRIBE_ARG).args(ids.iter().map(u64::to_string)).stdin(Stdio::null()).stdout(Stdio::piped());
-    let mut child = command.spawn().map_err(|e| Error::msg(format!("Steam couldn't be asked: {e}")))?;
+    let mut child = command.spawn().map_err(|e| text!("Steam couldn't be asked: {error}", error = e))?;
     let outcome = read_outcome(child.stdout.take().expect("piped stdout"), |_| {});
     let _ = child.wait();
     outcome.map(|_| ())
@@ -406,7 +426,7 @@ pub mod helper {
     #[test]
     fn reports_a_helper_failure_or_crash() {
       let mut output = Vec::new();
-      send(&mut output, &HelperMessage::Failed("Steam couldn't be reached.".into()));
+      send(&mut output, &HelperMessage::Failed(text!("Steam couldn't be reached.")));
       assert_eq!(read_outcome(output.as_slice(), |_| {}).unwrap_err().to_string(), "Steam couldn't be reached.");
       assert!(read_outcome(b"Steam crashed\n".as_slice(), |_| {}).is_err());
     }
@@ -429,7 +449,7 @@ pub async fn download_mods(
 ) -> Result<bool> {
   let downloads = downloads.inner().clone();
   if downloads.running.swap(true, Ordering::SeqCst) {
-    return Err(Error::msg("Mods are already being downloaded."));
+    return Err(text!("Mods are already being downloaded.").into());
   }
   downloads.cancelled.store(false, Ordering::SeqCst);
 
@@ -442,7 +462,7 @@ pub async fn download_mods(
   .await;
 
   downloads.running.store(false, Ordering::SeqCst);
-  outcome.map_err(|e| Error::msg(format!("The download stopped unexpectedly: {e}")))?
+  outcome.map_err(|e| text!("The download stopped unexpectedly: {error}", error = e))?
 }
 
 /// Stops waiting for the current download. Steam carries on downloading the
@@ -458,11 +478,11 @@ pub async fn unsubscribe_mods(downloads: State<'_, Arc<Downloads>>, ids: Vec<u64
   let downloads = downloads.inner().clone();
   // One Steam connection at a time.
   if downloads.running.swap(true, Ordering::SeqCst) {
-    return Err(Error::msg("Mods are being downloaded. Try again once they've finished."));
+    return Err(text!("Mods are being downloaded. Try again once they've finished.").into());
   }
   let outcome = tauri::async_runtime::spawn_blocking(move || run_unsubscribe(&ids)).await;
   downloads.running.store(false, Ordering::SeqCst);
-  outcome.map_err(|e| Error::msg(format!("Unsubscribing stopped unexpectedly: {e}")))?
+  outcome.map_err(|e| text!("Unsubscribing stopped unexpectedly: {error}", error = e))?
 }
 
 #[cfg(test)]

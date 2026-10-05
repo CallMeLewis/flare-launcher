@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Trans, useLingui } from "@lingui/react/macro";
 import { LoaderCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,6 +25,7 @@ export function JoinAddressDialog({
   onOpenChange: (open: boolean) => void;
   onFound: (server: ServerRow) => void;
 }) {
+  const { t } = useLingui();
   const [address, setAddress] = useState("");
   const [finding, setFinding] = useState(false);
   const [error, setError] = useState("");
@@ -56,15 +58,19 @@ export function JoinAddressDialog({
       <DialogContent className="sm:max-w-md">
         <form onSubmit={(event) => void find(event)} className="flex flex-col gap-4">
           <DialogHeader>
-            <DialogTitle className="text-base">Add server</DialogTitle>
+            <DialogTitle className="text-base">
+              <Trans>Add server</Trans>
+            </DialogTitle>
             <DialogDescription className="text-[13px]">
-              For a server that isn't in the list. Enter its address and the launcher finds it and shows it on the
-              right, ready to join.
+              <Trans>
+                For a server that isn't in the list. Enter its address and the launcher finds it and shows it on the
+                right, ready to join.
+              </Trans>
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="server-address" className="text-xs text-muted-foreground">
-              Server address
+              <Trans>Server address</Trans>
             </Label>
             <Input
               id="server-address"
@@ -83,21 +89,21 @@ export function JoinAddressDialog({
               role={error ? "alert" : undefined}
               className={error ? "text-xs text-danger" : "text-xs text-muted-foreground"}
             >
-              {error || "The address and the port you join on. Leave the port out to try the usual ones."}
+              {error || t`The address and the port you join on. Leave the port out to try the usual ones.`}
             </p>
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
+              <Trans>Cancel</Trans>
             </Button>
             <Button type="submit" disabled={finding || !address.trim()}>
               {finding ? (
                 <>
                   <LoaderCircle className="animate-spin motion-reduce:animate-none" aria-hidden />
-                  Finding…
+                  <Trans>Finding…</Trans>
                 </>
               ) : (
-                "Find server"
+                <Trans>Find server</Trans>
               )}
             </Button>
           </DialogFooter>

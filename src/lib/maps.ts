@@ -1,3 +1,5 @@
+import { t } from "@lingui/core/macro";
+
 const NAMES: Record<string, string> = {
   chernarusplus: "Chernarus",
   chernarusplusgloom: "Chernarus",
@@ -23,6 +25,6 @@ const NAMES: Record<string, string> = {
 
 /** Player-facing name for a map identifier reported by a server. */
 export function mapName(map: string): string {
-  if (!map) return "Unknown";
+  if (!map) return t`Unknown`;
   return NAMES[map] ?? map.charAt(0).toUpperCase() + map.slice(1);
 }

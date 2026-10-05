@@ -1,29 +1,41 @@
 import { useState } from "react";
 import { RefreshCw } from "lucide-react";
+import type { MessageDescriptor } from "@lingui/core";
+import { msg } from "@lingui/core/macro";
+import { Trans, useLingui } from "@lingui/react/macro";
 import { InstallUpdateDialog } from "@/components/install-update-dialog";
 import { ReleaseNotesList } from "@/components/release-notes";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useUpdateStatus } from "@/hooks/use-update-status";
 import { backend } from "@/lib/backend";
+import { backendText } from "@/lib/backend-messages";
 import { releaseNoteItems } from "@/lib/release-notes";
 import type { UpdateStatus } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
-function label(status: UpdateStatus): string {
+function label(status: UpdateStatus): MessageDescriptor {
   switch (status.state) {
     case "checking":
-      return "Checking for updates…";
-    case "available":
-      return `Download version ${status.version}`;
-    case "downloading":
-      return `Downloading update… ${Math.floor(status.percent)}%`;
-    case "ready":
-      return `Restart to update to version ${status.version}`;
-    case "error":
-      return `${status.message} Select to try again.`;
+      return msg`Checking for updates…`;
+    case "available": {
+      const version = status.version;
+      return msg`Download version ${version}`;
+    }
+    case "downloading": {
+      const percent = Math.floor(status.percent);
+      return msg`Downloading update… ${percent}%`;
+    }
+    case "ready": {
+      const version = status.version;
+      return msg`Restart to update to version ${version}`;
+    }
+    case "error": {
+      const message = backendText(status.message);
+      return msg`${message} Select to try again.`;
+    }
     default:
-      return "Check for updates";
+      return msg`Check for updates`;
   }
 }
 
@@ -32,12 +44,13 @@ function label(status: UpdateStatus): string {
  * install. Hidden in development builds, which cannot update themselves.
  */
 export function UpdateButton() {
+  const { i18n, t } = useLingui();
   const status = useUpdateStatus();
   const [confirmOpen, setConfirmOpen] = useState(false);
   if (status.state === "unsupported") return null;
 
   const busy = status.state === "checking" || status.state === "downloading";
-  const text = label(status);
+  const text = i18n._(label(status));
   // What the new version changes, shown with the label while it is on offer (hover or keyboard focus).
   const notes = "notes" in status ? releaseNoteItems(status.notes) : [];
 
@@ -76,7 +89,9 @@ export function UpdateButton() {
             className="block max-w-sm bg-popover px-3.5 py-3 text-popover-foreground shadow-md ring-1 ring-border **:data-[slot=tooltip-arrow]:bg-popover **:data-[slot=tooltip-arrow]:fill-popover"
           >
             <p className="font-semibold">{text}</p>
-            <p className="mt-2 font-medium opacity-80">What's new</p>
+            <p className="mt-2 font-medium opacity-80">
+              <Trans>What's new</Trans>
+            </p>
             <ReleaseNotesList items={notes} className="mt-1 leading-relaxed" />
           </TooltipContent>
         ) : (
@@ -86,7 +101,7 @@ export function UpdateButton() {
       {/* Announces state changes without reading out every percent of the download. */}
       <span className="sr-only" aria-live="polite">
         {status.state === "downloading"
-          ? "Downloading update"
+          ? t`Downloading update`
           : busy || status.state === "available" || status.state === "ready"
             ? text
             : ""}

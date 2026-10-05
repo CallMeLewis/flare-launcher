@@ -8,6 +8,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Trans } from "@lingui/react/macro";
 import { backend } from "@/lib/backend";
 
 /** Confirmation before a downloaded update installs. The installer runs silently, so this is the only prompt. */
@@ -24,19 +25,25 @@ export function InstallUpdateDialog({
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Install version {version}?</AlertDialogTitle>
+          <AlertDialogTitle>
+            <Trans>Install version {version}?</Trans>
+          </AlertDialogTitle>
           <AlertDialogDescription>
-            Flare Launcher will close, install the update in the background and open again in a few seconds. If DayZ is
-            running, it will keep running.
+            <Trans>
+              Flare Launcher will close, install the update in the background and open again in a few seconds. If DayZ
+              is running, it will keep running.
+            </Trans>
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Not now</AlertDialogCancel>
+          <AlertDialogCancel>
+            <Trans>Not now</Trans>
+          </AlertDialogCancel>
           <AlertDialogAction
             // A failed install shows on the update icon.
             onClick={() => void backend.installUpdate().catch(() => {})}
           >
-            Install and restart
+            <Trans>Install and restart</Trans>
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

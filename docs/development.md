@@ -92,10 +92,35 @@ list and pings servers, but joining, mod downloads and launching through Proton 
 installed. The Discord status has been tried against Discord on Windows, but not on Linux, including its Flatpak and
 Snap packages.
 
+## Languages
+
+The interface is translated with [Lingui](https://lingui.dev). It's written in British English (`en-GB`), which is
+also what any other language falls back to, and comes in American English (`en-US`), French (`fr`) and German (`de`)
+too. Each language's catalogue is a file in `src/locales/`, packaged with the app as a file of its own and loaded when
+chosen in Settings > Launcher. System, the default, uses the computer's language when the launcher has it.
+
+- To add a language, add it to `locales` in `lingui.config.ts`, to `Locale` in `src/lib/types.ts` and to `LOCALES` in
+  `src/lib/i18n.ts` (named in itself), run `pnpm i18n`, then translate every entry of its new `.po` file. A test fails
+  while any message is untranslated or a translation drops a placeholder or tag.
+- French addresses the player as "vous", German as "du".
+
+- Mark interface text where it's written: `<Trans>Refresh</Trans>` in JSX, and `t` from `useLingui()` for
+  attributes, toasts and other strings. Use `msg` for labels kept in module-level constants and translate them when
+  shown, since module code runs before the language loads. Counts go through `plural`.
+- After changing interface text, run `pnpm i18n` to update the catalogues, and commit them with the change. CI fails
+  when they're out of date.
+- `en-US.po` only needs the messages spelled differently, such as "Minimise" or "favourite"; the rest fall back to
+  British English. A test fails when a message with a British spelling has no American translation.
+- Text the Rust backend shows the player is written with `text!("Couldn't find {host}.", host = host)`. It reaches the
+  interface as its English template and values and is translated there. Templates are listed in
+  `src/lib/backend-messages.ts`; a test fails when the list and the Rust code differ. Text from elsewhere, such as the
+  system's own error messages, goes in a placeholder and isn't translated.
+- Server, mod and map names, release notes and the Discord activity aren't translated.
+
 ## Layout
 
 - `src/`: the interface. `App.tsx` holds the state, `components/` the screens, `lib/filter.ts` the filtering and
-  sorting, `lib/backend.ts` every call into Rust.
+  sorting, `lib/backend.ts` every call into Rust, `lib/i18n.ts` loading languages and `locales/` their catalogues.
 - `src-tauri/src/servers.rs`: downloads and caches the server list.
 - `src-tauri/src/query.rs`: ICMP ping for latency and Steam A2S_INFO queries for player counts.
 - `src-tauri/src/steam.rs`: finds Steam, DayZ and the Workshop folder, and reads which mods the player is subscribed to.

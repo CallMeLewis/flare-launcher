@@ -1,10 +1,13 @@
+import { t } from "@lingui/core/macro";
 import { Channel, invoke, isTauri } from "@tauri-apps/api/core";
 import { getCurrentWebview } from "@tauri-apps/api/webview";
 import { listen } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { open } from "@tauri-apps/plugin-dialog";
+import { backendText } from "./backend-messages";
 import type {
   AppMenu,
+  BackendText,
   Install,
   LaunchRequest,
   Mod,
@@ -196,9 +199,13 @@ export const backend = {
   },
 };
 
+const isBackendText = (value: unknown): value is BackendText =>
+  typeof value === "object" && value !== null && typeof (value as BackendText).message === "string";
+
 /** Turns whatever a failed command rejected with into a message to show. */
 export function errorMessage(error: unknown): string {
   if (typeof error === "string") return error;
+  if (isBackendText(error)) return backendText(error);
   if (error instanceof Error) return error.message;
-  return "Something went wrong.";
+  return t`Something went wrong.`;
 }

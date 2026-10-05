@@ -20,6 +20,9 @@ import {
   Trash2,
   X,
 } from "lucide-react";
+import type { MessageDescriptor } from "@lingui/core";
+import { msg, plural } from "@lingui/core/macro";
+import { Plural, Trans, useLingui } from "@lingui/react/macro";
 import { toast } from "sonner";
 import { Message } from "@/components/message";
 import {
@@ -65,24 +68,33 @@ const COLUMNS =
 // Updated reads left to right, so it starts a little after the right-aligned sizes rather than running into them.
 const UPDATED_GAP = "pl-4 2xl:pl-6";
 
-const HEADERS: { key: ModSortKey; label: string; numeric?: boolean; descendingFirst?: boolean; hint?: string }[] = [
-  { key: "name", label: "Mod" },
+const HEADERS: {
+  key: ModSortKey;
+  label: MessageDescriptor;
+  numeric?: boolean;
+  descendingFirst?: boolean;
+  hint?: MessageDescriptor;
+}[] = [
+  { key: "name", label: msg`Mod` },
   {
     key: "servers",
-    label: "Servers",
+    label: msg`Servers`,
     numeric: true,
     descendingFirst: true,
-    hint: "How many servers in the server list run this mod.",
+    hint: msg`How many servers in the server list run this mod.`,
   },
-  { key: "size", label: "Size", numeric: true, descendingFirst: true },
-  { key: "updated", label: "Updated", descendingFirst: true, hint: "When the mod was last updated on the Workshop." },
-  { key: "status", label: "Status" },
+  { key: "size", label: msg`Size`, numeric: true, descendingFirst: true },
+  {
+    key: "updated",
+    label: msg`Updated`,
+    descendingFirst: true,
+    hint: msg`When the mod was last updated on the Workshop.`,
+  },
+  { key: "status", label: msg`Status` },
 ];
 
-const count = new Intl.NumberFormat();
-const date = new Intl.DateTimeFormat(undefined, { day: "2-digit", month: "short", year: "numeric" });
-const formatDate = (seconds: number) => date.format(new Date(seconds * 1000));
-const plural = (n: number, one: string, many = `${one}s`) => `${count.format(n)} ${n === 1 ? one : many}`;
+// Each language's own medium date, such as 24 Sept 2026 or 24.09.2026, so it fits the column in all of them.
+const DATE_FORMAT: Intl.DateTimeFormatOptions = { dateStyle: "medium" };
 
 type Props = {
   state: SubscribedModsState;
@@ -119,6 +131,7 @@ export function ModsPage({
   onOpenSettings,
   onBrowseServers,
 }: Props) {
+  const { t, i18n } = useLingui();
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<ModSort>(DEFAULT_MOD_SORT);
   const [selected, setSelected] = useState<ReadonlySet<number>>(new Set());
@@ -168,11 +181,11 @@ export function ModsPage({
     body = (
       <Message
         icon={<CircleAlert className="size-6" aria-hidden />}
-        title="Your mods couldn't be read"
+        title={t`Your mods couldn't be read`}
         description={state.error}
         action={
           <Button onClick={() => void state.refresh()} disabled={state.refreshing}>
-            Try again
+            <Trans>Try again</Trans>
           </Button>
         }
       />
@@ -181,11 +194,11 @@ export function ModsPage({
     body = (
       <Message
         icon={<FolderSearch className="size-6" aria-hidden />}
-        title="DayZ wasn't found"
-        description="Your mods are listed once the launcher knows where DayZ is. Choose its folder in Settings."
+        title={t`DayZ wasn't found`}
+        description={t`Your mods are listed once the launcher knows where DayZ is. Choose its folder in Settings.`}
         action={
           <Button variant="secondary" onClick={onOpenSettings}>
-            Open Settings
+            <Trans>Open Settings</Trans>
           </Button>
         }
       />
@@ -194,11 +207,11 @@ export function ModsPage({
     body = (
       <Message
         icon={<PackageX className="size-6" aria-hidden />}
-        title="You're not subscribed to any mods"
-        description="When you join a server, the mods it needs are subscribed to and show up here."
+        title={t`You're not subscribed to any mods`}
+        description={t`When you join a server, the mods it needs are subscribed to and show up here.`}
         action={
           <Button variant="secondary" onClick={onBrowseServers}>
-            Browse servers
+            <Trans>Browse servers</Trans>
           </Button>
         }
       />
@@ -220,11 +233,11 @@ export function ModsPage({
         empty={
           <Message
             icon={<SearchX className="size-6" aria-hidden />}
-            title="No mods match"
-            description="Try a different name or Workshop ID."
+            title={t`No mods match`}
+            description={t`Try a different name or Workshop ID.`}
             action={
               <Button variant="secondary" onClick={() => setSearch("")}>
-                Clear search
+                <Trans>Clear search</Trans>
               </Button>
             }
           />
@@ -234,6 +247,10 @@ export function ModsPage({
   }
 
   const listed = state.mods !== null && mods.length > 0 && !searchingForDayz;
+  const selectedCount = i18n.number(selectedMods.length);
+  const shown = i18n.number(rows.length);
+  const modCount = mods.length;
+  const updateCount = toUpdate.length;
 
   return (
     <main className="flex min-w-0 flex-1 flex-col">
@@ -246,10 +263,10 @@ export function ModsPage({
             />
             <Input
               type="search"
-              aria-label="Search mods"
+              aria-label={t`Search mods`}
               autoComplete="off"
               spellCheck={false}
-              placeholder="Search mods by name or Workshop ID"
+              placeholder={t`Search mods by name or Workshop ID`}
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               disabled={!listed}
@@ -258,7 +275,7 @@ export function ModsPage({
             {search && (
               <button
                 type="button"
-                aria-label="Clear search"
+                aria-label={t`Clear search`}
                 onClick={() => setSearch("")}
                 className="absolute top-1/2 right-1 flex size-6 -translate-y-1/2 items-center justify-center rounded text-muted-foreground transition-colors duration-150 hover:text-foreground focus-visible:outline-2"
               >
@@ -270,7 +287,9 @@ export function ModsPage({
           {selectedMods.length > 0 && (
             <div className="flex shrink-0 items-center gap-2 pl-1">
               <span className="text-xs whitespace-nowrap text-muted-foreground" aria-live="polite">
-                <span className="data text-foreground">{count.format(selectedMods.length)}</span> selected
+                <Trans>
+                  <span className="data text-foreground">{selectedCount}</span> selected
+                </Trans>
               </span>
               <Button
                 variant="outline"
@@ -280,14 +299,14 @@ export function ModsPage({
                 onClick={() => setConfirming({ mods: selectedMods, open: true })}
               >
                 <Trash2 aria-hidden />
-                Unsubscribe
+                <Trans>Unsubscribe</Trans>
               </Button>
               <button
                 type="button"
                 onClick={() => setSelected(new Set())}
                 className="rounded text-xs text-muted-foreground underline-offset-2 transition-colors duration-150 hover:text-foreground hover:underline focus-visible:outline-2"
               >
-                Clear selection
+                <Trans>Clear selection</Trans>
               </button>
             </div>
           )}
@@ -295,9 +314,35 @@ export function ModsPage({
           <div className="ml-auto flex shrink-0 items-center gap-2 pl-2">
             {listed && (
               <p className="text-xs whitespace-nowrap text-muted-foreground" aria-live="polite">
-                <span className="data text-foreground">{count.format(rows.length)}</span>
-                {rows.length !== mods.length && <> of {count.format(mods.length)}</>}{" "}
-                {mods.length === 1 ? "mod" : "mods"}
+                {rows.length === mods.length ? (
+                  <Plural
+                    value={modCount}
+                    one={
+                      <Trans>
+                        <span className="data text-foreground">#</span> mod
+                      </Trans>
+                    }
+                    other={
+                      <Trans>
+                        <span className="data text-foreground">#</span> mods
+                      </Trans>
+                    }
+                  />
+                ) : (
+                  <Plural
+                    value={modCount}
+                    one={
+                      <Trans>
+                        <span className="data text-foreground">{shown}</span> of # mod
+                      </Trans>
+                    }
+                    other={
+                      <Trans>
+                        <span className="data text-foreground">{shown}</span> of # mods
+                      </Trans>
+                    }
+                  />
+                )}
                 <span className="max-xl:hidden">
                   {" · "}
                   <span className="data">{formatBytes(totalSize)}</span>
@@ -313,7 +358,7 @@ export function ModsPage({
                 onClick={() => onUpdate(toUpdate.map((mod) => mod.id))}
               >
                 <Download aria-hidden />
-                Update {plural(toUpdate.length, "mod")}
+                <Plural value={updateCount} one="Update # mod" other="Update # mods" />
               </Button>
             )}
             {toVerify.length > 0 && !job && (
@@ -327,11 +372,11 @@ export function ModsPage({
                     onClick={() => onVerify(toVerify.map((mod) => mod.id))}
                   >
                     <ShieldCheck aria-hidden />
-                    Verify mods
+                    <Trans>Verify mods</Trans>
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  Have Steam check your mods' files and download again any that are missing
+                  <Trans>Have Steam check your mods' files and download again any that are missing</Trans>
                 </TooltipContent>
               </Tooltip>
             )}
@@ -340,7 +385,7 @@ export function ModsPage({
                 <Button
                   variant="outline"
                   size="icon-sm"
-                  aria-label="Check your mods again"
+                  aria-label={t`Check your mods again`}
                   disabled={state.refreshing || searchingForDayz}
                   onClick={() => void state.refresh()}
                 >
@@ -350,7 +395,9 @@ export function ModsPage({
                   />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>Check your mods again</TooltipContent>
+              <TooltipContent>
+                <Trans>Check your mods again</Trans>
+              </TooltipContent>
             </Tooltip>
           </div>
         </div>
@@ -359,7 +406,7 @@ export function ModsPage({
         {listed && workshopUnreachable && !job && (
           <p className="flex items-center gap-2 border-t px-4 py-2 text-xs text-muted-foreground">
             <CircleAlert className="size-3.5 shrink-0 text-warning" aria-hidden />
-            The Steam Workshop couldn't be reached, so your mods weren't checked for updates.
+            <Trans>The Steam Workshop couldn't be reached, so your mods weren't checked for updates.</Trans>
           </p>
         )}
       </div>
@@ -375,11 +422,15 @@ export function ModsPage({
           try {
             await onUnsubscribe(ids);
             setSelected((current) => new Set([...current].filter((id) => !ids.includes(id))));
-            toast.success(ids.length === 1 ? "Unsubscribed" : `Unsubscribed from ${plural(ids.length, "mod")}`, {
-              description: "Steam removes the files from this computer shortly.",
-            });
+            const unsubscribed = ids.length;
+            toast.success(
+              unsubscribed === 1
+                ? t`Unsubscribed`
+                : t`Unsubscribed from ${plural(unsubscribed, { one: "# mod", other: "# mods" })}`,
+              { description: t`Steam removes the files from this computer shortly.` },
+            );
           } catch (e) {
-            toast.error("Couldn't unsubscribe", { description: errorMessage(e) });
+            toast.error(t`Couldn't unsubscribe`, { description: errorMessage(e) });
           } finally {
             setConfirming((current) => ({ ...current, open: false }));
           }
@@ -418,6 +469,7 @@ function ModTable({
   progressById,
   empty,
 }: TableProps) {
+  const { t, i18n } = useLingui();
   const scroller = useRef<HTMLDivElement>(null);
   const virtualizer = useVirtualizer({
     count: rows.length,
@@ -460,7 +512,7 @@ function ModTable({
   return (
     <div
       role="grid"
-      aria-label="Your mods"
+      aria-label={t`Your mods`}
       aria-multiselectable
       aria-readonly
       aria-rowcount={rows.length + 1}
@@ -477,7 +529,7 @@ function ModTable({
           <div role="columnheader" className="flex justify-center">
             <Checkbox
               tabIndex={-1}
-              aria-label={allShownSelected ? "Deselect every mod shown" : "Select every mod shown"}
+              aria-label={allShownSelected ? t`Deselect every mod shown` : t`Select every mod shown`}
               checked={allShownSelected ? true : someShownSelected ? "indeterminate" : false}
               onCheckedChange={onToggleAllShown}
               disabled={rows.length === 0}
@@ -495,7 +547,7 @@ function ModTable({
               >
                 <button
                   type="button"
-                  title={header.hint}
+                  title={header.hint && i18n._(header.hint)}
                   onClick={() =>
                     onSort({
                       key: header.key,
@@ -507,13 +559,13 @@ function ModTable({
                     active && "text-foreground",
                   )}
                 >
-                  {header.label}
+                  {i18n._(header.label)}
                   {active && <Arrow className="size-3" aria-hidden />}
                 </button>
               </div>
             );
           })}
-          <div role="columnheader" aria-label="Workshop page" />
+          <div role="columnheader" aria-label={t`Workshop page`} />
         </div>
       </div>
 
@@ -573,9 +625,12 @@ const ModRow = memo(function ModRow({
   onToggle,
   onActivate,
 }: RowProps) {
+  const { t, i18n } = useLingui();
+  const formatDate = (seconds: number) => i18n.date(new Date(seconds * 1000), DATE_FORMAT);
   const name = modName(mod);
   const outdated = modState(mod) === "outdated";
   const updated = mod.latestUpdatedAt ?? mod.updatedAt;
+  const copyDate = mod.updatedAt === null ? "" : formatDate(mod.updatedAt);
   const toggle = () => {
     onActivate(mod.id);
     onToggle(mod.id);
@@ -599,7 +654,7 @@ const ModRow = memo(function ModRow({
       )}
     >
       <div role="gridcell" className="flex justify-center" onClick={stop}>
-        <Checkbox tabIndex={-1} aria-label={`Select ${name}`} checked={selected} onCheckedChange={toggle} />
+        <Checkbox tabIndex={-1} aria-label={t`Select ${name}`} checked={selected} onCheckedChange={toggle} />
       </div>
 
       <div role="gridcell" className="flex min-w-0 items-center gap-2 pr-4">
@@ -609,19 +664,11 @@ const ModRow = memo(function ModRow({
       </div>
 
       <div role="gridcell" className="data flex items-center justify-end gap-1.5 pr-4 text-xs">
-        {favourites && favourites.length > 0 && (
-          <span title={`Your favourite servers that use it: ${favourites.join(", ")}`} className="text-warning">
-            <Star
-              className="size-3"
-              fill="currentColor"
-              aria-label={`Used by ${plural(favourites.length, "favourite server")}`}
-            />
-          </span>
-        )}
+        {favourites && favourites.length > 0 && <FavouritesStar favourites={favourites} />}
         {servers === null ? (
           <span className="text-muted-foreground/50">···</span>
         ) : (
-          <span className={cn(servers === 0 && "text-muted-foreground")}>{count.format(servers)}</span>
+          <span className={cn(servers === 0 && "text-muted-foreground")}>{i18n.number(servers)}</span>
         )}
       </div>
 
@@ -634,9 +681,9 @@ const ModRow = memo(function ModRow({
         className={cn("data truncate pr-3 text-xs text-muted-foreground", UPDATED_GAP)}
         title={
           outdated && mod.updatedAt !== null
-            ? `Your copy is from ${formatDate(mod.updatedAt)}`
+            ? t`Your copy is from ${copyDate}`
             : mod.removed
-              ? "When your copy was published"
+              ? t`When your copy was published`
               : undefined
         }
       >
@@ -652,12 +699,12 @@ const ModRow = memo(function ModRow({
           variant="ghost"
           size="icon-xs"
           tabIndex={-1}
-          aria-label={`Open ${name} in the Steam Workshop`}
-          title="Open in the Steam Workshop"
+          aria-label={t`Open ${name} in the Steam Workshop`}
+          title={t`Open in the Steam Workshop`}
           onClick={() =>
             backend
               .openWorkshopPage(mod.id)
-              .catch((e) => toast.error("Couldn't open the Workshop page", { description: errorMessage(e) }))
+              .catch((e) => toast.error(t`Couldn't open the Workshop page`, { description: errorMessage(e) }))
           }
           className="text-muted-foreground/70 hover:text-foreground group-hover:text-muted-foreground"
         >
@@ -668,10 +715,23 @@ const ModRow = memo(function ModRow({
   );
 });
 
-const REMOVED_HINT =
-  "It was removed from the Workshop or made private. Your copy still works, but it won't get updates.";
+function FavouritesStar({ favourites }: { favourites: string[] }) {
+  const { t } = useLingui();
+  const names = favourites.join(", ");
+  const favouriteCount = favourites.length;
+  return (
+    <span title={t`Your favourite servers that use it: ${names}`} className="text-warning">
+      <Star
+        className="size-3"
+        fill="currentColor"
+        aria-label={t`Used by ${plural(favouriteCount, { one: "# favourite server", other: "# favourite servers" })}`}
+      />
+    </span>
+  );
+}
 
 function ModStatus({ mod, progress }: { mod: SubscribedMod; progress: ModProgress | undefined }) {
+  const { t } = useLingui();
   const line = (icon: React.ReactNode, label: string, tone?: string, title?: string) => (
     <span className={cn("flex min-w-0 items-center gap-1.5 text-xs", tone)} title={title}>
       {icon}
@@ -685,16 +745,16 @@ function ModStatus({ mod, progress }: { mod: SubscribedMod; progress: ModProgres
         const percent = progress.total > 0 ? Math.floor((progress.downloaded / progress.total) * 100) : null;
         return line(
           <LoaderCircle className="size-3.5 shrink-0 animate-spin motion-reduce:animate-none" aria-hidden />,
-          percent === null ? "Starting" : `Downloading ${percent}%`,
+          percent === null ? t`Starting` : t`Downloading ${percent}%`,
           "text-foreground",
         );
       }
       case "queued":
-        return line(<Clock className="size-3.5 shrink-0" aria-hidden />, "Waiting", "text-muted-foreground");
+        return line(<Clock className="size-3.5 shrink-0" aria-hidden />, t`Waiting`, "text-muted-foreground");
       case "failed":
-        return line(<CircleX className="size-3.5 shrink-0" aria-hidden />, "Download failed", "text-danger");
+        return line(<CircleX className="size-3.5 shrink-0" aria-hidden />, t`Download failed`, "text-danger");
       case "installed":
-        return line(<CircleCheck className="size-3.5 shrink-0" aria-hidden />, "Up to date", "text-success");
+        return line(<CircleCheck className="size-3.5 shrink-0" aria-hidden />, t`Up to date`, "text-success");
     }
   }
 
@@ -702,51 +762,55 @@ function ModStatus({ mod, progress }: { mod: SubscribedMod; progress: ModProgres
     case "missing":
       return line(
         <CircleAlert className="size-3.5 shrink-0" aria-hidden />,
-        "Not downloaded",
+        t`Not downloaded`,
         "text-warning",
-        "Steam hasn't downloaded this mod to this computer yet.",
+        t`Steam hasn't downloaded this mod to this computer yet.`,
       );
     case "outdated":
-      return line(<CircleAlert className="size-3.5 shrink-0" aria-hidden />, "Update available", "text-warning");
+      return line(<CircleAlert className="size-3.5 shrink-0" aria-hidden />, t`Update available`, "text-warning");
     case "removed":
       return line(
         <CircleX className="size-3.5 shrink-0" aria-hidden />,
-        "Not on the Workshop",
+        t`Not on the Workshop`,
         "text-muted-foreground",
-        REMOVED_HINT,
+        t`It was removed from the Workshop or made private. Your copy still works, but it won't get updates.`,
       );
     case "current":
-      return line(<CircleCheck className="size-3.5 shrink-0" aria-hidden />, "Up to date", "text-success");
+      return line(<CircleCheck className="size-3.5 shrink-0" aria-hidden />, t`Up to date`, "text-success");
   }
 }
 
 function JobStatus({ job: { kind, progress }, onCancel }: { job: ModJob; onCancel: () => void }) {
+  const { t } = useLingui();
   const verifying = kind === "verify";
   const done = progress.filter((p) => p.status === "installed").length;
   // Steam only reports sizes for the mods it is downloading right now.
   const active = progress.filter((p) => p.status === "downloading");
   const downloaded = active.reduce((sum, p) => sum + p.downloaded, 0);
   const total = active.reduce((sum, p) => sum + p.total, 0);
+  const count = progress.length;
+  const downloadedSize = formatBytes(downloaded);
+  const totalSize = formatBytes(total);
 
   return (
     <div className="flex items-center gap-4 border-t px-4 py-2.5">
-      <span className="shrink-0 text-[13px] font-medium">{verifying ? "Verifying mods" : "Updating mods"}</span>
+      <span className="shrink-0 text-[13px] font-medium">
+        {verifying ? <Trans>Verifying mods</Trans> : <Trans>Updating mods</Trans>}
+      </span>
       <Progress
         value={downloadFraction(progress) * 100}
-        aria-label={verifying ? "Mod verify progress" : "Mod update progress"}
+        aria-label={verifying ? t`Mod verify progress` : t`Mod update progress`}
         className="flex-1"
       />
       <span className="data shrink-0 text-xs text-muted-foreground" aria-live="polite">
-        {done} of {progress.length}
+        <Trans>
+          {done} of {count}
+        </Trans>
         {" · "}
-        {total > 0
-          ? `${formatBytes(downloaded)} of ${formatBytes(total)}`
-          : verifying
-            ? "Checking files"
-            : "Waiting for Steam"}
+        {total > 0 ? t`${downloadedSize} of ${totalSize}` : verifying ? t`Checking files` : t`Waiting for Steam`}
       </span>
       <Button variant="secondary" size="sm" onClick={onCancel}>
-        Cancel
+        <Trans>Cancel</Trans>
       </Button>
     </div>
   );
@@ -765,28 +829,51 @@ function UnsubscribeDialog({
   onClose: () => void;
   onConfirm: (ids: number[]) => Promise<void>;
 }) {
+  const { t, i18n } = useLingui();
   const [working, setWorking] = useState(false);
 
   const one = list.length === 1;
   const size = list.reduce((sum, mod) => sum + (mod.installed ? (mod.size ?? 0) : 0), 0);
   const needed = list.filter((mod) => (favouritesUsing.get(mod.id)?.length ?? 0) > 0);
   const favouriteServers = [...new Set(needed.flatMap((mod) => favouritesUsing.get(mod.id) ?? []))];
+  const name = one ? modName(list[0]) : "";
+  const modCount = list.length;
+  const freed = formatBytes(size);
+  const usedCount = i18n.number(needed.length);
+  const names = favouriteServers.slice(0, 3).join(", ");
+  const more = favouriteServers.length - 3;
 
   return (
     <AlertDialog open={open} onOpenChange={(open) => !open && !working && onClose()}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>
-            {one ? `Unsubscribe from ${modName(list[0])}?` : `Unsubscribe from ${plural(list.length, "mod")}?`}
+            {one
+              ? t`Unsubscribe from ${name}?`
+              : t`Unsubscribe from ${plural(modCount, { one: "# mod", other: "# mods" })}?`}
           </AlertDialogTitle>
           <AlertDialogDescription>
-            Steam removes {one ? "it" : "them"} from this computer
-            {size > 0 && (
-              <>
-                , freeing <span className="data">{formatBytes(size)}</span>
-              </>
+            {one ? (
+              size > 0 ? (
+                <Trans>
+                  Steam removes it from this computer, freeing <span className="data">{freed}</span>. A server that
+                  needs it downloads it again when you join.
+                </Trans>
+              ) : (
+                <Trans>
+                  Steam removes it from this computer. A server that needs it downloads it again when you join.
+                </Trans>
+              )
+            ) : size > 0 ? (
+              <Trans>
+                Steam removes them from this computer, freeing <span className="data">{freed}</span>. A server that
+                needs them downloads them again when you join.
+              </Trans>
+            ) : (
+              <Trans>
+                Steam removes them from this computer. A server that needs them downloads them again when you join.
+              </Trans>
             )}
-            . A server that needs {one ? "it" : "them"} downloads {one ? "it" : "them"} again when you join.
           </AlertDialogDescription>
         </AlertDialogHeader>
         {needed.length > 0 && (
@@ -794,15 +881,19 @@ function UnsubscribeDialog({
             <Star className="mt-0.5 size-3.5 shrink-0 text-warning" fill="currentColor" aria-hidden />
             <span>
               {one
-                ? "Your favourite servers use it"
-                : `Your favourite servers use ${count.format(needed.length)} of these`}
-              : {favouriteServers.slice(0, 3).join(", ")}
-              {favouriteServers.length > 3 && ` and ${plural(favouriteServers.length - 3, "more", "more")}`}.
+                ? more > 0
+                  ? t`Your favourite servers use it: ${names} and ${plural(more, { one: "# more", other: "# more" })}.`
+                  : t`Your favourite servers use it: ${names}.`
+                : more > 0
+                  ? t`Your favourite servers use ${usedCount} of these: ${names} and ${plural(more, { one: "# more", other: "# more" })}.`
+                  : t`Your favourite servers use ${usedCount} of these: ${names}.`}
             </span>
           </p>
         )}
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={working}>Keep {one ? "it" : "them"}</AlertDialogCancel>
+          <AlertDialogCancel disabled={working}>
+            {one ? <Trans>Keep it</Trans> : <Trans>Keep them</Trans>}
+          </AlertDialogCancel>
           <AlertDialogAction
             variant="destructive"
             disabled={working}
@@ -816,10 +907,10 @@ function UnsubscribeDialog({
             {working ? (
               <>
                 <LoaderCircle className="animate-spin motion-reduce:animate-none" aria-hidden />
-                Unsubscribing…
+                <Trans>Unsubscribing…</Trans>
               </>
             ) : (
-              "Unsubscribe"
+              <Trans>Unsubscribe</Trans>
             )}
           </AlertDialogAction>
         </AlertDialogFooter>
@@ -829,8 +920,9 @@ function UnsubscribeDialog({
 }
 
 function LoadingRows() {
+  const { t } = useLingui();
   return (
-    <div aria-busy="true" aria-label="Loading your mods" className="min-h-0 flex-1 overflow-hidden">
+    <div aria-busy="true" aria-label={t`Loading your mods`} className="min-h-0 flex-1 overflow-hidden">
       <div className="h-8 border-b bg-card/60" />
       {Array.from({ length: 14 }, (_, i) => (
         <div key={i} className={cn(COLUMNS, "h-9 border-b border-border/50")}>

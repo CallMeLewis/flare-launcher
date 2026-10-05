@@ -1,4 +1,7 @@
 import { useId, useLayoutEffect, useRef, useState } from "react";
+import type { MessageDescriptor } from "@lingui/core";
+import { msg, plural } from "@lingui/core/macro";
+import { Plural, Trans, useLingui } from "@lingui/react/macro";
 import { ListFilter, Plus, RefreshCw, Search, X } from "lucide-react";
 import { FilterMenu } from "@/components/filter-menu";
 import { Button } from "@/components/ui/button";
@@ -8,8 +11,6 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { useActiveOption } from "@/hooks/use-active-option";
 import { NO_FILTERS, filterChips, type FilterChip, type Filters, type Option } from "@/lib/filter";
 import { cn } from "@/lib/utils";
-
-const count = new Intl.NumberFormat();
 
 type Props = {
   filters: Filters;
@@ -44,13 +45,17 @@ export function ServerToolbar({
   refreshLabel,
   onAddServer,
 }: Props) {
+  const { i18n } = useLingui();
   const set = (patch: Partial<Filters>) => onChange({ ...filters, ...patch });
   const chips = filterChips(filters);
+  const filtersOn = chips.length;
+  const shownCount = i18n.number(shown);
+  const totalCount = i18n.number(total);
   const reset = () => onChange({ ...NO_FILTERS, search: filters.search });
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <div className="border-b">
+    <div className="@container border-b">
       <div className="flex items-center gap-2 px-4 py-3">
         <SmartSearch
           filters={filters}
@@ -74,12 +79,29 @@ export function ServerToolbar({
                   )}
                 >
                   <ListFilter aria-hidden />
-                  Filters
-                  {chips.length > 0 && (
-                    <span className="data min-w-4 rounded-full bg-primary px-1.5 text-[11px] leading-4 text-primary-foreground">
-                      {chips.length}
-                      <span className="sr-only"> on</span>
-                    </span>
+                  {filtersOn > 0 ? (
+                    // A plural, so languages where "on" agrees with the number can say so.
+                    <Plural
+                      value={filtersOn}
+                      one={
+                        <Trans>
+                          Filters{" "}
+                          <span className="data min-w-4 rounded-full bg-primary px-1.5 text-[11px] leading-4 text-primary-foreground">
+                            #<span className="sr-only"> on</span>
+                          </span>
+                        </Trans>
+                      }
+                      other={
+                        <Trans>
+                          Filters{" "}
+                          <span className="data min-w-4 rounded-full bg-primary px-1.5 text-[11px] leading-4 text-primary-foreground">
+                            #<span className="sr-only"> on</span>
+                          </span>
+                        </Trans>
+                      }
+                    />
+                  ) : (
+                    <Trans>Filters</Trans>
                   )}
                 </Button>
               </PopoverTrigger>
@@ -110,23 +132,54 @@ export function ServerToolbar({
 
         <div className="ml-auto flex shrink-0 items-center gap-2 pl-2">
           <p className="text-xs whitespace-nowrap text-muted-foreground" aria-live="polite">
-            <span className="data text-foreground">{count.format(shown)}</span>
-            {shown !== total && <> of {count.format(total)}</>} {total === 1 ? "server" : "servers"}
+            {shown === total ? (
+              <Plural
+                value={total}
+                one={
+                  <Trans>
+                    <span className="data text-foreground">{shownCount}</span> server
+                  </Trans>
+                }
+                other={
+                  <Trans>
+                    <span className="data text-foreground">{shownCount}</span> servers
+                  </Trans>
+                }
+              />
+            ) : (
+              <Plural
+                value={total}
+                one={
+                  <Trans>
+                    <span className="data text-foreground">{shownCount}</span> of {totalCount} server
+                  </Trans>
+                }
+                other={
+                  <Trans>
+                    <span className="data text-foreground">{shownCount}</span> of {totalCount} servers
+                  </Trans>
+                }
+              />
+            )}
           </p>
-          {/* Folds to its icon below xl, as the sidebar does, so the toolbar still fits the smallest window. */}
+          {/* Folds to its icon when the toolbar is narrow, which depends on the window and on how long its words are. */}
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
                 variant="outline"
                 size="sm"
-                className="gap-1.5 px-2.5 text-[13px] font-normal max-xl:w-8 max-xl:px-0"
+                className="gap-1.5 px-2.5 text-[13px] font-normal @max-[60rem]:w-8 @max-[60rem]:px-0"
                 onClick={onAddServer}
               >
                 <Plus aria-hidden />
-                <span className="max-xl:sr-only">Add server</span>
+                <span className="@max-[60rem]:sr-only">
+                  <Trans>Add server</Trans>
+                </span>
               </Button>
             </TooltipTrigger>
-            <TooltipContent className="xl:hidden">Add server</TooltipContent>
+            <TooltipContent className="xl:hidden">
+              <Trans>Add server</Trans>
+            </TooltipContent>
           </Tooltip>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -168,6 +221,7 @@ function ChipStrip({
   onClear: () => void;
   onMore: () => void;
 }) {
+  const { t } = useLingui();
   const strip = useRef<HTMLDivElement>(null);
   const measure = useRef<HTMLUListElement>(null);
   const [fit, setFit] = useState({ shown: chips.length, clear: true });
@@ -204,7 +258,7 @@ function ChipStrip({
   const hidden = chips.length - fit.shown;
   return (
     <div ref={strip} className="relative flex min-w-52 flex-1 items-center overflow-hidden pl-1">
-      <ul aria-label="Filters on" className="flex items-center gap-1.5 whitespace-nowrap">
+      <ul aria-label={t`Filters on`} className="flex items-center gap-1.5 whitespace-nowrap">
         {chips.slice(0, fit.shown).map((chip) => (
           <Chip key={chip.key} chip={chip} onRemove={() => onRemove(chip)} />
         ))}
@@ -213,10 +267,10 @@ function ChipStrip({
             <button
               type="button"
               onClick={onMore}
-              aria-label={`${hidden} more ${hidden === 1 ? "filter" : "filters"} on, open Filters`}
+              aria-label={t`${plural(hidden, { one: "# more filter on, open Filters", other: "# more filters on, open Filters" })}`}
               className="flex h-6 items-center rounded-full border bg-muted px-2.5 text-xs transition-colors duration-150 hover:bg-accent focus-visible:outline-2"
             >
-              +{hidden} more
+              <MoreLabel hidden={hidden} />
             </button>
           </li>
         )}
@@ -234,22 +288,31 @@ function ChipStrip({
         <li>
           <ClearAll onClick={() => {}} />
         </li>
-        <li className="flex h-6 items-center rounded-full border px-2.5 text-xs">+{chips.length} more</li>
+        <li className="flex h-6 items-center rounded-full border px-2.5 text-xs">
+          <MoreLabel hidden={chips.length} />
+        </li>
       </ul>
     </div>
   );
 }
 
+function MoreLabel({ hidden }: { hidden: number }) {
+  return <Trans>+{hidden} more</Trans>;
+}
+
 function Chip({ chip, onRemove }: { chip: FilterChip; onRemove: () => void }) {
+  const { t, i18n } = useLingui();
+  const prefix = chip.prefix && i18n._(chip.prefix);
+  const label = typeof chip.label === "string" ? chip.label : i18n._(chip.label);
   return (
     <li className="flex h-6 max-w-72 shrink-0 items-center gap-1 rounded-full border bg-muted pr-0.5 pl-2.5 text-xs">
-      {chip.prefix && <span className="shrink-0 text-muted-foreground">{chip.prefix}</span>}
-      <span className="truncate" title={chip.label}>
-        {chip.label}
+      {prefix && <span className="shrink-0 text-muted-foreground">{prefix}</span>}
+      <span className="truncate" title={label}>
+        {label}
       </span>
       <button
         type="button"
-        aria-label={`Remove filter: ${chip.prefix ? `${chip.prefix} ` : ""}${chip.label}`}
+        aria-label={prefix ? t`Remove filter: ${prefix} ${label}` : t`Remove filter: ${label}`}
         onClick={onRemove}
         className="flex size-5 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors duration-150 hover:bg-accent hover:text-foreground focus-visible:outline-2"
       >
@@ -266,12 +329,15 @@ function ClearAll({ onClick }: { onClick: () => void }) {
       onClick={onClick}
       className="ml-1 rounded text-xs text-muted-foreground underline-offset-2 transition-colors duration-150 hover:text-foreground hover:underline focus-visible:outline-2"
     >
-      Clear all
+      <Trans>Clear all</Trans>
     </button>
   );
 }
 
-type Suggestion = { kind: string; label: string; count?: number; patch: Partial<Filters> };
+type SuggestionKind = "map" | "mod" | "version";
+type Suggestion = { kind: SuggestionKind; label: string; count?: number; patch: Partial<Filters> };
+
+const KIND_LABELS: Record<SuggestionKind, MessageDescriptor> = { map: msg`Map`, mod: msg`Mod`, version: msg`Version` };
 
 const SUGGESTIONS_PER_KIND = { map: 3, mod: 4, version: 2 };
 
@@ -287,7 +353,7 @@ function suggestionsFor(
     options.filter(({ value }) => !skip(value) && value.toLowerCase().includes(term)).slice(0, limit);
   return [
     ...matching(maps, SUGGESTIONS_PER_KIND.map, (map) => map === filters.map).map((option) => ({
-      kind: "Map",
+      kind: "map" as const,
       label: option.value,
       count: option.count,
       patch: { map: option.value },
@@ -295,7 +361,7 @@ function suggestionsFor(
     ...(filters.mods === "vanilla"
       ? []
       : matching(mods, SUGGESTIONS_PER_KIND.mod, (mod) => filters.requiredMods.includes(mod)).map((option) => ({
-          kind: "Mod",
+          kind: "mod" as const,
           label: option.value,
           count: option.count,
           patch: { requiredMods: [...filters.requiredMods, option.value] },
@@ -303,7 +369,7 @@ function suggestionsFor(
     // Only a number looks like a version; letters would match nothing useful.
     ...(/^\d/.test(term)
       ? matching(versions, SUGGESTIONS_PER_KIND.version, (version) => version === filters.version).map((option) => ({
-          kind: "Version",
+          kind: "version" as const,
           label: option.value,
           count: option.count,
           patch: { version: option.value },
@@ -331,9 +397,11 @@ function SmartSearch({
   versions: Option[];
   mods: Option[];
 }) {
+  const { t, i18n } = useLingui();
   const id = useId();
   const [open, setOpen] = useState(false);
-  const term = filters.search.trim().toLowerCase();
+  const search = filters.search.trim();
+  const term = search.toLowerCase();
   const suggestions = open && suggest && term.length >= 2 ? suggestionsFor(term, filters, maps, versions, mods) : [];
   const choose = (index: number) => {
     onChange({ ...suggestions[index].patch, search: "" });
@@ -350,14 +418,14 @@ function SmartSearch({
       <Input
         type="search"
         role="combobox"
-        aria-label="Search servers"
+        aria-label={t`Search servers`}
         aria-expanded={suggestions.length > 0}
         aria-controls={`${id}-list`}
         aria-activedescendant={active >= 0 ? `${id}-${active}` : undefined}
         aria-autocomplete="list"
         autoComplete="off"
         spellCheck={false}
-        placeholder={suggest ? "Search servers, maps or mods" : "Search name, map, IP or mod"}
+        placeholder={suggest ? t`Search servers, maps or mods` : t`Search name, map, IP or mod`}
         value={filters.search}
         onChange={(event) => {
           onChange({ search: event.target.value });
@@ -372,7 +440,7 @@ function SmartSearch({
       {filters.search && (
         <button
           type="button"
-          aria-label="Clear search"
+          aria-label={t`Clear search`}
           onClick={() => onChange({ search: "" })}
           className="absolute top-1/2 right-1 flex size-6 -translate-y-1/2 items-center justify-center rounded text-muted-foreground transition-colors duration-150 hover:text-foreground focus-visible:outline-2"
         >
@@ -381,7 +449,7 @@ function SmartSearch({
       )}
       {suggestions.length > 0 && (
         <div className="absolute inset-x-0 top-full z-50 mt-1 rounded-lg border bg-popover p-1 shadow-lg">
-          <ul id={`${id}-list`} role="listbox" aria-label="Add a filter">
+          <ul id={`${id}-list`} role="listbox" aria-label={t`Add a filter`}>
             {suggestions.map((suggestion, index) => (
               <li
                 key={`${suggestion.kind}:${suggestion.label}`}
@@ -397,24 +465,28 @@ function SmartSearch({
                 )}
               >
                 <span className="w-14 shrink-0 text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
-                  {suggestion.kind}
+                  {i18n._(KIND_LABELS[suggestion.kind])}
                 </span>
-                <span className={cn("truncate", suggestion.kind === "Version" && "data text-xs")}>
+                <span className={cn("truncate", suggestion.kind === "version" && "data text-xs")}>
                   {suggestion.label}
                 </span>
                 {suggestion.count !== undefined && (
                   <span className="data ml-auto shrink-0 text-xs text-muted-foreground">
-                    {count.format(suggestion.count)} {suggestion.count === 1 ? "server" : "servers"}
+                    <ServerCount servers={suggestion.count} />
                   </span>
                 )}
               </li>
             ))}
           </ul>
           <p className="border-t px-2 pt-1.5 pb-1 text-[11px] text-muted-foreground">
-            Choose one to add it as a filter, or press Enter to search names for “{filters.search.trim()}”.
+            <Trans>Choose one to add it as a filter, or press Enter to search names for “{search}”.</Trans>
           </p>
         </div>
       )}
     </div>
   );
+}
+
+function ServerCount({ servers }: { servers: number }) {
+  return <Plural value={servers} one="# server" other="# servers" />;
 }

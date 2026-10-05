@@ -1,0 +1,1829 @@
+msgid ""
+msgstr ""
+"POT-Creation-Date: 2026-10-05 00:47+0100\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: @lingui/cli\n"
+"Language: en-GB\n"
+
+#: src/App.tsx
+msgid "{count, plural, one {# mod} other {# mods}} downloaded for {name}"
+msgstr "{count, plural, one {# mod} other {# mods}} downloaded for {name}"
+
+#: src/App.tsx
+msgid "{count, plural, one {# mod} other {# mods}} downloaded."
+msgstr "{count, plural, one {# mod} other {# mods}} downloaded."
+
+#: src/components/mods-page.tsx
+#: src/components/server-detail.tsx
+msgid "{done} of {count}"
+msgstr "{done} of {count}"
+
+#: src/components/mods-page.tsx
+#: src/components/server-detail.tsx
+msgid "{downloadedSize} of {totalSize}"
+msgstr "{downloadedSize} of {totalSize}"
+
+#: src/lib/backend-messages.ts
+msgid "{error}"
+msgstr "{error}"
+
+#: src/components/server-toolbar.tsx
+msgid "{filtersOn, plural, one {Filters <0>#<1> on</1></0>} other {Filters <2>#<3> on</3></2>}}"
+msgstr "{filtersOn, plural, one {Filters <0>#<1> on</1></0>} other {Filters <2>#<3> on</3></2>}}"
+
+#: src/components/server-toolbar.tsx
+msgid "{hidden, plural, one {# more filter on, open Filters} other {# more filters on, open Filters}}"
+msgstr "{hidden, plural, one {# more filter on, open Filters} other {# more filters on, open Filters}}"
+
+#: src/components/update-button.tsx
+msgid "{message} Select to try again."
+msgstr "{message} Select to try again."
+
+#: src/lib/backend-messages.ts
+msgid "{missing, plural, one {# required mod is} other {# required mods are}} not installed yet."
+msgstr "{missing, plural, one {# required mod is} other {# required mods are}} not installed yet."
+
+#: src/components/server-detail.tsx
+msgid "{missing, plural, one {# to download} other {# to download}}"
+msgstr "{missing, plural, one {# to download} other {# to download}}"
+
+#: src/components/server-detail.tsx
+msgid "{missing, plural, one {Download # mod and play} other {Download # mods and play}}"
+msgstr "{missing, plural, one {Download # mod and play} other {Download # mods and play}}"
+
+#: src/components/server-detail.tsx
+msgid "{missing, plural, one {Download the # missing or out-of-date mod without starting DayZ.} other {Download the # missing or out-of-date mods without starting DayZ.}}"
+msgstr "{missing, plural, one {Download the # missing or out-of-date mod without starting DayZ.} other {Download the # missing or out-of-date mods without starting DayZ.}}"
+
+#: src/components/game-start-dialog.tsx
+msgid "{modCount, plural, one {# mod} other {# mods}}"
+msgstr "{modCount, plural, one {# mod} other {# mods}}"
+
+#: src/components/mods-page.tsx
+msgid "{modCount, plural, one {<0>{shown}</0> of # mod} other {<1>{shown}</1> of # mods}}"
+msgstr "{modCount, plural, one {<0>{shown}</0> of # mod} other {<1>{shown}</1> of # mods}}"
+
+#: src/components/mods-page.tsx
+msgid "{modCount, plural, one {<0>#</0> mod} other {<1>#</1> mods}}"
+msgstr "{modCount, plural, one {<0>#</0> mod} other {<1>#</1> mods}}"
+
+#: src/components/settings-dialog.tsx
+msgid "{modCount, plural, one {<0><1>#</1> mod</0>} other {<2><3>#</3> mods</2>}} downloaded. Steam keeps the ones you're subscribed to up to date."
+msgstr "{modCount, plural, one {<0><1>#</1> mod</0>} other {<2><3>#</3> mods</2>}} downloaded. Steam keeps the ones you're subscribed to up to date."
+
+#: src/App.tsx
+msgid "{name}. Select Play in the panel on the right to join."
+msgstr "{name}. Select Play in the panel on the right to join."
+
+#: src/components/server-toolbar.tsx
+msgid "{servers, plural, one {# server} other {# servers}}"
+msgstr "{servers, plural, one {# server} other {# servers}}"
+
+#: src/components/filter-menu.tsx
+msgid "{shown, plural, one {<0>#</0> server match} other {<1>#</1> servers match}}"
+msgstr "{shown, plural, one {<0>#</0> server match} other {<1>#</1> servers match}}"
+
+#: src/components/server-detail.tsx
+msgid "{speed}× speed"
+msgstr "{speed}× speed"
+
+#: src/components/server-toolbar.tsx
+msgid "{total, plural, one {<0>{shownCount}</0> of {totalCount} server} other {<1>{shownCount}</1> of {totalCount} servers}}"
+msgstr "{total, plural, one {<0>{shownCount}</0> of {totalCount} server} other {<1>{shownCount}</1> of {totalCount} servers}}"
+
+#: src/components/server-toolbar.tsx
+msgid "{total, plural, one {<0>{shownCount}</0> server} other {<1>{shownCount}</1> servers}}"
+msgstr "{total, plural, one {<0>{shownCount}</0> server} other {<1>{shownCount}</1> servers}}"
+
+#: src/components/mods-page.tsx
+msgid "{updateCount, plural, one {Update # mod} other {Update # mods}}"
+msgstr "{updateCount, plural, one {Update # mod} other {Update # mods}}"
+
+#: src/components/server-toolbar.tsx
+msgid "+{hidden} more"
+msgstr "+{hidden} more"
+
+#: src/components/filter-menu.tsx
+msgid "< {ms} ms"
+msgstr "< {ms} ms"
+
+#: src/components/mods-page.tsx
+msgid "<0>{selectedCount}</0> selected"
+msgstr "<0>{selectedCount}</0> selected"
+
+#: src/components/game-start-dialog.tsx
+msgid "<0>Joining </0><1>{name}</1>"
+msgstr "<0>Joining </0><1>{name}</1>"
+
+#: src/components/server-table.tsx
+msgid "1PP"
+msgstr "1PP"
+
+#: src/components/filter-menu.tsx
+#: src/lib/filter.ts
+msgid "1PP only"
+msgstr "1PP only"
+
+#: src/components/filter-menu.tsx
+#: src/lib/filter.ts
+msgid "3PP allowed"
+msgstr "3PP allowed"
+
+#: src/components/first-run-dialog.tsx
+msgid "A few choices before your first game. You can change any of them later in Settings."
+msgstr "A few choices before your first game. You can change any of them later in Settings."
+
+#: src/App.tsx
+msgid "A server shows here when it's on the same network and answers on a query port from 27015 to 27020. For any other server, use Add server."
+msgstr "A server shows here when it's on the same network and answers on a query port from 27015 to 27020. For any other server, use Add server."
+
+#: src/components/settings-dialog.tsx
+msgid "About"
+msgstr "About"
+
+#: src/components/filter-menu.tsx
+msgid "Access"
+msgstr "Access"
+
+#: src/hooks/use-app-menu-offer.ts
+msgid "Add"
+msgstr "Add"
+
+#: src/components/server-table.tsx
+msgid "Add {name} to favourites"
+msgstr "Add {name} to favourites"
+
+#: src/components/server-toolbar.tsx
+msgid "Add a filter"
+msgstr "Add a filter"
+
+#: src/hooks/use-app-menu-offer.ts
+msgid "Add Flare Launcher to your app menu?"
+msgstr "Add Flare Launcher to your app menu?"
+
+#: src/App.tsx
+#: src/components/join-address-dialog.tsx
+#: src/components/server-toolbar.tsx
+msgid "Add server"
+msgstr "Add server"
+
+#: src/components/settings-dialog.tsx
+msgid "Add to app menu"
+msgstr "Add to app menu"
+
+#: src/components/server-detail.tsx
+msgid "Add to favourites"
+msgstr "Add to favourites"
+
+#: src/components/first-run-dialog.tsx
+msgid "Add to the app menu"
+msgstr "Add to the app menu"
+
+#: src/components/settings-dialog.tsx
+msgid "Added to the command line"
+msgstr "Added to the command line"
+
+#: src/components/server-detail.tsx
+msgid "Address copied"
+msgstr "Address copied"
+
+#: src/components/filter-menu.tsx
+msgid "All maps"
+msgstr "All maps"
+
+#: src/components/app-sidebar.tsx
+msgid "All servers"
+msgstr "All servers"
+
+#: src/components/server-detail.tsx
+msgid "All up to date"
+msgstr "All up to date"
+
+#: src/components/filter-menu.tsx
+msgid "All versions"
+msgstr "All versions"
+
+#: src/components/filter-menu.tsx
+msgid "Any"
+msgstr "Any"
+
+#: src/components/settings-dialog.tsx
+msgid "Any other DayZ startup parameters, separated by spaces."
+msgstr "Any other DayZ startup parameters, separated by spaces."
+
+#: src/components/settings-dialog.tsx
+msgid "App menu"
+msgstr "App menu"
+
+#: src/components/settings-dialog.tsx
+msgid "Appearance"
+msgstr "Appearance"
+
+#: src/components/filter-menu.tsx
+#: src/lib/filter.ts
+msgid "BattlEye on"
+msgstr "BattlEye on"
+
+#: src/components/settings-dialog.tsx
+msgid "Behaviour"
+msgstr "Behaviour"
+
+#: src/components/settings-dialog.tsx
+msgid "Beta"
+msgstr "Beta"
+
+#: src/components/settings-dialog.tsx
+msgid "Browse"
+msgstr "Browse"
+
+#: src/App.tsx
+msgid "Browse all servers"
+msgstr "Browse all servers"
+
+#: src/components/mods-page.tsx
+msgid "Browse servers"
+msgstr "Browse servers"
+
+#: src/components/join-address-dialog.tsx
+#: src/components/mods-page.tsx
+#: src/components/server-detail.tsx
+msgid "Cancel"
+msgstr "Cancel"
+
+#: src/components/settings-dialog.tsx
+msgid "Changes save as you make them."
+msgstr "Changes save as you make them."
+
+#: src/components/first-run-dialog.tsx
+#: src/components/settings-dialog.tsx
+msgid "Character name"
+msgstr "Character name"
+
+#: src/components/settings-dialog.tsx
+#: src/components/update-button.tsx
+msgid "Check for updates"
+msgstr "Check for updates"
+
+#: src/components/settings-dialog.tsx
+msgid "Check for updates automatically"
+msgstr "Check for updates automatically"
+
+#: src/components/mods-page.tsx
+msgid "Check your mods again"
+msgstr "Check your mods again"
+
+#: src/components/mods-page.tsx
+msgid "Checking files"
+msgstr "Checking files"
+
+#: src/components/settings-dialog.tsx
+#: src/components/update-button.tsx
+msgid "Checking for updates…"
+msgstr "Checking for updates…"
+
+#: src/components/server-detail.tsx
+msgid "Checking mods"
+msgstr "Checking mods"
+
+#: src/components/settings-dialog.tsx
+msgid "Checking…"
+msgstr "Checking…"
+
+#: src/components/server-toolbar.tsx
+msgid "Choose one to add it as a filter, or press Enter to search names for “{search}”."
+msgstr "Choose one to add it as a filter, or press Enter to search names for “{search}”."
+
+#: src/components/settings-dialog.tsx
+msgid "Choose the DayZ folder"
+msgstr "Choose the DayZ folder"
+
+#: src/components/server-toolbar.tsx
+msgid "Clear all"
+msgstr "Clear all"
+
+#: src/App.tsx
+msgid "Clear filters"
+msgstr "Clear filters"
+
+#: src/components/mods-page.tsx
+#: src/components/server-toolbar.tsx
+msgid "Clear search"
+msgstr "Clear search"
+
+#: src/components/mods-page.tsx
+msgid "Clear selection"
+msgstr "Clear selection"
+
+#: src/components/game-start-dialog.tsx
+#: src/components/release-notes.tsx
+#: src/components/title-bar.tsx
+#: src/components/ui/dialog.tsx
+msgid "Close"
+msgstr "Close"
+
+#: src/components/first-run-dialog.tsx
+#: src/components/settings-dialog.tsx
+msgid "Close the launcher"
+msgstr "Close the launcher"
+
+#: src/components/filter-menu.tsx
+#: src/lib/filter.ts
+msgid "Community"
+msgstr "Community"
+
+#: src/components/filter-menu.tsx
+msgid "Connection"
+msgstr "Connection"
+
+#: src/components/server-detail.tsx
+msgid "Copy address"
+msgstr "Copy address"
+
+#: src/hooks/use-app-menu-offer.ts
+msgid "Couldn't add Flare Launcher to the app menu"
+msgstr "Couldn't add Flare Launcher to the app menu"
+
+#: src/components/settings-dialog.tsx
+msgid "Couldn't change the update channel"
+msgstr "Couldn't change the update channel"
+
+#: src/App.tsx
+msgid "Couldn't check your mods"
+msgstr "Couldn't check your mods"
+
+#: src/components/server-detail.tsx
+msgid "Couldn't copy the address"
+msgstr "Couldn't copy the address"
+
+#: src/App.tsx
+msgid "Couldn't download the mods"
+msgstr "Couldn't download the mods"
+
+#: src/lib/backend-messages.ts
+msgid "Couldn't find {host}. Check the address and try again."
+msgstr "Couldn't find {host}. Check the address and try again."
+
+#: src/components/server-detail.tsx
+msgid "Couldn't forget the password"
+msgstr "Couldn't forget the password"
+
+#: src/components/server-detail.tsx
+msgid "Couldn't load this server's mods."
+msgstr "Couldn't load this server's mods."
+
+#: src/components/settings-dialog.tsx
+msgid "Couldn't open the folder"
+msgstr "Couldn't open the folder"
+
+#: src/components/settings-dialog.tsx
+msgid "Couldn't open the folder picker"
+msgstr "Couldn't open the folder picker"
+
+#: src/components/mods-page.tsx
+#: src/components/server-detail.tsx
+msgid "Couldn't open the Workshop page"
+msgstr "Couldn't open the Workshop page"
+
+#: src/lib/backend-messages.ts
+msgid "Couldn't reach the server list: {error}"
+msgstr "Couldn't reach the server list: {error}"
+
+#: src/lib/backend-messages.ts
+msgid "Couldn't reach the update server."
+msgstr "Couldn't reach the update server."
+
+#: src/App.tsx
+msgid "Couldn't refresh the server list"
+msgstr "Couldn't refresh the server list"
+
+#: src/components/server-detail.tsx
+msgid "Couldn't remember the password"
+msgstr "Couldn't remember the password"
+
+#: src/components/settings-dialog.tsx
+msgid "Couldn't remove Flare Launcher from the app menu"
+msgstr "Couldn't remove Flare Launcher from the app menu"
+
+#: src/components/settings-dialog.tsx
+msgid "Couldn't save the setting"
+msgstr "Couldn't save the setting"
+
+#: src/App.tsx
+msgid "Couldn't search the network"
+msgstr "Couldn't search the network"
+
+#: src/App.tsx
+msgid "Couldn't start DayZ"
+msgstr "Couldn't start DayZ"
+
+#: src/components/mods-page.tsx
+msgid "Couldn't unsubscribe"
+msgstr "Couldn't unsubscribe"
+
+#: src/App.tsx
+msgid "Couldn't update the mods"
+msgstr "Couldn't update the mods"
+
+#: src/App.tsx
+msgid "Couldn't verify the mods"
+msgstr "Couldn't verify the mods"
+
+#: src/components/settings-dialog.tsx
+msgid "Dark"
+msgstr "Dark"
+
+#: src/components/filter-menu.tsx
+#: src/components/server-detail.tsx
+#: src/components/server-table.tsx
+#: src/lib/filter.ts
+msgid "Day"
+msgstr "Day"
+
+#: src/lib/backend-messages.ts
+msgid "DayZ couldn't be started: {error}"
+msgstr "DayZ couldn't be started: {error}"
+
+#: src/components/settings-dialog.tsx
+msgid "DayZ folder"
+msgstr "DayZ folder"
+
+#: src/components/first-run-dialog.tsx
+msgid "DayZ goes straight to loading when it starts."
+msgstr "DayZ goes straight to loading when it starts."
+
+#: src/App.tsx
+msgid "DayZ hasn't started yet"
+msgstr "DayZ hasn't started yet"
+
+#: src/components/game-start-dialog.tsx
+msgid "DayZ is open"
+msgstr "DayZ is open"
+
+#: src/App.tsx
+#: src/components/mods-page.tsx
+msgid "DayZ wasn't found"
+msgstr "DayZ wasn't found"
+
+#: src/components/server-detail.tsx
+msgid "DayZ wasn't found on this computer. <0>Set the DayZ folder</0> to play."
+msgstr "DayZ wasn't found on this computer. <0>Set the DayZ folder</0> to play."
+
+#: src/components/settings-dialog.tsx
+msgid "DayZ wasn't found through Steam. Choose the folder it is installed in."
+msgstr "DayZ wasn't found through Steam. Choose the folder it is installed in."
+
+#: src/lib/backend-messages.ts
+msgid "DayZ wasn't found. Set the DayZ folder in Settings."
+msgstr "DayZ wasn't found. Set the DayZ folder in Settings."
+
+#: src/components/settings-dialog.tsx
+msgid "DayZ_x64.exe isn't in that folder. Choose the folder DayZ is installed in."
+msgstr "DayZ_x64.exe isn't in that folder. Choose the folder DayZ is installed in."
+
+#: src/components/mods-page.tsx
+msgid "Deselect every mod shown"
+msgstr "Deselect every mod shown"
+
+#: src/components/settings-dialog.tsx
+msgid "Discord activity"
+msgstr "Discord activity"
+
+#: src/components/game-start-dialog.tsx
+msgid "Done"
+msgstr "Done"
+
+#: src/App.tsx
+msgid "Download cancelled"
+msgstr "Download cancelled"
+
+#: src/components/mods-page.tsx
+#: src/components/server-detail.tsx
+msgid "Download failed"
+msgstr "Download failed"
+
+#: src/components/settings-dialog.tsx
+#: src/components/update-button.tsx
+msgid "Download version {version}"
+msgstr "Download version {version}"
+
+#: src/components/server-detail.tsx
+msgid "Downloading"
+msgstr "Downloading"
+
+#: src/components/mods-page.tsx
+msgid "Downloading {percent}%"
+msgstr "Downloading {percent}%"
+
+#: src/components/server-detail.tsx
+msgid "Downloading mods"
+msgstr "Downloading mods"
+
+#: src/components/server-detail.tsx
+msgid "Downloading mods, then starting DayZ"
+msgstr "Downloading mods, then starting DayZ"
+
+#: src/components/update-button.tsx
+msgid "Downloading update"
+msgstr "Downloading update"
+
+#: src/components/update-button.tsx
+msgid "Downloading update… {percent}%"
+msgstr "Downloading update… {percent}%"
+
+#: src/components/settings-dialog.tsx
+msgid "Downloading version {version}… {percent}%"
+msgstr "Downloading version {version}… {percent}%"
+
+#: src/components/settings-dialog.tsx
+msgid "Downloading…"
+msgstr "Downloading…"
+
+#: src/App.tsx
+msgid "Enter it in the panel on the right, then select Play."
+msgstr "Enter it in the panel on the right, then select Play."
+
+#: src/lib/backend-messages.ts
+msgid "Enter the server's address, such as {example}."
+msgstr "Enter the server's address, such as {example}."
+
+#: src/components/server-detail.tsx
+msgid "Every mod for this server is installed and up to date."
+msgstr "Every mod for this server is installed and up to date."
+
+#: src/App.tsx
+msgid "Every mod is already up to date"
+msgstr "Every mod is already up to date"
+
+#: src/components/settings-dialog.tsx
+msgid "Extra parameters"
+msgstr "Extra parameters"
+
+#: src/components/game-start-dialog.tsx
+msgid "Failed"
+msgstr "Failed"
+
+#: src/components/server-table.tsx
+msgid "Favourite"
+msgstr "Favourite"
+
+#: src/components/app-sidebar.tsx
+msgid "Favourites"
+msgstr "Favourites"
+
+#: src/components/server-toolbar.tsx
+msgid "Filters"
+msgstr "Filters"
+
+#: src/components/server-toolbar.tsx
+msgid "Filters on"
+msgstr "Filters on"
+
+#: src/components/settings-dialog.tsx
+msgid "Find a DayZ server, get its mods and play."
+msgstr "Find a DayZ server, get its mods and play."
+
+#: src/components/settings-dialog.tsx
+msgid "Find it through Steam instead"
+msgstr "Find it through Steam instead"
+
+#: src/components/join-address-dialog.tsx
+msgid "Find server"
+msgstr "Find server"
+
+#: src/components/join-address-dialog.tsx
+msgid "Finding…"
+msgstr "Finding…"
+
+#: src/components/server-detail.tsx
+msgid "First and third person"
+msgstr "First and third person"
+
+#: src/components/server-detail.tsx
+#: src/components/server-table.tsx
+msgid "First person only"
+msgstr "First person only"
+
+#: src/components/settings-dialog.tsx
+msgid "First-time setup"
+msgstr "First-time setup"
+
+#: src/hooks/use-app-menu-offer.ts
+msgid "Flare Launcher is in your app menu"
+msgstr "Flare Launcher is in your app menu"
+
+#: src/components/settings-dialog.tsx
+msgid "Flare Launcher is in your app menu, added by another app. Remove it there."
+msgstr "Flare Launcher is in your app menu, added by another app. Remove it there."
+
+#: src/lib/backend-messages.ts
+msgid "Flare Launcher is in your app menu, but couldn't reopen: {error}"
+msgstr "Flare Launcher is in your app menu, but couldn't reopen: {error}"
+
+#: src/components/settings-dialog.tsx
+msgid "Flare Launcher is in your app menu."
+msgstr "Flare Launcher is in your app menu."
+
+#: src/components/install-update-dialog.tsx
+msgid "Flare Launcher will close, install the update in the background and open again in a few seconds. If DayZ is running, it will keep running."
+msgstr "Flare Launcher will close, install the update in the background and open again in a few seconds. If DayZ is running, it will keep running."
+
+#: src/components/settings-dialog.tsx
+msgid "Folders"
+msgstr "Folders"
+
+#: src/components/join-address-dialog.tsx
+msgid "For a server that isn't in the list. Enter its address and the launcher finds it and shows it on the right, ready to join."
+msgstr "For a server that isn't in the list. Enter its address and the launcher finds it and shows it on the right, ready to join."
+
+#: src/components/settings-dialog.tsx
+msgid "Found automatically from Steam"
+msgstr "Found automatically from Steam"
+
+#: src/components/settings-dialog.tsx
+msgid "Found through Steam at {folder}"
+msgstr "Found through Steam at {folder}"
+
+#: src/components/settings-dialog.tsx
+msgid "Game"
+msgstr "Game"
+
+#: src/components/filter-menu.tsx
+msgid "Game version"
+msgstr "Game version"
+
+#: src/components/filter-menu.tsx
+msgid "Gameplay"
+msgstr "Gameplay"
+
+#: src/components/settings-dialog.tsx
+msgid "Go through the choices offered when the launcher was first opened."
+msgstr "Go through the choices offered when the launcher was first opened."
+
+#: src/lib/launch-options.ts
+msgid "Goes straight to loading instead of playing the intro."
+msgstr "Goes straight to loading instead of playing the intro."
+
+#: src/components/mods-page.tsx
+msgid "Have Steam check your mods' files and download again any that are missing"
+msgstr "Have Steam check your mods' files and download again any that are missing"
+
+#: src/components/game-start-dialog.tsx
+msgid "Hide"
+msgstr "Hide"
+
+#: src/lib/filter.ts
+msgid "Hide empty"
+msgstr "Hide empty"
+
+#: src/components/filter-menu.tsx
+msgid "Hide empty servers"
+msgstr "Hide empty servers"
+
+#: src/lib/filter.ts
+msgid "Hide full"
+msgstr "Hide full"
+
+#: src/components/filter-menu.tsx
+msgid "Hide full servers"
+msgstr "Hide full servers"
+
+#: src/lib/filter.ts
+msgid "Hide offline"
+msgstr "Hide offline"
+
+#: src/components/filter-menu.tsx
+msgid "Hide offline servers"
+msgstr "Hide offline servers"
+
+#: src/components/server-detail.tsx
+msgid "Hide password"
+msgstr "Hide password"
+
+#: src/lib/launch-options.ts
+msgid "Hides the logo screens shown while the game starts."
+msgstr "Hides the logo screens shown while the game starts."
+
+#: src/components/settings-dialog.tsx
+msgid "How DayZ starts when you join a server."
+msgstr "How DayZ starts when you join a server."
+
+#: src/components/server-table.tsx
+msgid "How long it takes to reach the server and back. Values marked ~ are estimates."
+msgstr "How long it takes to reach the server and back. Values marked ~ are estimates."
+
+#: src/components/mods-page.tsx
+msgid "How many servers in the server list run this mod."
+msgstr "How many servers in the server list run this mod."
+
+#: src/components/settings-dialog.tsx
+msgid "How the launcher looks and behaves on this computer."
+msgstr "How the launcher looks and behaves on this computer."
+
+#: src/components/server-detail.tsx
+msgid "If it’s wrong, the server turns you away once DayZ has loaded."
+msgstr "If it’s wrong, the server turns you away once DayZ has loaded."
+
+#: src/components/first-run-dialog.tsx
+#: src/components/settings-dialog.tsx
+msgid "In game"
+msgstr "In game"
+
+#: src/components/game-start-dialog.tsx
+msgid "In progress"
+msgstr "In progress"
+
+#: src/components/server-detail.tsx
+msgid "In-game time"
+msgstr "In-game time"
+
+#: src/components/install-update-dialog.tsx
+msgid "Install and restart"
+msgstr "Install and restart"
+
+#: src/components/install-update-dialog.tsx
+msgid "Install version {version}?"
+msgstr "Install version {version}?"
+
+#: src/components/server-detail.tsx
+msgid "Installed"
+msgstr "Installed"
+
+#: src/components/settings-dialog.tsx
+msgid "Interface size"
+msgstr "Interface size"
+
+#: src/components/game-start-dialog.tsx
+msgid "It hasn't opened yet. It may still be loading; if it doesn't open, check Steam for a message."
+msgstr "It hasn't opened yet. It may still be loading; if it doesn't open, check Steam for a message."
+
+#: src/App.tsx
+msgid "It isn't in the server list right now. It comes back once the server is up again."
+msgstr "It isn't in the server list right now. It comes back once the server is up again."
+
+#: src/components/game-start-dialog.tsx
+msgid "It joins the server as soon as it has loaded."
+msgstr "It joins the server as soon as it has loaded."
+
+#: src/App.tsx
+msgid "It may still be loading. If it doesn't open, check Steam for a message."
+msgstr "It may still be loading. If it doesn't open, check Steam for a message."
+
+#: src/components/mods-page.tsx
+msgid "It was removed from the Workshop or made private. Your copy still works, but it won't get updates."
+msgstr "It was removed from the Workshop or made private. Your copy still works, but it won't get updates."
+
+#: src/components/mods-page.tsx
+msgid "Keep it"
+msgstr "Keep it"
+
+#: src/lib/launch-options.ts
+msgid "Keep running in the background"
+msgstr "Keep running in the background"
+
+#: src/components/first-run-dialog.tsx
+#: src/components/settings-dialog.tsx
+msgid "Keep the launcher open"
+msgstr "Keep the launcher open"
+
+#: src/components/mods-page.tsx
+msgid "Keep them"
+msgstr "Keep them"
+
+#: src/components/app-sidebar.tsx
+msgid "LAN"
+msgstr "LAN"
+
+#: src/components/settings-dialog.tsx
+msgid "Language"
+msgstr "Language"
+
+#: src/components/first-run-dialog.tsx
+#: src/components/settings-dialog.tsx
+msgid "Launcher"
+msgstr "Launcher"
+
+#: src/components/settings-dialog.tsx
+msgid "Lets your Discord friends see you're using Flare Launcher and when you're in game. Never which server you're on."
+msgstr "Lets your Discord friends see you're using Flare Launcher and when you're in game. Never which server you're on."
+
+#: src/components/settings-dialog.tsx
+msgid "Lets your Discord friends see you're using Flare Launcher. It closes when DayZ starts, so they won't see when you're in game."
+msgstr "Lets your Discord friends see you're using Flare Launcher. It closes when DayZ starts, so they won't see when you're in game."
+
+#: src/components/settings-dialog.tsx
+msgid "Light"
+msgstr "Light"
+
+#: src/components/first-run-dialog.tsx
+#: src/components/settings-dialog.tsx
+msgid "Light or dark, or System to match this computer."
+msgstr "Light or dark, or System to match this computer."
+
+#: src/components/server-detail.tsx
+msgid "Load mods"
+msgstr "Load mods"
+
+#: src/components/server-table.tsx
+msgid "Loading servers"
+msgstr "Loading servers"
+
+#: src/components/mods-page.tsx
+msgid "Loading your mods"
+msgstr "Loading your mods"
+
+#: src/components/settings-dialog.tsx
+msgid "Makes text and controls larger or smaller."
+msgstr "Makes text and controls larger or smaller."
+
+#: src/components/filter-menu.tsx
+#: src/components/server-detail.tsx
+#: src/components/server-table.tsx
+#: src/components/server-toolbar.tsx
+#: src/lib/filter.ts
+msgid "Map"
+msgstr "Map"
+
+#: src/components/settings-dialog.tsx
+msgid "Match this computer"
+msgstr "Match this computer"
+
+#: src/components/title-bar.tsx
+msgid "Maximise"
+msgstr "Maximise"
+
+#: src/components/title-bar.tsx
+msgid "Minimise"
+msgstr "Minimise"
+
+#: src/components/first-run-dialog.tsx
+#: src/components/settings-dialog.tsx
+msgid "Minimise the launcher"
+msgstr "Minimise the launcher"
+
+#: src/components/server-detail.tsx
+msgid "Missing or out of date"
+msgstr "Missing or out of date"
+
+#: src/components/mods-page.tsx
+#: src/components/server-toolbar.tsx
+#: src/lib/filter.ts
+msgid "Mod"
+msgstr "Mod"
+
+#: src/lib/mods.ts
+msgid "Mod {id}"
+msgstr "Mod {id}"
+
+#: src/components/server-detail.tsx
+msgid "Mod download progress"
+msgstr "Mod download progress"
+
+#: src/components/mods-page.tsx
+msgid "Mod update progress"
+msgstr "Mod update progress"
+
+#: src/components/mods-page.tsx
+msgid "Mod verify progress"
+msgstr "Mod verify progress"
+
+#: src/components/filter-menu.tsx
+#: src/lib/filter.ts
+msgid "Modded"
+msgstr "Modded"
+
+#: src/components/app-sidebar.tsx
+#: src/components/filter-menu.tsx
+#: src/components/server-detail.tsx
+msgid "Mods"
+msgstr "Mods"
+
+#: src/lib/backend-messages.ts
+msgid "Mods are already being downloaded."
+msgstr "Mods are already being downloaded."
+
+#: src/lib/backend-messages.ts
+msgid "Mods are being downloaded. Try again once they've finished."
+msgstr "Mods are being downloaded. Try again once they've finished."
+
+#: src/App.tsx
+#: src/components/game-start-dialog.tsx
+msgid "Mods ready"
+msgstr "Mods ready"
+
+#: src/App.tsx
+msgid "Mods up to date"
+msgstr "Mods up to date"
+
+#: src/App.tsx
+msgid "Mods verified"
+msgstr "Mods verified"
+
+#: src/components/server-detail.tsx
+msgid "More options"
+msgstr "More options"
+
+#: src/components/filter-menu.tsx
+msgid "Must run"
+msgstr "Must run"
+
+#: src/components/first-run-dialog.tsx
+#: src/components/settings-dialog.tsx
+msgid "Name set in DayZ"
+msgstr "Name set in DayZ"
+
+#: src/components/server-detail.tsx
+msgid "Needs a password store on this computer, such as GNOME Keyring or KWallet."
+msgstr "Needs a password store on this computer, such as GNOME Keyring or KWallet."
+
+#: src/components/filter-menu.tsx
+#: src/components/server-detail.tsx
+#: src/components/server-table.tsx
+#: src/lib/filter.ts
+msgid "Night"
+msgstr "Night"
+
+#: src/lib/backend-messages.ts
+msgid "No beta release has been published yet."
+msgstr "No beta release has been published yet."
+
+#: src/lib/backend-messages.ts
+msgid "No DayZ server answered at that address. Check it's running, or enter the server's query port instead of its game port."
+msgstr "No DayZ server answered at that address. Check it's running, or enter the server's query port instead of its game port."
+
+#: src/App.tsx
+msgid "No favourites yet"
+msgstr "No favourites yet"
+
+#: src/components/mods-page.tsx
+msgid "No mods match"
+msgstr "No mods match"
+
+#: src/components/filter-menu.tsx
+#: src/lib/filter.ts
+msgid "No password"
+msgstr "No password"
+
+#: src/lib/backend-messages.ts
+msgid "No password store was found on this computer ({error})."
+msgstr "No password store was found on this computer ({error})."
+
+#: src/App.tsx
+msgid "No recent servers"
+msgstr "No recent servers"
+
+#: src/lib/backend-messages.ts
+msgid "No release has been published yet."
+msgstr "No release has been published yet."
+
+#: src/components/server-table.tsx
+msgid "No response"
+msgstr "No response"
+
+#: src/App.tsx
+msgid "No servers found on your network"
+msgstr "No servers found on your network"
+
+#: src/App.tsx
+msgid "No servers match"
+msgstr "No servers match"
+
+#: src/components/mods-page.tsx
+msgid "Not downloaded"
+msgstr "Not downloaded"
+
+#: src/components/filter-menu.tsx
+msgid "Not for vanilla servers"
+msgstr "Not for vanilla servers"
+
+#: src/components/install-update-dialog.tsx
+#: src/hooks/use-app-menu-offer.ts
+msgid "Not now"
+msgstr "Not now"
+
+#: src/components/mods-page.tsx
+msgid "Not on the Workshop"
+msgstr "Not on the Workshop"
+
+#: src/components/game-start-dialog.tsx
+msgid "Not started"
+msgstr "Not started"
+
+#: src/components/settings-dialog.tsx
+msgid "Nothing extra"
+msgstr "Nothing extra"
+
+#: src/components/filter-menu.tsx
+#: src/components/server-table.tsx
+#: src/lib/filter.ts
+msgid "Official"
+msgstr "Official"
+
+#: src/components/server-table.tsx
+msgid "Official server"
+msgstr "Official server"
+
+#: src/components/server-table.tsx
+msgid "Offline"
+msgstr "Offline"
+
+#: src/lib/backend-messages.ts
+msgid "Only the AppImage can add itself to the app menu."
+msgstr "Only the AppImage can add itself to the app menu."
+
+#: src/components/mods-page.tsx
+#: src/components/server-detail.tsx
+msgid "Open {name} in the Steam Workshop"
+msgstr "Open {name} in the Steam Workshop"
+
+#: src/components/settings-dialog.tsx
+msgid "Open DayZ folder"
+msgstr "Open DayZ folder"
+
+#: src/components/settings-dialog.tsx
+msgid "Open Flare Launcher from your app menu like any other app. The file moves to your Applications folder."
+msgstr "Open Flare Launcher from your app menu like any other app. The file moves to your Applications folder."
+
+#: src/components/first-run-dialog.tsx
+msgid "Open Flare Launcher like any other app. The file moves to your Applications folder."
+msgstr "Open Flare Launcher like any other app. The file moves to your Applications folder."
+
+#: src/components/mods-page.tsx
+msgid "Open in the Steam Workshop"
+msgstr "Open in the Steam Workshop"
+
+#: src/hooks/use-app-menu-offer.ts
+msgid "Open it from there from now on."
+msgstr "Open it from there from now on."
+
+#: src/hooks/use-app-menu-offer.ts
+msgid "Open it like any other app. It moves to your Applications folder."
+msgstr "Open it like any other app. It moves to your Applications folder."
+
+#: src/components/settings-dialog.tsx
+msgid "Open mods folder"
+msgstr "Open mods folder"
+
+#: src/components/mods-page.tsx
+msgid "Open Settings"
+msgstr "Open Settings"
+
+#: src/components/server-table.tsx
+msgid "Password protected"
+msgstr "Password protected"
+
+#: src/components/filter-menu.tsx
+#: src/components/server-detail.tsx
+msgid "Perspective"
+msgstr "Perspective"
+
+#: src/App.tsx
+msgid "Pick a server"
+msgstr "Pick a server"
+
+#: src/components/filter-menu.tsx
+#: src/components/server-detail.tsx
+#: src/components/server-table.tsx
+#: src/lib/filter.ts
+msgid "Ping"
+msgstr "Ping"
+
+#: src/components/server-detail.tsx
+msgid "Play"
+msgstr "Play"
+
+#: src/components/filter-menu.tsx
+#: src/components/server-detail.tsx
+#: src/components/server-table.tsx
+msgid "Players"
+msgstr "Players"
+
+#: src/components/app-sidebar.tsx
+msgid "Recent"
+msgstr "Recent"
+
+#: src/App.tsx
+msgid "Refresh server list"
+msgstr "Refresh server list"
+
+#: src/components/server-detail.tsx
+msgid "Remember password"
+msgstr "Remember password"
+
+#: src/components/settings-dialog.tsx
+msgid "Remove"
+msgstr "Remove"
+
+#: src/components/filter-menu.tsx
+msgid "Remove {name}"
+msgstr "Remove {name}"
+
+#: src/components/server-table.tsx
+msgid "Remove {name} from favourites"
+msgstr "Remove {name} from favourites"
+
+#: src/components/server-toolbar.tsx
+msgid "Remove filter: {label}"
+msgstr "Remove filter: {label}"
+
+#: src/components/server-toolbar.tsx
+msgid "Remove filter: {prefix} {label}"
+msgstr "Remove filter: {prefix} {label}"
+
+#: src/components/server-detail.tsx
+msgid "Remove from favourites"
+msgstr "Remove from favourites"
+
+#: src/components/settings-dialog.tsx
+msgid "Removed from the app menu"
+msgstr "Removed from the app menu"
+
+#: src/components/filter-menu.tsx
+msgid "Reset filters"
+msgstr "Reset filters"
+
+#: src/components/settings-dialog.tsx
+msgid "Restart to update"
+msgstr "Restart to update"
+
+#: src/components/update-button.tsx
+msgid "Restart to update to version {version}"
+msgstr "Restart to update to version {version}"
+
+#: src/components/title-bar.tsx
+msgid "Restore down"
+msgstr "Restore down"
+
+#: src/components/settings-dialog.tsx
+msgid "Run setup again"
+msgstr "Run setup again"
+
+#: src/components/server-table.tsx
+msgid "Runs the mod {modMatch}"
+msgstr "Runs the mod {modMatch}"
+
+#: src/App.tsx
+msgid "Search again"
+msgstr "Search again"
+
+#: src/components/filter-menu.tsx
+#: src/components/mods-page.tsx
+msgid "Search mods"
+msgstr "Search mods"
+
+#: src/components/mods-page.tsx
+msgid "Search mods by name or Workshop ID"
+msgstr "Search mods by name or Workshop ID"
+
+#: src/components/server-toolbar.tsx
+msgid "Search name, map, IP or mod"
+msgstr "Search name, map, IP or mod"
+
+#: src/components/server-toolbar.tsx
+msgid "Search servers"
+msgstr "Search servers"
+
+#: src/components/server-toolbar.tsx
+msgid "Search servers, maps or mods"
+msgstr "Search servers, maps or mods"
+
+#: src/App.tsx
+msgid "Search the network again"
+msgstr "Search the network again"
+
+#: src/App.tsx
+msgid "Searching…"
+msgstr "Searching…"
+
+#: src/components/settings-dialog.tsx
+msgid "See what's new"
+msgstr "See what's new"
+
+#: src/components/mods-page.tsx
+msgid "Select {name}"
+msgstr "Select {name}"
+
+#: src/components/mods-page.tsx
+msgid "Select every mod shown"
+msgstr "Select every mod shown"
+
+#: src/App.tsx
+msgid "Select one to see its mods. Double-click to join straight away."
+msgstr "Select one to see its mods. Double-click to join straight away."
+
+#: src/components/filter-menu.tsx
+#: src/components/server-table.tsx
+msgid "Server"
+msgstr "Server"
+
+#: src/components/join-address-dialog.tsx
+msgid "Server address"
+msgstr "Server address"
+
+#: src/components/server-detail.tsx
+msgid "Server details"
+msgstr "Server details"
+
+#: src/App.tsx
+msgid "Server found"
+msgstr "Server found"
+
+#: src/components/app-sidebar.tsx
+msgid "Server lists"
+msgstr "Server lists"
+
+#: src/components/server-detail.tsx
+msgid "Server password"
+msgstr "Server password"
+
+#: src/components/filter-menu.tsx
+msgid "Server type"
+msgstr "Server type"
+
+#: src/components/mods-page.tsx
+#: src/components/server-table.tsx
+msgid "Servers"
+msgstr "Servers"
+
+#: src/components/filter-menu.tsx
+msgid "Servers that stop answering"
+msgstr "Servers that stop answering"
+
+#: src/App.tsx
+msgid "Servers you join from the launcher show up here."
+msgstr "Servers you join from the launcher show up here."
+
+#: src/App.tsx
+msgid "Set the DayZ folder in Settings."
+msgstr "Set the DayZ folder in Settings."
+
+#: src/components/app-sidebar.tsx
+#: src/components/settings-dialog.tsx
+msgid "Settings"
+msgstr "Settings"
+
+#: src/components/settings-dialog.tsx
+msgid "Setup"
+msgstr "Setup"
+
+#: src/components/server-detail.tsx
+msgid "Show password"
+msgstr "Show password"
+
+#: src/components/mods-page.tsx
+msgid "Size"
+msgstr "Size"
+
+#: src/lib/launch-options.ts
+msgid "Skip the intro"
+msgstr "Skip the intro"
+
+#: src/components/first-run-dialog.tsx
+msgid "Skip the intro and splash screens"
+msgstr "Skip the intro and splash screens"
+
+#: src/lib/launch-options.ts
+msgid "Skip the splash screens"
+msgstr "Skip the splash screens"
+
+#: src/lib/backend.ts
+msgid "Something went wrong."
+msgstr "Something went wrong."
+
+#: src/components/settings-dialog.tsx
+msgid "Stable"
+msgstr "Stable"
+
+#: src/components/settings-dialog.tsx
+msgid "Stable releases, or beta builds with newer changes."
+msgstr "Stable releases, or beta builds with newer changes."
+
+#: src/App.tsx
+msgid "Star a server to keep it here."
+msgstr "Star a server to keep it here."
+
+#: src/components/first-run-dialog.tsx
+msgid "Start browsing"
+msgstr "Start browsing"
+
+#: src/components/mods-page.tsx
+#: src/components/server-detail.tsx
+msgid "Starting"
+msgstr "Starting"
+
+#: src/components/game-start-dialog.tsx
+msgid "Starting DayZ"
+msgstr "Starting DayZ"
+
+#: src/components/server-detail.tsx
+msgid "Starting DayZ…"
+msgstr "Starting DayZ…"
+
+#: src/lib/launch-options.ts
+msgid "Starts the game in a window instead of full screen."
+msgstr "Starts the game in a window instead of full screen."
+
+#: src/components/settings-dialog.tsx
+msgid "Startup"
+msgstr "Startup"
+
+#: src/components/mods-page.tsx
+msgid "Status"
+msgstr "Status"
+
+#: src/components/game-start-dialog.tsx
+msgid "Steam and BattlEye check the game before it opens. This can take a minute."
+msgstr "Steam and BattlEye check the game before it opens. This can take a minute."
+
+#: src/App.tsx
+msgid "Steam checked {count, plural, one {# mod} other {# mods}} and downloaded again any files that were missing or incomplete."
+msgstr "Steam checked {count, plural, one {# mod} other {# mods}} and downloaded again any files that were missing or incomplete."
+
+#: src/lib/backend-messages.ts
+msgid "Steam couldn't be asked: {error}"
+msgstr "Steam couldn't be asked: {error}"
+
+#: src/lib/backend-messages.ts
+msgid "Steam couldn't be opened: {error}"
+msgstr "Steam couldn't be opened: {error}"
+
+#: src/lib/backend-messages.ts
+msgid "Steam couldn't be reached. Make sure Steam is running and you're signed in, then try again."
+msgstr "Steam couldn't be reached. Make sure Steam is running and you're signed in, then try again."
+
+#: src/lib/backend-messages.ts
+msgid "Steam couldn't download {failures, plural, one {# mod} other {# mods}}. Check your connection and disk space, then try again."
+msgstr "Steam couldn't download {failures, plural, one {# mod} other {# mods}}. Check your connection and disk space, then try again."
+
+#: src/lib/backend-messages.ts
+msgid "Steam couldn't unsubscribe you from {failures, plural, one {# mod} other {# mods}}. Try again."
+msgstr "Steam couldn't unsubscribe you from {failures, plural, one {# mod} other {# mods}}. Try again."
+
+#: src/lib/backend-messages.ts
+msgid "Steam didn't answer in time. Make sure Steam is running and you're signed in, then try again."
+msgstr "Steam didn't answer in time. Make sure Steam is running and you're signed in, then try again."
+
+#: src/components/mods-page.tsx
+msgid "Steam hasn't downloaded this mod to this computer yet."
+msgstr "Steam hasn't downloaded this mod to this computer yet."
+
+#: src/lib/backend-messages.ts
+msgid "Steam is out of date. Restart Steam so it can update, then try again."
+msgstr "Steam is out of date. Restart Steam so it can update, then try again."
+
+#: src/components/mods-page.tsx
+msgid "Steam removes it from this computer, freeing <0>{freed}</0>. A server that needs it downloads it again when you join."
+msgstr "Steam removes it from this computer, freeing <0>{freed}</0>. A server that needs it downloads it again when you join."
+
+#: src/components/mods-page.tsx
+msgid "Steam removes it from this computer. A server that needs it downloads it again when you join."
+msgstr "Steam removes it from this computer. A server that needs it downloads it again when you join."
+
+#: src/components/mods-page.tsx
+msgid "Steam removes the files from this computer shortly."
+msgstr "Steam removes the files from this computer shortly."
+
+#: src/components/mods-page.tsx
+msgid "Steam removes them from this computer, freeing <0>{freed}</0>. A server that needs them downloads them again when you join."
+msgstr "Steam removes them from this computer, freeing <0>{freed}</0>. A server that needs them downloads them again when you join."
+
+#: src/components/mods-page.tsx
+msgid "Steam removes them from this computer. A server that needs them downloads them again when you join."
+msgstr "Steam removes them from this computer. A server that needs them downloads them again when you join."
+
+#: src/App.tsx
+msgid "Steam will finish any repairs it had started."
+msgstr "Steam will finish any repairs it had started."
+
+#: src/App.tsx
+msgid "Steam will finish downloading these mods in the background."
+msgstr "Steam will finish downloading these mods in the background."
+
+#: src/lib/launch-options.ts
+msgid "Stops the game from pausing when you switch to another window."
+msgstr "Stops the game from pausing when you switch to another window."
+
+#: src/components/settings-dialog.tsx
+msgid "System"
+msgstr "System"
+
+#: src/components/game-start-dialog.tsx
+msgid "Taking longer than usual"
+msgstr "Taking longer than usual"
+
+#: src/lib/backend-messages.ts
+msgid "That server is no longer in the list. Refresh and try again."
+msgstr "That server is no longer in the list. Refresh and try again."
+
+#: src/components/join-address-dialog.tsx
+msgid "The address and the port you join on. Leave the port out to try the usual ones."
+msgstr "The address and the port you join on. Leave the port out to try the usual ones."
+
+#: src/components/filter-menu.tsx
+msgid "The anti-cheat DayZ uses"
+msgstr "The anti-cheat DayZ uses"
+
+#: src/components/settings-dialog.tsx
+msgid "The changes in the update waiting for you."
+msgstr "The changes in the update waiting for you."
+
+#: src/components/settings-dialog.tsx
+msgid "The changes in the version you are running."
+msgstr "The changes in the version you are running."
+
+#: src/lib/backend-messages.ts
+msgid "The download couldn't be started: {error}"
+msgstr "The download couldn't be started: {error}"
+
+#: src/lib/backend-messages.ts
+msgid "The download stopped unexpectedly: {error}"
+msgstr "The download stopped unexpectedly: {error}"
+
+#: src/lib/backend-messages.ts
+msgid "The download stopped unexpectedly. Try again."
+msgstr "The download stopped unexpectedly. Try again."
+
+#: src/lib/backend-messages.ts
+msgid "The folder couldn't be opened: {error}"
+msgstr "The folder couldn't be opened: {error}"
+
+#: src/lib/backend-messages.ts
+msgid "The installer already added Flare Launcher to the Start menu."
+msgstr "The installer already added Flare Launcher to the Start menu."
+
+#: src/components/settings-dialog.tsx
+msgid "The language the launcher is shown in."
+msgstr "The language the launcher is shown in."
+
+#: src/components/settings-dialog.tsx
+msgid "The launcher stays in your Applications folder."
+msgstr "The launcher stays in your Applications folder."
+
+#: src/components/server-detail.tsx
+msgid "The mods show again once the server is back in the list."
+msgstr "The mods show again once the server is back in the list."
+
+#: src/components/first-run-dialog.tsx
+#: src/components/settings-dialog.tsx
+msgid "The name other players see. Leave it empty to keep the one set in DayZ."
+msgstr "The name other players see. Leave it empty to keep the one set in DayZ."
+
+#: src/lib/backend-messages.ts
+msgid "The password store couldn't be used: {error}"
+msgstr "The password store couldn't be used: {error}"
+
+#: src/lib/backend-messages.ts
+msgid "The port after the colon has to be a number."
+msgstr "The port after the colon has to be a number."
+
+#: src/components/settings-dialog.tsx
+msgid "The server address, its mods and your character name are added automatically."
+msgstr "The server address, its mods and your character name are added automatically."
+
+#: src/lib/backend-messages.ts
+msgid "The server answered but didn't send its details. Try again in a moment."
+msgstr "The server answered but didn't send its details. Try again in a moment."
+
+#: src/App.tsx
+msgid "The server list couldn't be loaded"
+msgstr "The server list couldn't be loaded"
+
+#: src/lib/backend-messages.ts
+msgid "The server list wasn't in the expected format: {error}"
+msgstr "The server list wasn't in the expected format: {error}"
+
+#: src/lib/backend-messages.ts
+msgid "The settings folder couldn't be found."
+msgstr "The settings folder couldn't be found."
+
+#: src/components/mods-page.tsx
+msgid "The Steam Workshop couldn't be reached, so your mods weren't checked for updates."
+msgstr "The Steam Workshop couldn't be reached, so your mods weren't checked for updates."
+
+#: src/lib/backend-messages.ts
+msgid "The update failed a security check, so it wasn't installed."
+msgstr "The update failed a security check, so it wasn't installed."
+
+#: src/lib/backend-messages.ts
+msgid "The update failed: {error}"
+msgstr "The update failed: {error}"
+
+#: src/components/settings-dialog.tsx
+msgid "The version you're running."
+msgstr "The version you're running."
+
+#: src/components/settings-dialog.tsx
+msgid "The version you're running. This copy can't update itself."
+msgstr "The version you're running. This copy can't update itself."
+
+#: src/components/first-run-dialog.tsx
+#: src/components/settings-dialog.tsx
+msgid "Theme"
+msgstr "Theme"
+
+#: src/lib/backend-messages.ts
+msgid "There is no downloaded update to install."
+msgstr "There is no downloaded update to install."
+
+#: src/components/server-detail.tsx
+msgid "This is a vanilla server. No mods needed."
+msgstr "This is a vanilla server. No mods needed."
+
+#: src/components/server-table.tsx
+msgid "This server doesn't answer pings, so this is how long it took to answer a status request. That's usually a little higher than the real ping."
+msgstr "This server doesn't answer pings, so this is how long it took to answer a status request. That's usually a little higher than the real ping."
+
+#: src/components/game-start-dialog.tsx
+msgid "This server doesn't need any mods."
+msgstr "This server doesn't need any mods."
+
+#: src/App.tsx
+msgid "This server is offline"
+msgstr "This server is offline"
+
+#: src/components/server-table.tsx
+msgid "This server isn't answering, so it's probably offline or restarting."
+msgstr "This server isn't answering, so it's probably offline or restarting."
+
+#: src/components/server-detail.tsx
+msgid "This server isn't answering, so it's probably offline or restarting. You can still try to join."
+msgstr "This server isn't answering, so it's probably offline or restarting. You can still try to join."
+
+#: src/components/server-detail.tsx
+msgid "This server isn't in the server list right now, so it's probably offline. It comes back once the server is up again."
+msgstr "This server isn't in the server list right now, so it's probably offline. It comes back once the server is up again."
+
+#: src/App.tsx
+msgid "This server needs a password"
+msgstr "This server needs a password"
+
+#: src/components/server-table.tsx
+#: src/lib/filter.ts
+msgid "Time"
+msgstr "Time"
+
+#: src/components/filter-menu.tsx
+msgid "Time of day"
+msgstr "Time of day"
+
+#: src/components/mods-page.tsx
+msgid "Try a different name or Workshop ID."
+msgstr "Try a different name or Workshop ID."
+
+#: src/App.tsx
+msgid "Try a different search or fewer filters."
+msgstr "Try a different search or fewer filters."
+
+#: src/App.tsx
+#: src/components/mods-page.tsx
+#: src/components/server-detail.tsx
+#: src/components/settings-dialog.tsx
+msgid "Try again"
+msgstr "Try again"
+
+#: src/App.tsx
+msgid "Trying again…"
+msgstr "Trying again…"
+
+#: src/lib/filter.ts
+msgid "under {maxPing} ms"
+msgstr "under {maxPing} ms"
+
+#: src/lib/maps.ts
+msgid "Unknown"
+msgstr "Unknown"
+
+#: src/components/mods-page.tsx
+msgid "Unsubscribe"
+msgstr "Unsubscribe"
+
+#: src/components/mods-page.tsx
+msgid "Unsubscribe from {modCount, plural, one {# mod} other {# mods}}?"
+msgstr "Unsubscribe from {modCount, plural, one {# mod} other {# mods}}?"
+
+#: src/components/mods-page.tsx
+msgid "Unsubscribe from {name}?"
+msgstr "Unsubscribe from {name}?"
+
+#: src/components/mods-page.tsx
+msgid "Unsubscribed"
+msgstr "Unsubscribed"
+
+#: src/components/mods-page.tsx
+msgid "Unsubscribed from {unsubscribed, plural, one {# mod} other {# mods}}"
+msgstr "Unsubscribed from {unsubscribed, plural, one {# mod} other {# mods}}"
+
+#: src/lib/backend-messages.ts
+msgid "Unsubscribing stopped unexpectedly: {error}"
+msgstr "Unsubscribing stopped unexpectedly: {error}"
+
+#: src/components/mods-page.tsx
+msgid "Unsubscribing…"
+msgstr "Unsubscribing…"
+
+#: src/components/mods-page.tsx
+#: src/components/settings-dialog.tsx
+msgid "Up to date"
+msgstr "Up to date"
+
+#: src/components/mods-page.tsx
+msgid "Update available"
+msgstr "Update available"
+
+#: src/App.tsx
+msgid "Update cancelled"
+msgstr "Update cancelled"
+
+#: src/components/settings-dialog.tsx
+msgid "Update channel"
+msgstr "Update channel"
+
+#: src/components/settings-dialog.tsx
+msgid "Update download progress"
+msgstr "Update download progress"
+
+#: src/components/mods-page.tsx
+msgid "Updated"
+msgstr "Updated"
+
+#: src/components/settings-dialog.tsx
+msgid "Updates"
+msgstr "Updates"
+
+#: src/components/mods-page.tsx
+msgid "Updating mods"
+msgstr "Updating mods"
+
+#: src/lib/backend-messages.ts
+msgid "Use Add or remove programs to take Flare Launcher off this computer."
+msgstr "Use Add or remove programs to take Flare Launcher off this computer."
+
+#: src/components/mods-page.tsx
+msgid "Used by {favouriteCount, plural, one {# favourite server} other {# favourite servers}}"
+msgstr "Used by {favouriteCount, plural, one {# favourite server} other {# favourite servers}}"
+
+#: src/components/settings-dialog.tsx
+msgid "Using this folder."
+msgstr "Using this folder."
+
+#: src/components/filter-menu.tsx
+#: src/lib/filter.ts
+msgid "Vanilla"
+msgstr "Vanilla"
+
+#: src/App.tsx
+msgid "Verify cancelled"
+msgstr "Verify cancelled"
+
+#: src/components/mods-page.tsx
+msgid "Verify mods"
+msgstr "Verify mods"
+
+#: src/components/mods-page.tsx
+msgid "Verifying mods"
+msgstr "Verifying mods"
+
+#: src/components/server-detail.tsx
+#: src/components/server-toolbar.tsx
+#: src/components/settings-dialog.tsx
+#: src/lib/filter.ts
+msgid "Version"
+msgstr "Version"
+
+#: src/components/settings-dialog.tsx
+msgid "Version {version} is available."
+msgstr "Version {version} is available."
+
+#: src/components/settings-dialog.tsx
+msgid "Version {version} is ready to install. The launcher restarts to finish."
+msgstr "Version {version} is ready to install. The launcher restarts to finish."
+
+#: src/components/settings-dialog.tsx
+msgid "Version, updates and release notes."
+msgstr "Version, updates and release notes."
+
+#: src/App.tsx
+msgid "Wait for the mods to finish downloading, then try again."
+msgstr "Wait for the mods to finish downloading, then try again."
+
+#: src/components/mods-page.tsx
+#: src/components/server-detail.tsx
+msgid "Waiting"
+msgstr "Waiting"
+
+#: src/components/mods-page.tsx
+#: src/components/server-detail.tsx
+msgid "Waiting for Steam"
+msgstr "Waiting for Steam"
+
+#: src/components/server-detail.tsx
+msgid "Waiting to download"
+msgstr "Waiting to download"
+
+#: src/components/first-run-dialog.tsx
+msgid "Welcome to Flare Launcher"
+msgstr "Welcome to Flare Launcher"
+
+#: src/components/first-run-dialog.tsx
+#: src/components/settings-dialog.tsx
+msgid "What the launcher does once the game is running."
+msgstr "What the launcher does once the game is running."
+
+#: src/components/release-notes.tsx
+#: src/components/update-button.tsx
+msgid "What's new"
+msgstr "What's new"
+
+#: src/components/release-notes.tsx
+msgid "What's new in version {version}"
+msgstr "What's new in version {version}"
+
+#: src/components/first-run-dialog.tsx
+#: src/components/settings-dialog.tsx
+msgid "When DayZ starts"
+msgstr "When DayZ starts"
+
+#: src/components/settings-dialog.tsx
+msgid "When the launcher starts and every few hours."
+msgstr "When the launcher starts and every few hours."
+
+#: src/components/mods-page.tsx
+msgid "When the mod was last updated on the Workshop."
+msgstr "When the mod was last updated on the Workshop."
+
+#: src/components/mods-page.tsx
+msgid "When you join a server, the mods it needs are subscribed to and show up here."
+msgstr "When you join a server, the mods it needs are subscribed to and show up here."
+
+#: src/components/mods-page.tsx
+msgid "When your copy was published"
+msgstr "When your copy was published"
+
+#: src/components/settings-dialog.tsx
+msgid "Where DayZ and its mods live on this computer."
+msgstr "Where DayZ and its mods live on this computer."
+
+#: src/lib/launch-options.ts
+msgid "Windowed mode"
+msgstr "Windowed mode"
+
+#: src/components/settings-dialog.tsx
+msgid "Workshop mods"
+msgstr "Workshop mods"
+
+#: src/components/mods-page.tsx
+msgid "Workshop page"
+msgstr "Workshop page"
+
+#: src/components/settings-dialog.tsx
+msgid "You have the latest version. Last checked at {time}."
+msgstr "You have the latest version. Last checked at {time}."
+
+#: src/components/mods-page.tsx
+msgid "You're not subscribed to any mods"
+msgstr "You're not subscribed to any mods"
+
+#: src/components/mods-page.tsx
+msgid "Your copy is from {copyDate}"
+msgstr "Your copy is from {copyDate}"
+
+#: src/components/mods-page.tsx
+msgid "Your favourite servers that use it: {names}"
+msgstr "Your favourite servers that use it: {names}"
+
+#: src/components/mods-page.tsx
+msgid "Your favourite servers use {usedCount} of these: {names} and {more, plural, one {# more} other {# more}}."
+msgstr "Your favourite servers use {usedCount} of these: {names} and {more, plural, one {# more} other {# more}}."
+
+#: src/components/mods-page.tsx
+msgid "Your favourite servers use {usedCount} of these: {names}."
+msgstr "Your favourite servers use {usedCount} of these: {names}."
+
+#: src/components/mods-page.tsx
+msgid "Your favourite servers use it: {names} and {more, plural, one {# more} other {# more}}."
+msgstr "Your favourite servers use it: {names} and {more, plural, one {# more} other {# more}}."
+
+#: src/components/mods-page.tsx
+msgid "Your favourite servers use it: {names}."
+msgstr "Your favourite servers use it: {names}."
+
+#: src/lib/backend-messages.ts
+msgid "Your home folder couldn't be found."
+msgstr "Your home folder couldn't be found."
+
+#: src/components/app-sidebar.tsx
+msgid "Your library"
+msgstr "Your library"
+
+#: src/components/mods-page.tsx
+msgid "Your mods"
+msgstr "Your mods"
+
+#: src/components/mods-page.tsx
+msgid "Your mods are listed once the launcher knows where DayZ is. Choose its folder in Settings."
+msgstr "Your mods are listed once the launcher knows where DayZ is. Choose its folder in Settings."
+
+#: src/components/mods-page.tsx
+msgid "Your mods couldn't be read"
+msgstr "Your mods couldn't be read"

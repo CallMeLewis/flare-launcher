@@ -8,6 +8,7 @@ const base: Settings = {
   extraArgs: "",
   uiScale: 1,
   theme: "system",
+  language: "system",
   skipIntro: false,
   noSplash: false,
   noPause: false,

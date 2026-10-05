@@ -1,3 +1,4 @@
+import { i18n } from "@lingui/core";
 import { describe, expect, it } from "vitest";
 import {
   DEFAULT_FILTERS,
@@ -241,7 +242,8 @@ describe("pickSaved", () => {
 describe("filterChips", () => {
   it("lists what narrows the list, each with what removing it changes", () => {
     const chips = filterChips({ ...DEFAULT_FILTERS, map: "Livonia", maxPing: 80, requiredMods: ["CF", "Expansion"] });
-    expect(chips.map((chip) => [chip.prefix ?? "", chip.label])).toEqual([
+    const text = (label: (typeof chips)[number]["label"]) => (typeof label === "string" ? label : i18n._(label));
+    expect(chips.map((chip) => [chip.prefix ? i18n._(chip.prefix) : "", text(chip.label)])).toEqual([
       ["Map", "Livonia"],
       ["", "Hide empty"],
       ["Ping", "under 80 ms"],

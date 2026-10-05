@@ -7,6 +7,7 @@ use std::sync::LazyLock;
 use keyring_core::Entry;
 
 use crate::error::{Error, Result};
+use crate::text;
 
 /// What the passwords are filed under in the credential store, where the player can also see and remove them.
 const SERVICE: &str = "Flare Launcher";
@@ -23,12 +24,14 @@ static STORE: LazyLock<std::result::Result<(), String>> = LazyLock::new(|| {
 });
 
 fn entry(server_id: &str) -> Result<Entry> {
-  STORE.as_ref().map_err(|e| Error::msg(format!("No password store was found on this computer ({e}).")))?;
+  STORE
+    .as_ref()
+    .map_err(|e| Error::from(text!("No password store was found on this computer ({error}).", error = e)))?;
   Entry::new(SERVICE, server_id).map_err(store_error)
 }
 
 fn store_error(error: keyring_core::Error) -> Error {
-  Error::msg(format!("The password store couldn't be used: {error}"))
+  text!("The password store couldn't be used: {error}", error = error).into()
 }
 
 /// The store can be slow, and on Linux may ask the player to unlock it, so it's never used on the main thread.

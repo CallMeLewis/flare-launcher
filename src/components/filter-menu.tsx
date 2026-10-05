@@ -1,4 +1,5 @@
 import { useId, useState, type ReactNode } from "react";
+import { Plural, Trans, useLingui } from "@lingui/react/macro";
 import { Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -12,7 +13,6 @@ import { cn } from "@/lib/utils";
 
 const ANY = "any";
 const PINGS = [50, 100, 150];
-const count = new Intl.NumberFormat();
 
 type Props = {
   filters: Filters;
@@ -28,83 +28,92 @@ type Props = {
 
 /** Every filter, in groups, inside the Filters popover. */
 export function FilterMenu({ filters, onChange, maps, versions, mods, shown, canReset, onReset }: Props) {
+  const { t, i18n } = useLingui();
   return (
     <div className="flex max-h-[min(640px,var(--radix-popover-content-available-height))] flex-col">
       <div className="grid min-h-0 grid-cols-2 overflow-y-auto">
         <div className="border-r">
-          <Group title="Server">
-            <Field label="Map">
+          <Group title={t`Server`}>
+            <Field label={t`Map`}>
               <Select value={filters.map || ANY} onValueChange={(map) => onChange({ map: map === ANY ? "" : map })}>
-                <SelectTrigger size="sm" aria-label="Map" className="w-full text-[13px]">
-                  <SelectValue>{filters.map || "All maps"}</SelectValue>
+                <SelectTrigger size="sm" aria-label={t`Map`} className="w-full text-[13px]">
+                  <SelectValue>{filters.map || t`All maps`}</SelectValue>
                 </SelectTrigger>
                 <SelectContent className="max-h-80">
-                  <SelectItem value={ANY}>All maps</SelectItem>
+                  <SelectItem value={ANY}>
+                    <Trans>All maps</Trans>
+                  </SelectItem>
                   {maps.map(({ value, count: servers }) => (
                     <SelectItem key={value} value={value}>
                       {value}
-                      <span className="data ml-1 text-xs text-muted-foreground">{count.format(servers)}</span>
+                      <span className="data ml-1 text-xs text-muted-foreground">{i18n.number(servers)}</span>
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </Field>
-            <Field label="Game version">
+            <Field label={t`Game version`}>
               <Select
                 value={filters.version || ANY}
                 onValueChange={(version) => onChange({ version: version === ANY ? "" : version })}
               >
-                <SelectTrigger size="sm" aria-label="Game version" className="w-full text-[13px]">
+                <SelectTrigger size="sm" aria-label={t`Game version`} className="w-full text-[13px]">
                   <SelectValue>
-                    {filters.version ? <span className="data text-xs">{filters.version}</span> : "All versions"}
+                    {filters.version ? <span className="data text-xs">{filters.version}</span> : t`All versions`}
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent className="max-h-80">
-                  <SelectItem value={ANY}>All versions</SelectItem>
+                  <SelectItem value={ANY}>
+                    <Trans>All versions</Trans>
+                  </SelectItem>
                   {versions.map(({ value, count: servers }) => (
                     <SelectItem key={value} value={value}>
                       <span className="data text-xs">{value}</span>
-                      <span className="data ml-1 text-xs text-muted-foreground">{count.format(servers)}</span>
+                      <span className="data ml-1 text-xs text-muted-foreground">{i18n.number(servers)}</span>
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </Field>
-            <Field label="Server type">
+            <Field label={t`Server type`}>
               <Segmented<ServerType>
-                label="Server type"
+                label={t`Server type`}
                 value={filters.serverType}
                 onChange={(serverType) => onChange({ serverType })}
                 options={[
-                  ["any", "Any"],
-                  ["official", "Official"],
-                  ["community", "Community"],
+                  ["any", t`Any`],
+                  ["official", t`Official`],
+                  ["community", t`Community`],
                 ]}
               />
             </Field>
           </Group>
 
-          <Group title="Players">
+          <Group title={t`Players`}>
             <Check
-              label="Hide empty servers"
+              label={t`Hide empty servers`}
               checked={filters.hasPlayers}
               onChange={(hasPlayers) => onChange({ hasPlayers })}
             />
-            <Check label="Hide full servers" checked={filters.notFull} onChange={(notFull) => onChange({ notFull })} />
+            <Check
+              label={t`Hide full servers`}
+              checked={filters.notFull}
+              onChange={(notFull) => onChange({ notFull })}
+            />
           </Group>
 
-          <Group title="Connection">
-            <Field label="Ping">
+          <Group title={t`Connection`}>
+            <Field label={t`Ping`}>
               <Segmented<string>
-                label="Ping"
+                label={t`Ping`}
                 value={filters.maxPing === null ? ANY : String(filters.maxPing)}
                 onChange={(value) => onChange({ maxPing: value === ANY ? null : Number(value) })}
-                options={[[ANY, "Any"], ...PINGS.map((ms): [string, string] => [String(ms), `< ${ms} ms`])]}
+                options={[[ANY, t`Any`], ...PINGS.map((ms): [string, string] => [String(ms), t`< ${ms} ms`])]}
               />
             </Field>
             <Check
-              label="Hide offline servers"
-              hint="Servers that stop answering"
+              label={t`Hide offline servers`}
+              hint={t`Servers that stop answering`}
               checked={filters.hideOffline}
               onChange={(hideOffline) => onChange({ hideOffline })}
             />
@@ -112,42 +121,42 @@ export function FilterMenu({ filters, onChange, maps, versions, mods, shown, can
         </div>
 
         <div>
-          <Group title="Gameplay">
-            <Field label="Perspective">
+          <Group title={t`Gameplay`}>
+            <Field label={t`Perspective`}>
               <Segmented<Perspective>
-                label="Perspective"
+                label={t`Perspective`}
                 value={filters.perspective}
                 onChange={(perspective) => onChange({ perspective })}
                 options={[
-                  ["any", "Any"],
-                  ["first", "1PP only"],
-                  ["third", "3PP allowed"],
+                  ["any", t`Any`],
+                  ["first", t`1PP only`],
+                  ["third", t`3PP allowed`],
                 ]}
               />
             </Field>
-            <Field label="Time of day">
+            <Field label={t`Time of day`}>
               <Segmented<TimeOfDay>
-                label="Time of day"
+                label={t`Time of day`}
                 value={filters.timeOfDay}
                 onChange={(timeOfDay) => onChange({ timeOfDay })}
                 options={[
-                  ["any", "Any"],
-                  ["day", "Day"],
-                  ["night", "Night"],
+                  ["any", t`Any`],
+                  ["day", t`Day`],
+                  ["night", t`Night`],
                 ]}
               />
             </Field>
           </Group>
 
-          <Group title="Mods">
+          <Group title={t`Mods`}>
             <Segmented<ModsFilter>
-              label="Mods"
+              label={t`Mods`}
               value={filters.mods}
               onChange={(value) => onChange({ mods: value, ...(value === "vanilla" && { requiredMods: [] }) })}
               options={[
-                ["any", "Any"],
-                ["modded", "Modded"],
-                ["vanilla", "Vanilla"],
+                ["any", t`Any`],
+                ["modded", t`Modded`],
+                ["vanilla", t`Vanilla`],
               ]}
             />
             <ModPicker
@@ -158,15 +167,15 @@ export function FilterMenu({ filters, onChange, maps, versions, mods, shown, can
             />
           </Group>
 
-          <Group title="Access">
+          <Group title={t`Access`}>
             <Check
-              label="No password"
+              label={t`No password`}
               checked={filters.noPassword}
               onChange={(noPassword) => onChange({ noPassword })}
             />
             <Check
-              label="BattlEye on"
-              hint="The anti-cheat DayZ uses"
+              label={t`BattlEye on`}
+              hint={t`The anti-cheat DayZ uses`}
               checked={filters.battlEye}
               onChange={(battlEye) => onChange({ battlEye })}
             />
@@ -176,10 +185,22 @@ export function FilterMenu({ filters, onChange, maps, versions, mods, shown, can
 
       <div className="flex items-center justify-between border-t px-4 py-2.5">
         <p className="text-xs text-muted-foreground" aria-live="polite">
-          <span className="data text-foreground">{count.format(shown)}</span> {shown === 1 ? "server" : "servers"} match
+          <Plural
+            value={shown}
+            one={
+              <Trans>
+                <span className="data text-foreground">#</span> server match
+              </Trans>
+            }
+            other={
+              <Trans>
+                <span className="data text-foreground">#</span> servers match
+              </Trans>
+            }
+          />
         </p>
         <Button variant="ghost" size="sm" disabled={!canReset} onClick={onReset} className="h-7 text-xs">
-          Reset filters
+          <Trans>Reset filters</Trans>
         </Button>
       </div>
     </div>
@@ -287,6 +308,7 @@ function ModPicker({
   disabled: boolean;
   onChange: (chosen: string[]) => void;
 }) {
+  const { t, i18n } = useLingui();
   const id = useId();
   const [text, setText] = useState("");
   const term = text.trim().toLowerCase();
@@ -304,7 +326,7 @@ function ModPicker({
   return (
     <div className="flex flex-col gap-1.5">
       <label htmlFor={id} className="text-xs text-muted-foreground">
-        Must run
+        <Trans>Must run</Trans>
       </label>
       <div className="relative">
         <Search
@@ -320,7 +342,7 @@ function ModPicker({
           aria-autocomplete="list"
           autoComplete="off"
           spellCheck={false}
-          placeholder={disabled ? "Not for vanilla servers" : "Search mods"}
+          placeholder={disabled ? t`Not for vanilla servers` : t`Search mods`}
           disabled={disabled}
           value={text}
           onChange={(event) => {
@@ -332,7 +354,7 @@ function ModPicker({
         />
       </div>
       {matches.length > 0 && (
-        <ul id={`${id}-list`} role="listbox" aria-label="Mods" className="flex flex-col rounded-md border p-1">
+        <ul id={`${id}-list`} role="listbox" aria-label={t`Mods`} className="flex flex-col rounded-md border p-1">
           {matches.map((mod, index) => (
             <li
               key={mod.value}
@@ -348,7 +370,7 @@ function ModPicker({
               )}
             >
               <span className="truncate">{mod.value}</span>
-              <span className="data ml-auto shrink-0 text-xs text-muted-foreground">{count.format(mod.count)}</span>
+              <span className="data ml-auto shrink-0 text-xs text-muted-foreground">{i18n.number(mod.count)}</span>
             </li>
           ))}
         </ul>
@@ -365,7 +387,7 @@ function ModPicker({
               </span>
               <button
                 type="button"
-                aria-label={`Remove ${name}`}
+                aria-label={t`Remove ${name}`}
                 onClick={() => onChange(chosen.filter((other) => other !== name))}
                 className="flex size-5 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors duration-150 hover:bg-accent hover:text-foreground focus-visible:outline-2"
               >

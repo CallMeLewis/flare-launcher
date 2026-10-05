@@ -1,5 +1,7 @@
 import { useEffect } from "react";
 import { toast } from "sonner";
+import { t } from "@lingui/core/macro";
+import { useLingui } from "@lingui/react/macro";
 import { backend, errorMessage } from "@/lib/backend";
 
 /** Set once the player has answered the offer, so it is only made once. */
@@ -9,8 +11,8 @@ const JUST_ADDED = "appMenuJustAdded";
 
 // Shown as the launcher reopens, so it stays long enough to be seen while the server list loads.
 const added = () =>
-  toast.success("Flare Launcher is in your app menu", {
-    description: "Open it from there from now on.",
+  toast.success(t`Flare Launcher is in your app menu`, {
+    description: t`Open it from there from now on.`,
     duration: 10_000,
   });
 
@@ -34,7 +36,7 @@ export async function addToAppMenu(): Promise<boolean> {
     return true;
   } catch (error) {
     localStorage.removeItem(JUST_ADDED);
-    toast.error("Couldn't add Flare Launcher to the app menu", { description: errorMessage(error) });
+    toast.error(t`Couldn't add Flare Launcher to the app menu`, { description: errorMessage(error) });
     return false;
   }
 }
@@ -44,6 +46,7 @@ export async function addToAppMenu(): Promise<boolean> {
  * so this is what makes it open like any other app. Waits while `enabled` is false: first-time setup offers it itself.
  */
 export function useAppMenuOffer(enabled: boolean) {
+  const { t } = useLingui();
   useEffect(() => {
     if (localStorage.getItem(JUST_ADDED)) {
       localStorage.removeItem(JUST_ADDED);
@@ -57,23 +60,23 @@ export function useAppMenuOffer(enabled: boolean) {
       .then((menu) => {
         if (cancelled || !menu.supported || menu.added) return;
         const answered = markAppMenuOffered;
-        toast("Add Flare Launcher to your app menu?", {
+        toast(t`Add Flare Launcher to your app menu?`, {
           id: "app-menu-offer",
-          description: "Open it like any other app. It moves to your Applications folder.",
+          description: t`Open it like any other app. It moves to your Applications folder.`,
           duration: Infinity,
           action: {
-            label: "Add",
+            label: t`Add`,
             onClick: () => {
               answered();
               void addToAppMenu();
             },
           },
-          cancel: { label: "Not now", onClick: answered },
+          cancel: { label: t`Not now`, onClick: answered },
         });
       })
       .catch(() => {});
     return () => {
       cancelled = true;
     };
-  }, [enabled]);
+  }, [enabled, t]);
 }

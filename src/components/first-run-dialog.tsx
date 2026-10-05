@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Trans, useLingui } from "@lingui/react/macro";
 import { SettingRow, SettingsGroup, THEMES } from "@/components/settings-dialog";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
@@ -23,6 +24,7 @@ type Props = {
  * at any point keeps what was chosen and every other setting keeps its default.
  */
 export function FirstRunDialog({ open, settings, onChange, onDone }: Props) {
+  const { t, i18n } = useLingui();
   const set = (patch: Partial<Settings>) => onChange({ ...settings, ...patch });
   // Only an AppImage that isn't in the app menu yet is offered it, and it's added on finishing: adding may move the
   // launcher and reopen it.
@@ -53,23 +55,25 @@ export function FirstRunDialog({ open, settings, onChange, onDone }: Props) {
         <div className="flex items-center gap-4">
           <img src={appIcon} alt="" className="size-12 shrink-0" />
           <div className="flex flex-col gap-1">
-            <DialogTitle className="text-lg">Welcome to Flare Launcher</DialogTitle>
+            <DialogTitle className="text-lg">
+              <Trans>Welcome to Flare Launcher</Trans>
+            </DialogTitle>
             <DialogDescription className="text-[13px]">
-              A few choices before your first game. You can change any of them later in Settings.
+              <Trans>A few choices before your first game. You can change any of them later in Settings.</Trans>
             </DialogDescription>
           </div>
         </div>
 
-        <SettingsGroup title="In game">
+        <SettingsGroup title={t`In game`}>
           <SettingRow
             id="setup-profile-name"
-            label="Character name"
-            description="The name other players see. Leave it empty to keep the one set in DayZ."
+            label={t`Character name`}
+            description={t`The name other players see. Leave it empty to keep the one set in DayZ.`}
           >
             <Input
               id="setup-profile-name"
               aria-describedby="setup-profile-name-description"
-              placeholder="Name set in DayZ"
+              placeholder={t`Name set in DayZ`}
               autoComplete="off"
               spellCheck={false}
               value={settings.profileName}
@@ -79,8 +83,8 @@ export function FirstRunDialog({ open, settings, onChange, onDone }: Props) {
           </SettingRow>
           <SettingRow
             id="setup-skip-intro"
-            label="Skip the intro and splash screens"
-            description="DayZ goes straight to loading when it starts."
+            label={t`Skip the intro and splash screens`}
+            description={t`DayZ goes straight to loading when it starts.`}
           >
             <Switch
               id="setup-skip-intro"
@@ -91,8 +95,12 @@ export function FirstRunDialog({ open, settings, onChange, onDone }: Props) {
           </SettingRow>
         </SettingsGroup>
 
-        <SettingsGroup title="Launcher">
-          <SettingRow id="setup-theme" label="Theme" description="Light or dark, or System to match this computer.">
+        <SettingsGroup title={t`Launcher`}>
+          <SettingRow
+            id="setup-theme"
+            label={t`Theme`}
+            description={t`Light or dark, or System to match this computer.`}
+          >
             <ToggleGroup
               type="single"
               aria-labelledby="setup-theme-label"
@@ -110,15 +118,15 @@ export function FirstRunDialog({ open, settings, onChange, onDone }: Props) {
                   className="gap-1.5"
                 >
                   <Icon className="size-3.5" aria-hidden />
-                  {label}
+                  {i18n._(label)}
                 </ToggleGroupItem>
               ))}
             </ToggleGroup>
           </SettingRow>
           <SettingRow
             id="setup-after-launch"
-            label="When DayZ starts"
-            description="What the launcher does once the game is running."
+            label={t`When DayZ starts`}
+            description={t`What the launcher does once the game is running.`}
           >
             <Select
               value={settings.afterLaunch}
@@ -132,17 +140,23 @@ export function FirstRunDialog({ open, settings, onChange, onDone }: Props) {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="keep">Keep the launcher open</SelectItem>
-                <SelectItem value="minimise">Minimise the launcher</SelectItem>
-                <SelectItem value="close">Close the launcher</SelectItem>
+                <SelectItem value="keep">
+                  <Trans>Keep the launcher open</Trans>
+                </SelectItem>
+                <SelectItem value="minimise">
+                  <Trans>Minimise the launcher</Trans>
+                </SelectItem>
+                <SelectItem value="close">
+                  <Trans>Close the launcher</Trans>
+                </SelectItem>
               </SelectContent>
             </Select>
           </SettingRow>
           {offerAppMenu && (
             <SettingRow
               id="setup-app-menu"
-              label="Add to the app menu"
-              description="Open Flare Launcher like any other app. The file moves to your Applications folder."
+              label={t`Add to the app menu`}
+              description={t`Open Flare Launcher like any other app. The file moves to your Applications folder.`}
             >
               <Switch
                 id="setup-app-menu"
@@ -155,7 +169,9 @@ export function FirstRunDialog({ open, settings, onChange, onDone }: Props) {
         </SettingsGroup>
 
         <div className="flex justify-end">
-          <Button onClick={finish}>Start browsing</Button>
+          <Button onClick={finish}>
+            <Trans>Start browsing</Trans>
+          </Button>
         </div>
       </DialogContent>
     </Dialog>

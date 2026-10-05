@@ -5,8 +5,9 @@ use std::sync::RwLock;
 use serde::{Deserialize, Serialize};
 use tauri::State;
 
-use crate::error::{Error, Result};
+use crate::error::Result;
 use crate::query::Info;
+use crate::text;
 
 const LIST_URL: &str = "https://dayzsalauncher.com/api/v1/launcher/servers/dayz";
 
@@ -178,7 +179,7 @@ fn into_stored(api: ApiServer) -> StoredServer {
 /// must be a plain IP, as it ends up on DayZ's command line.
 fn parse_list(body: &[u8]) -> Result<HashMap<String, StoredServer>> {
   let response: ListResponse = serde_json::from_slice(body)
-    .map_err(|e| Error::msg(format!("The server list wasn't in the expected format: {e}")))?;
+    .map_err(|e| text!("The server list wasn't in the expected format: {error}", error = e))?;
   let total = response.result.len();
   let mut servers = HashMap::with_capacity(total);
   for value in response.result {
@@ -246,7 +247,7 @@ pub fn server_mods(cache: State<'_, ServerCache>, id: String) -> Result<Vec<Mod>
     .unwrap()
     .get(&id)
     .map(|s| s.mods.clone())
-    .ok_or_else(|| Error::msg("That server is no longer in the list. Refresh and try again."))
+    .ok_or_else(|| text!("That server is no longer in the list. Refresh and try again.").into())
 }
 
 #[cfg(test)]

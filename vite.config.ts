@@ -1,5 +1,7 @@
+/// <reference types="vitest/config" />
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import { lingui } from "@lingui/vite-plugin";
 import tailwindcss from "@tailwindcss/vite";
 import { readFileSync } from "node:fs";
 import { fileURLToPath, URL } from "node:url";
@@ -12,7 +14,8 @@ export default defineConfig({
   base: "./",
   clearScreen: false,
   define: { __APP_VERSION__: JSON.stringify(version), __APP_RELEASE_NOTES__: JSON.stringify(notes) },
-  plugins: [react(), tailwindcss()],
+  plugins: [react(), lingui({ macroTransform: true, failOnCompileError: true }), tailwindcss()],
   resolve: { alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) } },
   server: { watch: { ignored: ["**/src-tauri/**"] } },
+  test: { setupFiles: ["src/test-setup.ts"] },
 });

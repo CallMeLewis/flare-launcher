@@ -47,7 +47,8 @@ mod imp {
 
   use super::AppMenu;
   use crate::desktop::without_appimage_env;
-  use crate::error::{Error, Result};
+  use crate::error::Result;
+  use crate::text;
 
   /// Named after the program, which is what the window reports to the desktop, so docks match the window to it.
   const DESKTOP_FILE: &str = "flare-launcher.desktop";
@@ -79,9 +80,9 @@ mod imp {
   }
 
   pub fn add(app: &AppHandle) -> Result<bool> {
-    let current = appimage().ok_or_else(|| Error::msg("Only the AppImage can add itself to the app menu."))?;
-    let home = std::env::home_dir().ok_or_else(|| Error::msg("Your home folder couldn't be found."))?;
-    let data = data_home().ok_or_else(|| Error::msg("Your home folder couldn't be found."))?;
+    let current = appimage().ok_or_else(|| text!("Only the AppImage can add itself to the app menu."))?;
+    let home = std::env::home_dir().ok_or_else(|| text!("Your home folder couldn't be found."))?;
+    let data = data_home().ok_or_else(|| text!("Your home folder couldn't be found."))?;
     let target = home.join("Applications").join(APPIMAGE_NAME);
     let moved = current != target;
     if moved {
@@ -97,14 +98,14 @@ mod imp {
     if moved {
       without_appimage_env(&mut Command::new(&target))
         .spawn()
-        .map_err(|e| Error::msg(format!("Flare Launcher is in your app menu, but couldn't reopen: {e}")))?;
+        .map_err(|e| text!("Flare Launcher is in your app menu, but couldn't reopen: {error}", error = e))?;
       app.exit(0);
     }
     Ok(moved)
   }
 
   pub fn remove() -> Result<()> {
-    let data = data_home().ok_or_else(|| Error::msg("Your home folder couldn't be found."))?;
+    let data = data_home().ok_or_else(|| text!("Your home folder couldn't be found."))?;
     let apps = data.join("applications");
     remove_if_present(&apps.join(DESKTOP_FILE))?;
     remove_if_present(&data.join("icons/hicolor/256x256/apps").join(ICON_FILE))?;
@@ -196,18 +197,19 @@ mod imp {
   use tauri::AppHandle;
 
   use super::AppMenu;
-  use crate::error::{Error, Result};
+  use crate::error::Result;
+  use crate::text;
 
   pub fn status() -> AppMenu {
     AppMenu { supported: false, added: false, ours: false }
   }
 
   pub fn add(_app: &AppHandle) -> Result<bool> {
-    Err(Error::msg("The installer already added Flare Launcher to the Start menu."))
+    Err(text!("The installer already added Flare Launcher to the Start menu.").into())
   }
 
   pub fn remove() -> Result<()> {
-    Err(Error::msg("Use Add or remove programs to take Flare Launcher off this computer."))
+    Err(text!("Use Add or remove programs to take Flare Launcher off this computer.").into())
   }
 }
 

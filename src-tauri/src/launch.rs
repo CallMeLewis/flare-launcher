@@ -10,9 +10,10 @@ use sysinfo::{ProcessRefreshKind, ProcessesToUpdate, System, UpdateKind};
 use tauri::{AppHandle, State};
 use tauri_plugin_opener::OpenerExt;
 
-use crate::error::{Error, Result};
+use crate::error::Result;
 use crate::servers::ServerCache;
 use crate::steam::{self, Install};
+use crate::text;
 
 /// Folder inside the DayZ directory that holds our links to Workshop mods.
 /// Short relative paths keep the `-mod=` argument well under the Windows
@@ -126,18 +127,23 @@ pub fn launch(cache: State<'_, ServerCache>, request: LaunchRequest) -> Result<(
     let servers = cache.0.read().unwrap();
     let server = servers
       .get(&request.server_id)
-      .ok_or_else(|| Error::msg("That server is no longer in the list. Refresh and try again."))?;
+      .ok_or_else(|| text!("That server is no longer in the list. Refresh and try again."))?;
     let mod_ids: Vec<u64> = server.mods.iter().map(|m| m.steam_workshop_id).collect();
     (server.row.ip.clone(), server.row.game_port, mod_ids)
   };
 
   let install = steam::locate(request.dayz_dir.as_deref())
-    .ok_or_else(|| Error::msg("DayZ wasn't found. Set the DayZ folder in Settings."))?;
+    .ok_or_else(|| text!("DayZ wasn't found. Set the DayZ folder in Settings."))?;
 
   let missing = mod_ids.iter().filter(|&&id| !install.is_mod_installed(id)).count();
   if missing > 0 {
-    let noun = if missing == 1 { "mod is" } else { "mods are" };
-    return Err(Error::msg(format!("{missing} required {noun} not installed yet.")));
+    return Err(
+      text!(
+        "{missing, plural, one {# required mod is} other {# required mods are}} not installed yet.",
+        missing = missing
+      )
+      .into(),
+    );
   }
 
   link_mods(&install, &mod_ids)?;
@@ -150,7 +156,7 @@ pub fn launch(cache: State<'_, ServerCache>, request: LaunchRequest) -> Result<(
     non_empty(&request.extra_args),
   );
   let mut child =
-    game_command(&install, &args).spawn().map_err(|e| Error::msg(format!("DayZ couldn't be started: {e}")))?;
+    game_command(&install, &args).spawn().map_err(|e| text!("DayZ couldn't be started: {error}", error = e))?;
   // Collected once it ends, so it doesn't linger as a finished process while the launcher stays open.
   std::thread::spawn(move || child.wait());
   Ok(())
@@ -189,7 +195,7 @@ pub fn open_workshop_page(app: AppHandle, id: u64) -> Result<()> {
   app
     .opener()
     .open_url(format!("steam://url/CommunityFilePage/{id}"), None::<&str>)
-    .map_err(|e| Error::msg(format!("Steam couldn't be opened: {e}")))
+    .map_err(|e| text!("Steam couldn't be opened: {error}", error = e).into())
 }
 
 #[cfg(test)]

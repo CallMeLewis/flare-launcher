@@ -37,6 +37,8 @@ jobs:
         run: pnpm exec prettier --check .
       - name: Lint
         run: pnpm lint
+      - name: Translation catalogues are up to date
+        run: pnpm i18n && git diff --exit-code src/locales
       - name: Type check and build
         run: pnpm build
       - name: Test
