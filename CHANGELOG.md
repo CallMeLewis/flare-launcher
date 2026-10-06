@@ -2,6 +2,18 @@
 
 What changed in each version of Flare Launcher, newest first.
 
+## 1.2.0 - 2026-10-07
+
+- New Country column in the server list, showing each server's flag with the country's name on hover; filter by country in the Filters menu, and see it in the server panel.
+- New in the server panel: how long until night falls, or until daylight at night, in real time.
+- On Linux, new warning above Play when a system memory setting is too low for DayZ, which can make the game freeze, with the commands to fix it.
+- New Spanish language, in Settings > Launcher.
+- Improved colours in both themes: the sidebar, server panel and menus stand apart from the server list, search boxes and dropdowns have easier-to-see edges, and in light mode the green, amber and red status text is easier to read.
+- Improved Linux support: DayZ is now found when Steam is installed as a Snap or as the older Debian and Ubuntu package, and Play starts the game through the Flatpak version of Steam when that's where DayZ is installed.
+- Improved French, German and American English wording in several places, including a shorter French perspective label in the server panel that was being cut off.
+- On Linux, fixed the window freezing while a .deb or .rpm update asks for your password.
+- Fixed the refresh button above the server list being cut off when the window is narrow.
+
 ## 1.1.6 - 2026-10-06
 
 - On Windows, the installer now shows the Flare Launcher icon.
