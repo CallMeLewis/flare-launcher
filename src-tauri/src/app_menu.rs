@@ -170,11 +170,39 @@ mod imp {
     quoted
   }
 
-  /// Whether a desktop entry exists and its `Exec=` line runs this AppImage.
+  /// The arguments of an `Exec=` value, with quotes and the escapes [`exec_quote`] adds undone.
+  pub(super) fn exec_args(value: &str) -> Vec<String> {
+    let mut args = Vec::new();
+    let mut arg: Option<String> = None;
+    let mut quoted = false;
+    let mut chars = value.chars();
+    while let Some(c) = chars.next() {
+      match c {
+        '"' => {
+          quoted = !quoted;
+          arg.get_or_insert_with(String::new);
+        }
+        '\\' => {
+          if let Some(next) = chars.next() {
+            arg.get_or_insert_with(String::new).push(next);
+          }
+        }
+        c if c.is_whitespace() && !quoted => args.extend(arg.take()),
+        c => arg.get_or_insert_with(String::new).push(c),
+      }
+    }
+    args.extend(arg);
+    args
+  }
+
+  /// Whether a desktop entry exists and its `Exec=` line runs this AppImage. The path has to be a whole argument, so
+  /// an entry for a copy with a longer name doesn't count.
   pub(super) fn opens(entry: &Path, appimage: &Path) -> bool {
     let target = appimage.display().to_string();
     std::fs::read_to_string(entry)
-      .map(|text| text.lines().any(|line| line.starts_with("Exec=") && line.contains(&target)))
+      .map(|text| {
+        text.lines().filter_map(|line| line.strip_prefix("Exec=")).any(|value| exec_args(value).contains(&target))
+      })
       .unwrap_or(false)
   }
 
@@ -217,7 +245,7 @@ mod imp {
 mod tests {
   use std::path::Path;
 
-  use super::imp::{any_entry_opens, desktop_entry, opens};
+  use super::imp::{any_entry_opens, desktop_entry, exec_args, opens};
 
   #[test]
   fn writes_a_desktop_entry_that_runs_the_appimage() {
@@ -237,6 +265,13 @@ mod tests {
   }
 
   #[test]
+  fn reads_the_arguments_of_an_exec_line() {
+    assert_eq!(exec_args(r#""/home/x\$\"y/F.AppImage" %U"#), [r#"/home/x$"y/F.AppImage"#, "%U"]);
+    assert_eq!(exec_args("/opt/F.AppImage  --flag"), ["/opt/F.AppImage", "--flag"]);
+    assert_eq!(exec_args(r#""/a b/F.AppImage""#), ["/a b/F.AppImage"]);
+  }
+
+  #[test]
   fn finds_entries_that_open_this_appimage() {
     let root = std::env::temp_dir().join(format!("dzsl-menu-test-{}", std::process::id()));
     let apps = root.join("applications");
@@ -252,6 +287,15 @@ mod tests {
     assert!(any_entry_opens(&apps, &appimage));
     assert!(opens(&gear, &appimage));
     assert!(!opens(&apps.join("missing.desktop"), &appimage));
+    // A copy with a longer name isn't this AppImage.
+    let old = apps.join("old.desktop");
+    std::fs::write(&old, format!("[Desktop Entry]\nExec={}.old\n", appimage.display())).unwrap();
+    assert!(!opens(&old, &appimage));
+    // The launcher's own entry, for a path with characters the Exec line escapes.
+    let odd = root.join("x$y/Flare-Launcher.AppImage");
+    let own = apps.join("flare-launcher.desktop");
+    std::fs::write(&own, desktop_entry(&odd, Path::new("/i.png"))).unwrap();
+    assert!(opens(&own, &odd));
 
     std::fs::remove_dir_all(root).unwrap();
   }
