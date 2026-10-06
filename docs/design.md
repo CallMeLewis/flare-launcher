@@ -10,22 +10,23 @@ Dark Mode (OLED) with Data-Dense Dashboard layout, plus a matching light theme. 
 
 Tokens live in `src/globals.css`. Use the tokens, never raw hex in components.
 
-Light is the `:root` set and dark the `.dark` set; the class goes on `<html>`. Light values keep text at WCAG AA (4.5:1) on every surface, which is why primary and the status colours are a shade darker than in dark.
+Light is the `:root` set and dark the `.dark` set; the class goes on `<html>`. Light values keep text at WCAG AA (4.5:1) on every surface, which is why primary and the status colours are a shade darker than in dark. Field edges (`input`) reach 3:1 against the background in both, so they're too strong to fill a control with: fills use `control`.
 
 | Role | Dark | Light | Use |
 |---|---|---|---|
 | background | `#0B1120` | `#FFFFFF` | App background, table |
-| card | `#0F172A` | `#F8FAFC` | Sidebar, detail panel |
-| popover | `#111827` | `#FFFFFF` | Menus, dialogs, toasts |
-| muted / accent | `#1E293B` | `#F1F5F9` | Hover surfaces |
-| border | `#1E293B` | `#E2E8F0` | Dividers |
-| input | `#334155` | `#CBD5E1` | Field borders |
+| card | `#0F1829` | `#F5F7FA` | Sidebar, detail panel |
+| popover | `#131C30` | `#FFFFFF` | Menus, dialogs, toasts |
+| muted / accent | `#18223A` | `#EEF2F6` | Hover surfaces |
+| border | `#1F2A40` | `#DFE5EC` | Dividers |
+| input | `#56677F` | `#8794A8` | Field edges: inputs, selects, checkboxes, outline buttons |
+| control | `#334155` | `#CBD5E1` | Control fills: a switch that is off, the chosen segment |
 | foreground | `#F1F5F9` | `#0F172A` | Primary text |
-| muted-foreground | `#94A3B8` | `#475569` | Secondary text |
+| muted-foreground | `#9AA8BD` | `#475569` | Secondary text |
 | primary | `#22C55E` | `#15803D` | Play button, selection, focus ring |
-| success | `#4ADE80` | `#15803D` | Installed, good ping |
-| warning | `#FBBF24` | `#B45309` | Full server, missing mod, favourite, fair ping |
-| danger | `#F87171` | `#DC2626` | Poor ping, errors |
+| success | `#4ADE80` | `#166534` | Installed, good ping |
+| warning | `#FBBF24` | `#92400E` | Full server, missing mod, favourite, fair ping |
+| danger | `#F87171` | `#C81E1E` | Poor ping, errors |
 
 Green means "good to go" and is reserved for that. Colour never carries meaning alone: pair it with a number, icon or label.
 

@@ -15,31 +15,33 @@
 
   --background: #ffffff;
   --foreground: #0f172a;
-  --card: #f8fafc;
+  --card: #f5f7fa;
   --card-foreground: #0f172a;
   --popover: #ffffff;
   --popover-foreground: #0f172a;
   --primary: #15803d;
   --primary-foreground: #ffffff;
-  --secondary: #f1f5f9;
+  --secondary: #eef2f6;
   --secondary-foreground: #0f172a;
-  --muted: #f1f5f9;
+  --muted: #eef2f6;
   --muted-foreground: #475569;
-  --accent: #f1f5f9;
+  --accent: #eef2f6;
   --accent-foreground: #0f172a;
-  --destructive: #dc2626;
-  --border: #e2e8f0;
-  --input: #cbd5e1;
+  --destructive: #c81e1e;
+  --border: #dfe5ec;
+  /* Field edges, dark enough to see (3:1). Fills such as switches use --control instead. */
+  --input: #8794a8;
+  --control: #cbd5e1;
   --ring: #15803d;
 
-  --success: #15803d;
-  --warning: #b45309;
-  --danger: #dc2626;
+  --success: #166534;
+  --warning: #92400e;
+  --danger: #c81e1e;
   /* Windows' own hover colour for the close button in the title bar. */
   --caption-close: #c42b1c;
   --row-stripe: #f8fafc;
-  --row-hover: #f1f5f9;
-  --row-selected: #dcfce7;
+  --row-hover: #eff3f7;
+  --row-selected: #dcf7e6;
   --scrollbar: #cbd5e1;
   --scrollbar-hover: #94a3b8;
 }
@@ -49,29 +51,30 @@
 
   --background: #0b1120;
   --foreground: #f1f5f9;
-  --card: #0f172a;
+  --card: #0f1829;
   --card-foreground: #f1f5f9;
-  --popover: #111827;
+  --popover: #131c30;
   --popover-foreground: #f1f5f9;
   --primary: #22c55e;
   --primary-foreground: #04130a;
-  --secondary: #1e293b;
+  --secondary: #18223a;
   --secondary-foreground: #f1f5f9;
-  --muted: #1e293b;
-  --muted-foreground: #94a3b8;
-  --accent: #1e293b;
+  --muted: #18223a;
+  --muted-foreground: #9aa8bd;
+  --accent: #18223a;
   --accent-foreground: #f1f5f9;
   --destructive: #dc2626;
-  --border: #1e293b;
-  --input: #334155;
+  --border: #1f2a40;
+  --input: #56677f;
+  --control: #334155;
   --ring: #22c55e;
 
   --success: #4ade80;
   --warning: #fbbf24;
   --danger: #f87171;
-  --row-stripe: #0d1426;
-  --row-hover: #131c31;
-  --row-selected: #12261f;
+  --row-stripe: #0d1425;
+  --row-hover: #141d33;
+  --row-selected: #0f2a20;
   --scrollbar: #334155;
   --scrollbar-hover: #475569;
 }
@@ -102,6 +105,7 @@
   --color-destructive: var(--destructive);
   --color-border: var(--border);
   --color-input: var(--input);
+  --color-control: var(--control);
   --color-ring: var(--ring);
   --color-success: var(--success);
   --color-warning: var(--warning);
