@@ -3,9 +3,18 @@
 What changed in each version of Flare Launcher, newest first. Versions before 1.1.0 were released as DayZ Server
 Launcher.
 
-## 1.1.6-beta.1 - 2026-10-05
+## 1.1.6 - 2026-10-06
 
+- On Windows, the installer now shows the Flare Launcher icon.
+- The server list no longer stutters while pings come in when it's filtered or sorted by ping.
 - Fixed Refresh not updating servers you added by address, which kept showing their old player count and mods until the launcher was restarted.
+- Fixed DayZ sometimes starting twice when you joined a server that needs a password twice in quick succession.
+- Fixed the server panel sometimes showing the mods of the server selected before, with the wrong number of mods to download next to Play.
+- Fixed the Mods filter listing a mod twice when two Workshop mods share its name; choosing it now finds the servers running either one.
+- Fixed Verify and Update on the Mods page sometimes never finishing for mods that were already up to date.
+- Fixed a mod you unsubscribed from in the launcher staying off the Mods page after you subscribed to it again in Steam, until the launcher was restarted.
+- Fixed switching the update channel in Settings > About sometimes offering the other channel's version.
+- On Linux, fixed Settings > Launcher still offering Add to app menu after the launcher had been added, when your home folder's name contains symbols such as $.
 
 ## 1.1.5 - 2026-10-05
 
