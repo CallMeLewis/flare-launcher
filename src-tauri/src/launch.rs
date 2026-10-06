@@ -8,6 +8,7 @@ use std::time::{Duration, Instant};
 use serde::Deserialize;
 use sysinfo::{ProcessRefreshKind, ProcessesToUpdate, System, UpdateKind};
 use tauri::{AppHandle, State};
+#[cfg(not(target_os = "linux"))]
 use tauri_plugin_opener::OpenerExt;
 
 use crate::error::Result;
@@ -204,10 +205,15 @@ pub async fn wait_for_game(timeout_secs: u64) -> bool {
 /// Opens a mod's Workshop page in the Steam client so it can be subscribed to.
 #[tauri::command]
 pub fn open_workshop_page(app: AppHandle, id: u64) -> Result<()> {
-  app
-    .opener()
-    .open_url(format!("steam://url/CommunityFilePage/{id}"), None::<&str>)
-    .map_err(|e| text!("Steam couldn't be opened: {error}", error = e).into())
+  let url = format!("steam://url/CommunityFilePage/{id}");
+  #[cfg(target_os = "linux")]
+  let opened = {
+    let _ = app;
+    crate::desktop::open(&url).map_err(|e| e.to_string())
+  };
+  #[cfg(not(target_os = "linux"))]
+  let opened = app.opener().open_url(url, None::<&str>).map_err(|e| e.to_string());
+  opened.map_err(|e| text!("Steam couldn't be opened: {error}", error = e).into())
 }
 
 #[cfg(test)]

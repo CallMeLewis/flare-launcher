@@ -361,17 +361,23 @@ pub enum Folder {
 /// Opens the DayZ or Workshop folder in the file manager.
 #[tauri::command]
 pub fn open_folder(app: tauri::AppHandle, dayz_dir: Option<String>, folder: Folder) -> crate::error::Result<()> {
-  use tauri_plugin_opener::OpenerExt;
   let install =
     locate(dayz_dir.as_deref()).ok_or_else(|| crate::text!("DayZ wasn't found. Set the DayZ folder in Settings."))?;
   let path = match folder {
     Folder::Game => install.dayz_dir,
     Folder::Workshop => install.workshop_dir,
   };
-  app
-    .opener()
-    .open_path(path.to_string_lossy(), None::<&str>)
-    .map_err(|e| crate::text!("The folder couldn't be opened: {error}", error = e).into())
+  #[cfg(target_os = "linux")]
+  let opened = {
+    let _ = app;
+    crate::desktop::open(&path.to_string_lossy()).map_err(|e| e.to_string())
+  };
+  #[cfg(not(target_os = "linux"))]
+  let opened = {
+    use tauri_plugin_opener::OpenerExt;
+    app.opener().open_path(path.to_string_lossy(), None::<&str>).map_err(|e| e.to_string())
+  };
+  opened.map_err(|e| crate::text!("The folder couldn't be opened: {error}", error = e).into())
 }
 
 /// Returns which of the given Workshop mods are installed and up to date. A mod updated on the Workshop since Steam

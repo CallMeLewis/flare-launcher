@@ -79,6 +79,17 @@ pub fn without_appimage_env(command: &mut std::process::Command) -> &mut std::pr
   command
 }
 
+/// Opens a link or folder with the desktop's own app for it, away from the AppImage's libraries and settings. A
+/// `steam://` link may start Steam, which fails to start the game with them, as do some file managers.
+pub fn open(target: &str) -> std::io::Result<()> {
+  let mut command = std::process::Command::new("xdg-open");
+  command.arg(target);
+  let mut child = without_appimage_env(&mut command).spawn()?;
+  // Collected once it ends, so it doesn't linger as a finished process.
+  std::thread::spawn(move || child.wait());
+  Ok(())
+}
+
 /// The variables that mention the AppImage's folder, each with that folder's entries taken out of it, or `None` when
 /// nothing is left.
 fn outside_appdir(vars: impl Iterator<Item = (String, String)>, appdir: &str) -> Vec<(String, Option<String>)> {
