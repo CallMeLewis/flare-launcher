@@ -112,8 +112,15 @@ fn game_command(install: &Install, args: &[String]) -> Command {
 }
 
 #[cfg(not(windows))]
-fn game_command(_install: &Install, args: &[String]) -> Command {
-  let mut command = Command::new("steam");
+fn game_command(install: &Install, args: &[String]) -> Command {
+  let mut command = match steam::client_for(install) {
+    steam::SteamClient::Native => Command::new("steam"),
+    steam::SteamClient::Flatpak => {
+      let mut command = Command::new("flatpak");
+      command.args(["run", steam::FLATPAK_STEAM]);
+      command
+    }
+  };
   command.arg("-applaunch").arg(steam::DAYZ_APP_ID.to_string()).args(args).arg("-nolauncher");
   // From the AppImage, Steam would otherwise inherit its libraries and fail to start the game.
   #[cfg(target_os = "linux")]
@@ -155,8 +162,13 @@ pub fn launch(cache: State<'_, ServerCache>, request: LaunchRequest) -> Result<(
     password(&request.password),
     non_empty(&request.extra_args),
   );
-  let mut child =
-    game_command(&install, &args).spawn().map_err(|e| text!("DayZ couldn't be started: {error}", error = e))?;
+  let mut child = game_command(&install, &args).spawn().map_err(|e| {
+    #[cfg(not(windows))]
+    if e.kind() == std::io::ErrorKind::NotFound {
+      return text!("Steam wasn't found on this computer. Install Steam, then try again.");
+    }
+    text!("DayZ couldn't be started: {error}", error = e)
+  })?;
   // Collected once it ends, so it doesn't linger as a finished process while the launcher stays open.
   std::thread::spawn(move || child.wait());
   Ok(())

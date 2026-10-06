@@ -1396,6 +1396,10 @@ msgid "Steam couldn't be reached. Make sure Steam is running and you're signed i
 msgstr ""
 
 #: src/lib/backend-messages.ts
+msgid "Steam couldn't be reached. With the Flatpak version of Steam, the launcher may not be able to download mods: subscribe to them in the Steam Workshop instead, then try again."
+msgstr ""
+
+#: src/lib/backend-messages.ts
 msgid "Steam couldn't download {failures, plural, one {# mod} other {# mods}}. Check your connection and disk space, then try again."
 msgstr ""
 
@@ -1433,6 +1437,10 @@ msgstr ""
 
 #: src/components/mods-page.tsx
 msgid "Steam removes them from this computer. A server that needs them downloads them again when you join."
+msgstr ""
+
+#: src/lib/backend-messages.ts
+msgid "Steam wasn't found on this computer. Install Steam, then try again."
 msgstr ""
 
 #: src/App.tsx

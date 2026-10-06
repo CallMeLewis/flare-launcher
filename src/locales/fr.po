@@ -1396,6 +1396,10 @@ msgid "Steam couldn't be reached. Make sure Steam is running and you're signed i
 msgstr "Impossible de joindre Steam. Vérifiez que Steam est ouvert et que vous êtes connecté, puis réessayez."
 
 #: src/lib/backend-messages.ts
+msgid "Steam couldn't be reached. With the Flatpak version of Steam, the launcher may not be able to download mods: subscribe to them in the Steam Workshop instead, then try again."
+msgstr "Impossible de joindre Steam. Avec la version Flatpak de Steam, le lanceur ne peut peut-être pas télécharger les mods : abonnez-vous-y plutôt dans le Workshop Steam, puis réessayez."
+
+#: src/lib/backend-messages.ts
 msgid "Steam couldn't download {failures, plural, one {# mod} other {# mods}}. Check your connection and disk space, then try again."
 msgstr "Steam n’a pas pu télécharger {failures, plural, one {# mod} other {# mods}}. Vérifiez votre connexion et l’espace disque, puis réessayez."
 
@@ -1434,6 +1438,10 @@ msgstr "Steam les supprime de cet ordinateur, ce qui libère <0>{freed}</0>. Un 
 #: src/components/mods-page.tsx
 msgid "Steam removes them from this computer. A server that needs them downloads them again when you join."
 msgstr "Steam les supprime de cet ordinateur. Un serveur qui en a besoin les retéléchargera quand vous le rejoindrez."
+
+#: src/lib/backend-messages.ts
+msgid "Steam wasn't found on this computer. Install Steam, then try again."
+msgstr "Steam est introuvable sur cet ordinateur. Installez Steam, puis réessayez."
 
 #: src/App.tsx
 msgid "Steam will finish any repairs it had started."

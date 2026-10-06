@@ -135,6 +135,12 @@ fn connect() -> Result<Client> {
       SteamAPIInitError::VersionMismatch(_) => {
         text!("Steam is out of date. Restart Steam so it can update, then try again.")
       }
+      // Steam's library may not reach the Flatpak's Steam from outside its sandbox. Steam downloads mods subscribed to
+      // on the Workshop itself, and the launcher finds them in the Flatpak's folder.
+      #[cfg(not(windows))]
+      _ if crate::steam::only_flatpak_steam() => text!(
+        "Steam couldn't be reached. With the Flatpak version of Steam, the launcher may not be able to download mods: subscribe to them in the Steam Workshop instead, then try again."
+      ),
       _ => text!("Steam couldn't be reached. Make sure Steam is running and you're signed in, then try again."),
     })
   })

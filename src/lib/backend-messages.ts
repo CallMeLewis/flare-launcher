@@ -36,11 +36,16 @@ export const BACKEND_MESSAGES = [
   msg({ message: "Steam couldn't be reached. Make sure Steam is running and you're signed in, then try again." }),
   msg({
     message:
+      "Steam couldn't be reached. With the Flatpak version of Steam, the launcher may not be able to download mods: subscribe to them in the Steam Workshop instead, then try again.",
+  }),
+  msg({
+    message:
       "Steam couldn't download {failures, plural, one {# mod} other {# mods}}. Check your connection and disk space, then try again.",
   }),
   msg({ message: "Steam couldn't unsubscribe you from {failures, plural, one {# mod} other {# mods}}. Try again." }),
   msg({ message: "Steam didn't answer in time. Make sure Steam is running and you're signed in, then try again." }),
   msg({ message: "Steam is out of date. Restart Steam so it can update, then try again." }),
+  msg({ message: "Steam wasn't found on this computer. Install Steam, then try again." }),
   msg({ message: "That server is no longer in the list. Refresh and try again." }),
   msg({ message: "The download couldn't be started: {error}" }),
   msg({ message: "The download stopped unexpectedly. Try again." }),

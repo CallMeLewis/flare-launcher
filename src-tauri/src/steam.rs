@@ -95,6 +95,59 @@ fn steam_roots_in(home: &Path) -> Vec<PathBuf> {
   ]
 }
 
+/// The Flatpak's copy of Steam, when it's installed.
+#[cfg(not(windows))]
+pub fn flatpak_steam_root() -> Option<PathBuf> {
+  let home = std::env::home_dir()?;
+  [".local/share/Steam", "data/Steam"]
+    .into_iter()
+    .map(|dir| home.join(format!(".var/app/{FLATPAK_STEAM}/{dir}")))
+    .find(|root| root.is_dir())
+}
+
+/// Which Steam starts the game on Linux: the one installed as a system package, or the Flatpak.
+#[cfg(not(windows))]
+#[derive(Debug, PartialEq)]
+pub enum SteamClient {
+  Native,
+  Flatpak,
+}
+
+/// The Steam that owns this DayZ install. The Flatpak is used when the game is in one of its libraries, or when it's
+/// the only Steam there is; otherwise the `steam` command, as for most players.
+#[cfg(not(windows))]
+pub fn client_for(install: &Install) -> SteamClient {
+  let flatpak_root = flatpak_steam_root();
+  let in_flatpak = flatpak_root.as_deref().is_some_and(|root| in_libraries_of(root, &install.dayz_dir));
+  pick_client(in_flatpak, on_path("steam"), flatpak_root.is_some() && on_path("flatpak"))
+}
+
+#[cfg(not(windows))]
+fn pick_client(in_flatpak_library: bool, native: bool, flatpak: bool) -> SteamClient {
+  if flatpak && (in_flatpak_library || !native) { SteamClient::Flatpak } else { SteamClient::Native }
+}
+
+/// Whether the Flatpak is the only Steam on this computer.
+#[cfg(not(windows))]
+pub fn only_flatpak_steam() -> bool {
+  flatpak_steam_root().is_some() && !on_path("steam")
+}
+
+/// Whether a folder is inside one of a Steam install's libraries.
+#[cfg(not(windows))]
+fn in_libraries_of(steam_root: &Path, dir: &Path) -> bool {
+  let vdf = std::fs::read_to_string(steam_root.join("steamapps").join("libraryfolders.vdf")).ok();
+  let mut libraries = vdf.as_deref().map(parse_library_paths).unwrap_or_default();
+  libraries.push(steam_root.to_path_buf());
+  libraries.iter().any(|library| dir.starts_with(library))
+}
+
+/// Whether a program can be started by name.
+#[cfg(not(windows))]
+fn on_path(program: &str) -> bool {
+  std::env::var_os("PATH").is_some_and(|path| std::env::split_paths(&path).any(|dir| dir.join(program).is_file()))
+}
+
 /// Splits a line of a Valve KeyValues file into its quoted tokens.
 fn quoted_tokens(line: &str) -> Vec<String> {
   let mut tokens = Vec::new();
@@ -650,5 +703,19 @@ timestamp = 5250757174595880000;
     assert_eq!(parse_active_account(vdf), Some(12345));
     // Steam writes 0 once the player signs out.
     assert_eq!(parse_active_account("\"ActiveUser\"		\"0\""), None);
+  }
+
+  #[cfg(not(windows))]
+  #[test]
+  fn starts_the_game_through_the_steam_that_has_it() {
+    // Most players: only the system package.
+    assert_eq!(pick_client(false, true, false), SteamClient::Native);
+    // Only the Flatpak.
+    assert_eq!(pick_client(false, false, true), SteamClient::Flatpak);
+    // Both, with the game in the Flatpak's library, or in the system package's.
+    assert_eq!(pick_client(true, true, true), SteamClient::Flatpak);
+    assert_eq!(pick_client(false, true, true), SteamClient::Native);
+    // Neither: the steam command, so the error says Steam is missing.
+    assert_eq!(pick_client(false, false, false), SteamClient::Native);
   }
 }
