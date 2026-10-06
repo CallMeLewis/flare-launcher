@@ -331,32 +331,33 @@ export function App() {
   const play = useCallback(
     async (server: ServerRow, password = "", startGame = true) => {
       if (playing.current) return;
-      setSelectedId(server.id);
-      if (unlisted.has(server.id)) {
-        toast.info(t`This server is offline`, {
-          description: t`It isn't in the server list right now. It comes back once the server is up again.`,
-        });
-        return;
-      }
-      // Joining from the list, by double-click or Enter, uses the password the player chose to remember.
-      if (startGame && server.password && !password) {
-        password = (await backend.savedPassword(server.id).catch(() => null)) ?? "";
-      }
-      // Without its password the server turns the player away only after the mods download and DayZ starts.
-      if (startGame && server.password && !password) {
-        toast.info(t`This server needs a password`, {
-          description: t`Enter it in the panel on the right, then select Play.`,
-        });
-        requestAnimationFrame(() => document.getElementById("server-password")?.focus());
-        return;
-      }
-      if (!install) {
-        toast.error(t`DayZ wasn't found`, { description: t`Set the DayZ folder in Settings.` });
-        return;
-      }
+      // Claimed straight away, as looking up a saved password can wait on the keyring.
       playing.current = true;
-      setJob({ serverId: server.id, phase: "checking", startsGame: startGame, progress: [] });
       try {
+        setSelectedId(server.id);
+        if (unlisted.has(server.id)) {
+          toast.info(t`This server is offline`, {
+            description: t`It isn't in the server list right now. It comes back once the server is up again.`,
+          });
+          return;
+        }
+        // Joining from the list, by double-click or Enter, uses the password the player chose to remember.
+        if (startGame && server.password && !password) {
+          password = (await backend.savedPassword(server.id).catch(() => null)) ?? "";
+        }
+        // Without its password the server turns the player away only after the mods download and DayZ starts.
+        if (startGame && server.password && !password) {
+          toast.info(t`This server needs a password`, {
+            description: t`Enter it in the panel on the right, then select Play.`,
+          });
+          requestAnimationFrame(() => document.getElementById("server-password")?.focus());
+          return;
+        }
+        if (!install) {
+          toast.error(t`DayZ wasn't found`, { description: t`Set the DayZ folder in Settings.` });
+          return;
+        }
+        setJob({ serverId: server.id, phase: "checking", startsGame: startGame, progress: [] });
         const mods = await backend.serverMods(server.id);
         const ids = mods.map((mod) => mod.steamWorkshopId);
         const installed = new Set(await backend.installedMods(settings.dayzDir, ids));
