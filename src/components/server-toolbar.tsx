@@ -10,6 +10,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useActiveOption } from "@/hooks/use-active-option";
 import { NO_FILTERS, filterChips, type FilterChip, type Filters, type Option } from "@/lib/filter";
+import { countryName } from "@/lib/countries";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -19,6 +20,8 @@ type Props = {
   filtersEnabled: boolean;
   maps: Option[];
   versions: Option[];
+  /** Countries in the list by code, A to Z by name. */
+  countries: Option[];
   /** Mods in the list, busiest first. */
   mods: Option[];
   shown: number;
@@ -37,6 +40,7 @@ export function ServerToolbar({
   filtersEnabled,
   maps,
   versions,
+  countries,
   mods,
   shown,
   total,
@@ -47,7 +51,7 @@ export function ServerToolbar({
 }: Props) {
   const { i18n } = useLingui();
   const set = (patch: Partial<Filters>) => onChange({ ...filters, ...patch });
-  const chips = filterChips(filters);
+  const chips = filterChips(filters, (code) => countryName(code, i18n.locale));
   const filtersOn = chips.length;
   const shownCount = i18n.number(shown);
   const totalCount = i18n.number(total);
@@ -111,6 +115,7 @@ export function ServerToolbar({
                   onChange={set}
                   maps={maps}
                   versions={versions}
+                  countries={countries}
                   mods={mods}
                   shown={shown}
                   canReset={chips.length > 0}

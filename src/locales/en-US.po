@@ -37,6 +37,14 @@ msgstr ""
 msgid "{hidden, plural, one {# more filter on, open Filters} other {# more filters on, open Filters}}"
 msgstr ""
 
+#: src/lib/format.ts
+msgid "{hours} h"
+msgstr ""
+
+#: src/lib/format.ts
+msgid "{hours} h {rest} min"
+msgstr ""
+
 #: src/components/update-button.tsx
 msgid "{message} Select to try again."
 msgstr ""
@@ -75,6 +83,10 @@ msgstr ""
 
 #: src/App.tsx
 msgid "{name}. Select Play in the panel on the right to join."
+msgstr ""
+
+#: src/lib/format.ts
+msgid "{rest} min"
 msgstr ""
 
 #: src/components/server-toolbar.tsx
@@ -187,6 +199,10 @@ msgstr ""
 
 #: src/components/server-detail.tsx
 msgid "Address copied"
+msgstr ""
+
+#: src/components/filter-menu.tsx
+msgid "All countries"
 msgstr ""
 
 #: src/components/filter-menu.tsx
@@ -430,8 +446,19 @@ msgstr ""
 msgid "Couldn't verify the mods"
 msgstr ""
 
+#: src/components/filter-menu.tsx
+#: src/components/server-detail.tsx
+#: src/components/server-table.tsx
+#: src/lib/filter.ts
+msgid "Country"
+msgstr ""
+
 #: src/components/settings-dialog.tsx
 msgid "Dark"
+msgstr ""
+
+#: src/components/server-detail.tsx
+msgid "Dark in"
 msgstr ""
 
 #: src/components/filter-menu.tsx
@@ -439,6 +466,10 @@ msgstr ""
 #: src/components/server-table.tsx
 #: src/lib/filter.ts
 msgid "Day"
+msgstr ""
+
+#: src/components/server-detail.tsx
+msgid "Daylight in"
 msgstr ""
 
 #: src/lib/backend-messages.ts
@@ -1099,6 +1130,14 @@ msgstr ""
 msgid "Players"
 msgstr ""
 
+#: src/components/server-detail.tsx
+msgid "Real time until day breaks on this server. Some servers speed up the night, so it may come sooner."
+msgstr ""
+
+#: src/components/server-detail.tsx
+msgid "Real time until night falls on this server."
+msgstr ""
+
 #: src/components/app-sidebar.tsx
 msgid "Recent"
 msgstr ""
@@ -1219,6 +1258,10 @@ msgstr ""
 
 #: src/components/join-address-dialog.tsx
 msgid "Server address"
+msgstr ""
+
+#: src/components/settings-dialog.tsx
+msgid "Server countries come from IP Geolocation by DB-IP (db-ip.com), under CC BY 4.0."
 msgstr ""
 
 #: src/components/server-detail.tsx
@@ -1588,6 +1631,10 @@ msgstr ""
 
 #: src/lib/filter.ts
 msgid "under {maxPing} ms"
+msgstr ""
+
+#: src/lib/format.ts
+msgid "under 1 min"
 msgstr ""
 
 #: src/lib/maps.ts

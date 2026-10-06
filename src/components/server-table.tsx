@@ -7,6 +7,7 @@ import { ArrowDown, ArrowUp, Lock, Moon, Puzzle, Star, Sun } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton";
 import type { PingResult, Pings } from "@/hooks/use-pings";
 import { isNight, matchedMod, type Sort, type SortKey } from "@/lib/filter";
+import { CountryFlag } from "@/components/country-flag";
 import { mapName } from "@/lib/maps";
 import type { ServerRow } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -14,7 +15,7 @@ import { cn } from "@/lib/utils";
 const ROW_HEIGHT = 36;
 // Narrow layouts drop the Time column so server names keep their room.
 const COLUMNS =
-  "grid grid-cols-[36px_minmax(0,1fr)_104px_116px_72px] lg:grid-cols-[36px_minmax(0,1fr)_112px_124px_76px_76px] 2xl:grid-cols-[36px_minmax(0,1fr)_168px_148px_96px_96px] items-center";
+  "grid grid-cols-[36px_minmax(0,1fr)_104px_64px_116px_72px] lg:grid-cols-[36px_minmax(0,1fr)_112px_68px_124px_76px_76px] 2xl:grid-cols-[36px_minmax(0,1fr)_168px_84px_148px_96px_96px] items-center";
 const TIME_COLUMN = "max-lg:hidden";
 
 const HEADERS: {
@@ -26,6 +27,7 @@ const HEADERS: {
 }[] = [
   { key: "name", label: msg`Server` },
   { key: "map", label: msg`Map` },
+  { key: "country", label: msg`Country` },
   { key: "players", label: msg`Players`, descendingFirst: true },
   { key: "time", label: msg`Time` },
   {
@@ -187,6 +189,7 @@ export function ServerTable({
                 <span />
                 <Skeleton className="h-3.5" style={{ width: `${35 + ((i * 37) % 45)}%` }} />
                 <Skeleton className="h-3.5 w-16" />
+                <Skeleton className="h-3.5 w-6" />
                 <Skeleton className="h-3.5 w-20" />
                 <Skeleton className={cn("h-3.5 w-12", TIME_COLUMN)} />
                 <span />
@@ -332,6 +335,10 @@ const Row = memo(function Row({
 
       <div role="gridcell" className="truncate pr-3 text-muted-foreground" title={mapName(row.map)}>
         {mapName(row.map)}
+      </div>
+
+      <div role="gridcell" className="flex items-center pr-3">
+        {row.country && <CountryFlag code={row.country} />}
       </div>
 
       <div role="gridcell" className="flex items-center gap-2 pr-3">

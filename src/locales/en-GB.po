@@ -37,6 +37,14 @@ msgstr "{filtersOn, plural, one {Filters <0>#<1> on</1></0>} other {Filters <2>#
 msgid "{hidden, plural, one {# more filter on, open Filters} other {# more filters on, open Filters}}"
 msgstr "{hidden, plural, one {# more filter on, open Filters} other {# more filters on, open Filters}}"
 
+#: src/lib/format.ts
+msgid "{hours} h"
+msgstr "{hours} h"
+
+#: src/lib/format.ts
+msgid "{hours} h {rest} min"
+msgstr "{hours} h {rest} min"
+
 #: src/components/update-button.tsx
 msgid "{message} Select to try again."
 msgstr "{message} Select to try again."
@@ -76,6 +84,10 @@ msgstr "{modCount, plural, one {<0><1>#</1> mod</0>} other {<2><3>#</3> mods</2>
 #: src/App.tsx
 msgid "{name}. Select Play in the panel on the right to join."
 msgstr "{name}. Select Play in the panel on the right to join."
+
+#: src/lib/format.ts
+msgid "{rest} min"
+msgstr "{rest} min"
 
 #: src/components/server-toolbar.tsx
 msgid "{servers, plural, one {# server} other {# servers}}"
@@ -188,6 +200,10 @@ msgstr "Added to the command line"
 #: src/components/server-detail.tsx
 msgid "Address copied"
 msgstr "Address copied"
+
+#: src/components/filter-menu.tsx
+msgid "All countries"
+msgstr "All countries"
 
 #: src/components/filter-menu.tsx
 msgid "All maps"
@@ -430,9 +446,20 @@ msgstr "Couldn't update the mods"
 msgid "Couldn't verify the mods"
 msgstr "Couldn't verify the mods"
 
+#: src/components/filter-menu.tsx
+#: src/components/server-detail.tsx
+#: src/components/server-table.tsx
+#: src/lib/filter.ts
+msgid "Country"
+msgstr "Country"
+
 #: src/components/settings-dialog.tsx
 msgid "Dark"
 msgstr "Dark"
+
+#: src/components/server-detail.tsx
+msgid "Dark in"
+msgstr "Dark in"
 
 #: src/components/filter-menu.tsx
 #: src/components/server-detail.tsx
@@ -440,6 +467,10 @@ msgstr "Dark"
 #: src/lib/filter.ts
 msgid "Day"
 msgstr "Day"
+
+#: src/components/server-detail.tsx
+msgid "Daylight in"
+msgstr "Daylight in"
 
 #: src/lib/backend-messages.ts
 msgid "DayZ couldn't be started: {error}"
@@ -1099,6 +1130,14 @@ msgstr "Play"
 msgid "Players"
 msgstr "Players"
 
+#: src/components/server-detail.tsx
+msgid "Real time until day breaks on this server. Some servers speed up the night, so it may come sooner."
+msgstr "Real time until day breaks on this server. Some servers speed up the night, so it may come sooner."
+
+#: src/components/server-detail.tsx
+msgid "Real time until night falls on this server."
+msgstr "Real time until night falls on this server."
+
 #: src/components/app-sidebar.tsx
 msgid "Recent"
 msgstr "Recent"
@@ -1220,6 +1259,10 @@ msgstr "Server"
 #: src/components/join-address-dialog.tsx
 msgid "Server address"
 msgstr "Server address"
+
+#: src/components/settings-dialog.tsx
+msgid "Server countries come from IP Geolocation by DB-IP (db-ip.com), under CC BY 4.0."
+msgstr "Server countries come from IP Geolocation by DB-IP (db-ip.com), under CC BY 4.0."
 
 #: src/components/server-detail.tsx
 msgid "Server details"
@@ -1589,6 +1632,10 @@ msgstr "Trying again…"
 #: src/lib/filter.ts
 msgid "under {maxPing} ms"
 msgstr "under {maxPing} ms"
+
+#: src/lib/format.ts
+msgid "under 1 min"
+msgstr "under 1 min"
 
 #: src/lib/maps.ts
 msgid "Unknown"

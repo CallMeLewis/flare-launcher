@@ -5,6 +5,7 @@ use std::sync::RwLock;
 use serde::{Deserialize, Serialize};
 use tauri::State;
 
+use crate::countries;
 use crate::error::Result;
 use crate::query::Info;
 use crate::text;
@@ -81,6 +82,8 @@ pub struct ServerRow {
   pub version: String,
   pub time: String,
   pub time_acceleration: Option<f32>,
+  /// The two-letter code of the country the server is in, such as `DE`, when its address shows one.
+  pub country: Option<String>,
   pub mod_count: usize,
   /// Positions in [`ServerList::mod_names`], for searching by mod.
   pub mods: Vec<u32>,
@@ -145,13 +148,22 @@ pub fn from_query(addr: SocketAddr, info: Info, mods: Vec<Mod>) -> Option<Stored
     version: info.version,
     time: tags.iter().find(|tag| tag.contains(':')).copied().unwrap_or_default().to_string(),
     time_acceleration: tags.iter().find_map(|tag| tag.strip_prefix("etm")?.parse().ok()),
+    country: country_of(addr.ip()),
     mod_count: mods.len(),
     mods: Vec::new(),
   };
   Some(StoredServer { row, mods, listed: false })
 }
 
+fn country_of(ip: IpAddr) -> Option<String> {
+  match ip {
+    IpAddr::V4(ip) => countries::country(ip),
+    IpAddr::V6(_) => None,
+  }
+}
+
 fn into_stored(api: ApiServer) -> StoredServer {
+  let country = api.endpoint.ip.parse().ok().and_then(country_of);
   let row = ServerRow {
     id: format!("{}:{}", api.endpoint.ip, api.endpoint.port),
     ip: api.endpoint.ip,
@@ -168,6 +180,7 @@ fn into_stored(api: ApiServer) -> StoredServer {
     version: api.version,
     time: api.time,
     time_acceleration: api.time_acceleration,
+    country,
     mod_count: api.mods.len(),
     mods: Vec::new(),
   };
@@ -279,6 +292,7 @@ mod tests {
     let bare = &servers["9.9.9.9:27016"];
     assert!(bare.row.official);
     assert_eq!(bare.row.time_acceleration, None);
+    assert_eq!(alpha.row.country.as_deref(), Some("AU"));
   }
 
   #[test]
@@ -324,6 +338,7 @@ mod tests {
     assert_eq!(server.row.map, "chernarusplus");
     assert_eq!(server.row.time, "08:41");
     assert_eq!(server.row.time_acceleration, Some(6.0));
+    assert_eq!(server.row.country, None);
     assert_eq!(server.row.mod_count, 1);
     assert!(server.row.password && server.row.first_person_only && server.row.battl_eye && !server.row.official);
     assert!(!server.listed);

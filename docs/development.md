@@ -123,6 +123,9 @@ chosen in Settings > Launcher. System, the default, uses the computer's language
   sorting, `lib/backend.ts` every call into Rust, `lib/i18n.ts` loading languages and `locales/` their catalogues.
 - `src-tauri/src/servers.rs`: downloads and caches the server list.
 - `src-tauri/src/query.rs`: ICMP ping for latency and Steam A2S_INFO queries for player counts.
+- `src-tauri/src/countries.rs`: finds the country a server's address is in, from the table in
+  `src-tauri/data/countries.bin`. `pnpm countries` rebuilds it from DB-IP's free IP to Country Lite database, which
+  Settings > About credits as its licence asks.
 - `src-tauri/src/steam.rs`: finds Steam, DayZ and the Workshop folder, and reads which mods the player is subscribed to.
 - `src-tauri/src/launch.rs`: links mods into `<DayZ>/!dzsl` and starts the game.
 - `src-tauri/src/workshop.rs`: subscribes to, downloads and unsubscribes from mods through Steamworks.

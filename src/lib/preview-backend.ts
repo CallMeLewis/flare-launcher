@@ -64,6 +64,8 @@ export async function fetchServers(): Promise<ServerList> {
       version: api.version ?? "",
       time: api.time ?? "",
       timeAcceleration: api.timeAcceleration ?? null,
+      // Only the backend has the table of countries.
+      country: null,
       modCount: api.mods?.length ?? 0,
       mods: (api.mods ?? []).map(position),
     });

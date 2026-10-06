@@ -17,6 +17,8 @@ export type ServerRow = {
   /** In-game time as `HH:MM`. */
   time: string;
   timeAcceleration: number | null;
+  /** Two-letter code of the country the server is in, such as `DE`, or `null` when its address doesn't show one. */
+  country: string | null;
   modCount: number;
   /** Positions in {@link ServerList.modNames}, for searching by mod. */
   mods: number[];

@@ -1,4 +1,5 @@
 import { i18n } from "@lingui/core";
+import { t } from "@lingui/core/macro";
 import type { ModProgress } from "./types";
 
 const UNITS = ["B", "KB", "MB", "GB", "TB"];
@@ -31,4 +32,14 @@ export function downloadFraction(progress: ModProgress[]): number {
     return acc + (p.total > 0 ? Math.min(p.downloaded / p.total, 1) : 0);
   }, 0);
   return sum / progress.length;
+}
+
+/** A wait in whole minutes, as `40 min` or `1 h 20 min`. */
+export function formatMinutes(minutes: number): string {
+  if (minutes < 1) return t`under 1 min`;
+  const hours = Math.floor(minutes / 60);
+  const rest = minutes % 60;
+  if (hours === 0) return t`${rest} min`;
+  if (rest === 0) return t`${hours} h`;
+  return t`${hours} h ${rest} min`;
 }

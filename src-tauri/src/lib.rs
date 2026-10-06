@@ -1,4 +1,5 @@
 mod app_menu;
+mod countries;
 mod credentials;
 #[cfg(target_os = "linux")]
 mod desktop;

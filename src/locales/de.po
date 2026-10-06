@@ -37,6 +37,14 @@ msgstr "{filtersOn, plural, one {Filter <0>#<1> aktiv</1></0>} other {Filter <2>
 msgid "{hidden, plural, one {# more filter on, open Filters} other {# more filters on, open Filters}}"
 msgstr "{hidden, plural, one {# weiterer Filter aktiv, Filter öffnen} other {# weitere Filter aktiv, Filter öffnen}}"
 
+#: src/lib/format.ts
+msgid "{hours} h"
+msgstr "{hours} Std."
+
+#: src/lib/format.ts
+msgid "{hours} h {rest} min"
+msgstr "{hours} Std. {rest} Min."
+
 #: src/components/update-button.tsx
 msgid "{message} Select to try again."
 msgstr "{message} Klicke, um es erneut zu versuchen."
@@ -76,6 +84,10 @@ msgstr "{modCount, plural, one {<0><1>#</1> Mod</0>} other {<2><3>#</3> Mods</2>
 #: src/App.tsx
 msgid "{name}. Select Play in the panel on the right to join."
 msgstr "{name}. Klicke im Bereich rechts auf Spielen, um beizutreten."
+
+#: src/lib/format.ts
+msgid "{rest} min"
+msgstr "{rest} Min."
 
 #: src/components/server-toolbar.tsx
 msgid "{servers, plural, one {# server} other {# servers}}"
@@ -188,6 +200,10 @@ msgstr "Zur Befehlszeile hinzugefügt"
 #: src/components/server-detail.tsx
 msgid "Address copied"
 msgstr "Adresse kopiert"
+
+#: src/components/filter-menu.tsx
+msgid "All countries"
+msgstr "Alle Länder"
 
 #: src/components/filter-menu.tsx
 msgid "All maps"
@@ -430,9 +446,20 @@ msgstr "Mods konnten nicht aktualisiert werden"
 msgid "Couldn't verify the mods"
 msgstr "Mods konnten nicht überprüft werden"
 
+#: src/components/filter-menu.tsx
+#: src/components/server-detail.tsx
+#: src/components/server-table.tsx
+#: src/lib/filter.ts
+msgid "Country"
+msgstr "Land"
+
 #: src/components/settings-dialog.tsx
 msgid "Dark"
 msgstr "Dunkel"
+
+#: src/components/server-detail.tsx
+msgid "Dark in"
+msgstr "Dunkel in"
 
 #: src/components/filter-menu.tsx
 #: src/components/server-detail.tsx
@@ -440,6 +467,10 @@ msgstr "Dunkel"
 #: src/lib/filter.ts
 msgid "Day"
 msgstr "Tag"
+
+#: src/components/server-detail.tsx
+msgid "Daylight in"
+msgstr "Hell in"
 
 #: src/lib/backend-messages.ts
 msgid "DayZ couldn't be started: {error}"
@@ -1099,6 +1130,14 @@ msgstr "Spielen"
 msgid "Players"
 msgstr "Spieler"
 
+#: src/components/server-detail.tsx
+msgid "Real time until day breaks on this server. Some servers speed up the night, so it may come sooner."
+msgstr "Echtzeit bis zum Tagesanbruch auf diesem Server. Manche Server lassen die Nacht schneller vergehen, dann wird es früher hell."
+
+#: src/components/server-detail.tsx
+msgid "Real time until night falls on this server."
+msgstr "Echtzeit bis zum Einbruch der Nacht auf diesem Server."
+
 #: src/components/app-sidebar.tsx
 msgid "Recent"
 msgstr "Zuletzt gespielt"
@@ -1220,6 +1259,10 @@ msgstr "Server"
 #: src/components/join-address-dialog.tsx
 msgid "Server address"
 msgstr "Serveradresse"
+
+#: src/components/settings-dialog.tsx
+msgid "Server countries come from IP Geolocation by DB-IP (db-ip.com), under CC BY 4.0."
+msgstr "Die Länder der Server stammen aus IP Geolocation by DB-IP (db-ip.com), unter CC BY 4.0."
 
 #: src/components/server-detail.tsx
 msgid "Server details"
@@ -1589,6 +1632,10 @@ msgstr "Neuer Versuch…"
 #: src/lib/filter.ts
 msgid "under {maxPing} ms"
 msgstr "unter {maxPing} ms"
+
+#: src/lib/format.ts
+msgid "under 1 min"
+msgstr "unter 1 Min."
 
 #: src/lib/maps.ts
 msgid "Unknown"

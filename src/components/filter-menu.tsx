@@ -1,6 +1,7 @@
 import { useId, useState, type ReactNode } from "react";
 import { Plural, Trans, useLingui } from "@lingui/react/macro";
 import { Search, X } from "lucide-react";
+import { CountryFlag } from "@/components/country-flag";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -9,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useActiveOption } from "@/hooks/use-active-option";
 import type { Filters, ModsFilter, Option, Perspective, ServerType, TimeOfDay } from "@/lib/filter";
+import { countryName } from "@/lib/countries";
 import { cn } from "@/lib/utils";
 
 const ANY = "any";
@@ -19,6 +21,8 @@ type Props = {
   onChange: (patch: Partial<Filters>) => void;
   maps: Option[];
   versions: Option[];
+  /** Countries by code. */
+  countries: Option[];
   mods: Option[];
   shown: number;
   /** Whether anything is narrowed, so Reset has something to do. */
@@ -27,7 +31,7 @@ type Props = {
 };
 
 /** Every filter, in groups, inside the Filters popover. */
-export function FilterMenu({ filters, onChange, maps, versions, mods, shown, canReset, onReset }: Props) {
+export function FilterMenu({ filters, onChange, maps, versions, countries, mods, shown, canReset, onReset }: Props) {
   const { t, i18n } = useLingui();
   return (
     <div className="flex max-h-[min(640px,var(--radix-popover-content-available-height))] flex-col">
@@ -69,6 +73,37 @@ export function FilterMenu({ filters, onChange, maps, versions, mods, shown, can
                   {versions.map(({ value, count: servers }) => (
                     <SelectItem key={value} value={value}>
                       <span className="data text-xs">{value}</span>
+                      <span className="data ml-1 text-xs text-muted-foreground">{i18n.number(servers)}</span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Field>
+            <Field label={t`Country`}>
+              <Select
+                value={filters.country || ANY}
+                onValueChange={(country) => onChange({ country: country === ANY ? "" : country })}
+              >
+                <SelectTrigger size="sm" aria-label={t`Country`} className="w-full text-[13px]">
+                  <SelectValue>
+                    {filters.country ? (
+                      <span className="flex min-w-0 items-center gap-2">
+                        <CountryFlag code={filters.country} />
+                        <span className="truncate">{countryName(filters.country, i18n.locale)}</span>
+                      </span>
+                    ) : (
+                      t`All countries`
+                    )}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent className="max-h-80">
+                  <SelectItem value={ANY}>
+                    <Trans>All countries</Trans>
+                  </SelectItem>
+                  {countries.map(({ value, count: servers }) => (
+                    <SelectItem key={value} value={value}>
+                      <CountryFlag code={value} />
+                      {countryName(value, i18n.locale)}
                       <span className="data ml-1 text-xs text-muted-foreground">{i18n.number(servers)}</span>
                     </SelectItem>
                   ))}

@@ -32,6 +32,7 @@ import {
   NO_FILTERS,
   activeFilterCount,
   filterServers,
+  countryCounts,
   mapCounts,
   modCounts,
   pickSaved,
@@ -42,6 +43,7 @@ import {
   type Filters,
   type Sort,
 } from "@/lib/filter";
+import { countryName } from "@/lib/countries";
 import type { Install, PlayJob, ServerRow, Settings } from "@/lib/types";
 
 const DEFAULT_SETTINGS: Settings = {
@@ -76,7 +78,7 @@ const withRows = (rows: ServerRow[], added: ServerRow[]) => {
 };
 
 export function App() {
-  const { t } = useLingui();
+  const { t, i18n } = useLingui();
   const servers = useServers(onRefreshFailed);
   const pings = usePings();
   const lan = useLan(onLanSearchFailed);
@@ -165,6 +167,10 @@ export function App() {
   const recents = useMemo(() => new Set(recentIds), [recentIds]);
   const maps = useMemo(() => mapCounts(servers.rows), [servers.rows]);
   const versions = useMemo(() => versionCounts(servers.rows), [servers.rows]);
+  const countries = useMemo(
+    () => countryCounts(servers.rows, (code) => countryName(code, i18n.locale)),
+    [servers.rows, i18n.locale],
+  );
   const mods = useMemo(() => modCounts(servers.rows, servers.modNames), [servers.rows, servers.modNames]);
   // Servers found by asking them directly that the server list doesn't have.
   const listedIds = useMemo(() => new Set(servers.rows.map((row) => row.id)), [servers.rows]);
@@ -557,6 +563,7 @@ export function App() {
                     filtersEnabled={view === "all"}
                     maps={maps}
                     versions={versions}
+                    countries={countries}
                     mods={mods}
                     shown={listed.length}
                     total={inView.length}

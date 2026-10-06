@@ -14,6 +14,8 @@ export type Filters = {
   map: string;
   /** Game version, or an empty string for any version. */
   version: string;
+  /** Two-letter country code, or an empty string for any country. */
+  country: string;
   serverType: ServerType;
   hasPlayers: boolean;
   notFull: boolean;
@@ -33,6 +35,7 @@ export const DEFAULT_FILTERS: Filters = {
   search: "",
   map: "",
   version: "",
+  country: "",
   serverType: "any",
   hasPlayers: true,
   notFull: false,
@@ -85,9 +88,34 @@ export function pickSaved(stored: Record<string, unknown>): SavedFilters {
   };
 }
 
+// The in-game hours night falls and day breaks.
+const DUSK = 20;
+const DAWN = 5;
+
 export function isNight(time: string): boolean {
   const hour = Number.parseInt(time, 10);
-  return Number.isFinite(hour) && (hour < 5 || hour >= 20);
+  return Number.isFinite(hour) && (hour < DAWN || hour >= DUSK);
+}
+
+/**
+ * How many real minutes until night falls, or day breaks if it's night, on a server whose clock read `time` (`HH:MM`)
+ * `elapsedMs` ago and runs `acceleration` times faster than real time. `null` when the time can't be read. Servers
+ * can also speed up the night on its own, which the server list doesn't say, so a wait for daylight may be shorter.
+ */
+export function untilDayChange(
+  time: string,
+  acceleration: number | null,
+  elapsedMs = 0,
+): { night: boolean; minutes: number } | null {
+  const match = /^(\d{1,2}):(\d{2})$/.exec(time.trim());
+  if (!match) return null;
+  const speed = acceleration && acceleration > 0 ? acceleration : 1;
+  const day = 24 * 60;
+  const now = (Number(match[1]) * 60 + Number(match[2]) + (elapsedMs / 60_000) * speed) % day;
+  const night = now < DAWN * 60 || now >= DUSK * 60;
+  const target = (night ? DAWN : DUSK) * 60;
+  const gameMinutes = (target - now + day) % day;
+  return { night, minutes: Math.ceil(gameMinutes / speed) };
 }
 
 /** Moves favourites to the top, keeping the existing order within each group. */
@@ -98,7 +126,7 @@ export function pinFavourites(rows: ServerRow[], favourites: ReadonlySet<string>
   return pinned.length === 0 ? rows : [...pinned, ...rest];
 }
 
-export const SORT_KEYS = ["name", "map", "players", "time", "ping"] as const;
+export const SORT_KEYS = ["name", "map", "country", "players", "time", "ping"] as const;
 export type SortKey = (typeof SORT_KEYS)[number];
 export type Sort = { key: SortKey; descending: boolean };
 
@@ -149,6 +177,7 @@ export function filterServers(
   return rows.filter((row) => {
     if (filters.map && mapName(row.map) !== filters.map) return false;
     if (filters.version && row.version !== filters.version) return false;
+    if (filters.country && row.country !== filters.country) return false;
     if (filters.serverType === "official" && !row.official) return false;
     if (filters.serverType === "community" && row.official) return false;
     if (filters.hasPlayers && row.players === 0) return false;
@@ -204,6 +233,10 @@ export function sortServers(
         return direction * a.name.localeCompare(b.name, undefined, { sensitivity: "base" });
       case "map":
         return direction * mapName(a.map).localeCompare(mapName(b.map));
+      case "country":
+        // Servers with no country sink to the bottom either way.
+        if (!a.country || !b.country) return (a.country ? 0 : 1) - (b.country ? 0 : 1);
+        return direction * a.country.localeCompare(b.country);
       case "players":
         return direction * (a.players - b.players);
       case "time":
@@ -245,6 +278,13 @@ export function versionCounts(rows: ServerRow[]): Option[] {
   );
 }
 
+/** Countries in the list by code, in the order of `name`, the name shown for each. */
+export function countryCounts(rows: ServerRow[], name: (code: string) => string): Option[] {
+  return countBy(rows, (row) => row.country ?? "").sort((a, b) =>
+    name(a.value).localeCompare(name(b.value), undefined, { sensitivity: "base" }),
+  );
+}
+
 /**
  * A filter that is on, as a chip the player can remove. A label that is a plain string is a value such as a map, mod
  * or version name, shown as it is; descriptors are translated where the chip is shown.
@@ -261,12 +301,17 @@ const PERSPECTIVE_LABELS: Record<Exclude<Perspective, "any">, MessageDescriptor>
   third: msg`3PP allowed`,
 };
 
-/** The filters that narrow the list, the search aside, in the order the Filters menu shows them. */
-export function filterChips(filters: Filters): FilterChip[] {
+/**
+ * The filters that narrow the list, the search aside, in the order the Filters menu shows them. `countryName` names
+ * a country by its code in the interface language.
+ */
+export function filterChips(filters: Filters, countryName: (code: string) => string = (code) => code): FilterChip[] {
   const chips: FilterChip[] = [];
   if (filters.map) chips.push({ key: "map", prefix: msg`Map`, label: filters.map, clear: { map: "" } });
   if (filters.version)
     chips.push({ key: "version", prefix: msg`Version`, label: filters.version, clear: { version: "" } });
+  if (filters.country)
+    chips.push({ key: "country", prefix: msg`Country`, label: countryName(filters.country), clear: { country: "" } });
   if (filters.serverType !== "any")
     chips.push({
       key: "serverType",

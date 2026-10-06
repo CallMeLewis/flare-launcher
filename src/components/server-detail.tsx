@@ -18,8 +18,9 @@ import {
   Star,
 } from "lucide-react";
 import { toast } from "sonner";
+import { CountryFlag } from "@/components/country-flag";
 import { PingValue } from "@/components/server-table";
-import { isNight } from "@/lib/filter";
+import { isNight, untilDayChange } from "@/lib/filter";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -34,7 +35,8 @@ import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { PingResult } from "@/hooks/use-pings";
 import { backend, errorMessage } from "@/lib/backend";
-import { downloadFraction, formatBytes } from "@/lib/format";
+import { countryName } from "@/lib/countries";
+import { downloadFraction, formatBytes, formatMinutes } from "@/lib/format";
 import { mapName } from "@/lib/maps";
 import type { Install, Mod, ModProgress, PlayJob, ServerRow } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -95,6 +97,9 @@ export function ServerDetail({
   const [modsAttempt, setModsAttempt] = useState(0);
   // Which mods are installed couldn't be checked. Play still works: joining checks the mods again.
   const [checkFailed, setCheckFailed] = useState(false);
+  // When this copy of the server arrived, and the time now, to work out how far its clock has moved on since.
+  const [receivedAt, setReceivedAt] = useState(Date.now);
+  const [now, setNow] = useState(Date.now);
 
   const unlisted = offline === "unlisted";
   const canCheckMods = install !== null && !unlisted;
@@ -125,6 +130,16 @@ export function ServerDetail({
       cancelled = true;
     };
   }, [server, modsAttempt, unlisted]);
+
+  useEffect(() => {
+    setReceivedAt(Date.now());
+    setNow(Date.now());
+  }, [server]);
+
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 30_000);
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     backend
@@ -199,6 +214,8 @@ export function ServerDetail({
   const maxPlayers = ping?.maxPlayers ?? server.maxPlayers;
   const canPlay = canCheckMods && !checking && !busy;
   const speed = server.timeAcceleration ? i18n.number(server.timeAcceleration) : "";
+  // What an unlisted server last reported is long out of date.
+  const dayChange = unlisted ? null : untilDayChange(server.time, server.timeAcceleration, now - receivedAt);
 
   /** Play, from the button or Enter in the password field. Saves the password first when Remember is ticked. */
   function join() {
@@ -270,6 +287,18 @@ export function ServerDetail({
           </span>
         </Stat>
         <Stat label={t`Map`}>{mapName(server.map)}</Stat>
+        <Stat label={t`Country`}>
+          {server.country ? (
+            <span className="flex items-center gap-1.5">
+              <CountryFlag code={server.country} />
+              <span className="truncate" title={countryName(server.country, i18n.locale)}>
+                {countryName(server.country, i18n.locale)}
+              </span>
+            </span>
+          ) : (
+            <span className="data">–</span>
+          )}
+        </Stat>
         <Stat label={t`In-game time`}>
           {/* What an unlisted server last reported is long out of date. */}
           <span className="data">{(!unlisted && server.time) || "–"}</span>
@@ -278,6 +307,22 @@ export function ServerDetail({
               {isNight(server.time) ? t`Night` : t`Day`}
               {server.timeAcceleration ? ` · ${t`${speed}× speed`}` : ""}
             </span>
+          )}
+        </Stat>
+        <Stat label={dayChange?.night ? t`Daylight in` : t`Dark in`}>
+          {dayChange ? (
+            <span
+              className="data"
+              title={
+                dayChange.night
+                  ? t`Real time until day breaks on this server. Some servers speed up the night, so it may come sooner.`
+                  : t`Real time until night falls on this server.`
+              }
+            >
+              {formatMinutes(dayChange.minutes)}
+            </span>
+          ) : (
+            <span className="data">–</span>
           )}
         </Stat>
         <Stat label={t`Perspective`}>{server.firstPersonOnly ? t`First person only` : t`First and third person`}</Stat>

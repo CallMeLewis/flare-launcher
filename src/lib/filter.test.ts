@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   DEFAULT_FILTERS,
   activeFilterCount,
+  countryCounts,
   filterServers,
   mapCounts,
   matchedMod,
@@ -11,6 +12,7 @@ import {
   pickSaved,
   pinFavourites,
   sortServers,
+  untilDayChange,
   versionCounts,
   type Filters,
 } from "./filter";
@@ -31,6 +33,7 @@ function server(overrides: Partial<ServerRow> & { id: string }): ServerRow {
     battlEye: true,
     version: "1.29",
     time: "12:00",
+    country: null,
     timeAcceleration: null,
     modCount: 0,
     mods: [],
@@ -287,5 +290,53 @@ describe("pinFavourites", () => {
 
   it("returns the same list when nothing is a favourite", () => {
     expect(pinFavourites(rows, new Set())).toBe(rows);
+  });
+});
+
+describe("countries", () => {
+  const placed = [
+    server({ id: "1.1.1.1:2303", country: "DE" }),
+    server({ id: "2.2.2.2:2303", country: "FR" }),
+    server({ id: "3.3.3.3:2303", country: "DE" }),
+    server({ id: "4.4.4.4:2303" }),
+  ];
+  const names: Record<string, string> = { DE: "Germany", FR: "France" };
+
+  it("keeps only the chosen country's servers", () => {
+    const ids = filterServers(placed, { ...DEFAULT_FILTERS, hasPlayers: false, country: "DE" }).map((r) => r.id);
+    expect(ids).toEqual(["1.1.1.1:2303", "3.3.3.3:2303"]);
+  });
+
+  it("counts countries in the order of their names", () => {
+    expect(countryCounts(placed, (code) => names[code])).toEqual([
+      { value: "FR", count: 1 },
+      { value: "DE", count: 2 },
+    ]);
+  });
+
+  it("sorts servers with no country last either way", () => {
+    for (const descending of [false, true])
+      expect(sortServers(placed, { key: "country", descending }, () => null).at(-1)?.id).toBe("4.4.4.4:2303");
+  });
+});
+
+describe("untilDayChange", () => {
+  it("counts real minutes until night falls", () => {
+    expect(untilDayChange("18:00", 1)).toEqual({ night: false, minutes: 120 });
+    expect(untilDayChange("18:00", 4)).toEqual({ night: false, minutes: 30 });
+  });
+
+  it("counts until daybreak at night, across midnight", () => {
+    expect(untilDayChange("22:30", 2)).toEqual({ night: true, minutes: 195 });
+    expect(untilDayChange("04:59", null)).toEqual({ night: true, minutes: 1 });
+  });
+
+  it("moves the clock on by the time since the server reported it", () => {
+    // Half an hour at 4x speed is two hours in game.
+    expect(untilDayChange("18:00", 4, 30 * 60_000)).toEqual({ night: true, minutes: 135 });
+  });
+
+  it("gives up on a time it can't read", () => {
+    expect(untilDayChange("", 1)).toBeNull();
   });
 });

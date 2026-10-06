@@ -701,6 +701,11 @@ function AboutSection() {
           </Select>
         </SettingRow>
       </SettingsGroup>
+
+      <p className="text-xs text-muted-foreground">
+        {/* DB-IP's licence (CC BY 4.0) asks for this credit. */}
+        <Trans>Server countries come from IP Geolocation by DB-IP (db-ip.com), under CC BY 4.0.</Trans>
+      </p>
     </>
   );
 }
