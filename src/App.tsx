@@ -151,6 +151,14 @@ export function App() {
     () => subscribed.mods && subscribed.mods.filter((mod) => !unsubscribedIds.has(mod.id)),
     [subscribed.mods, unsubscribedIds],
   );
+  // Once Steam's record no longer lists a mod it stops being hidden, so subscribing to it again in Steam shows it.
+  useEffect(() => {
+    const listed = new Set(subscribed.mods?.map((mod) => mod.id));
+    setUnsubscribedIds((ids) => {
+      const kept = [...ids].filter((id) => listed.has(id));
+      return kept.length === ids.size ? ids : new Set(kept);
+    });
+  }, [subscribed.mods]);
   useAppMenuOffer(setupDone);
 
   const favourites = useMemo(() => new Set(favouriteIds), [favouriteIds]);
