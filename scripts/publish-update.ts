@@ -235,7 +235,9 @@ async function publishRelease(release: Release): Promise<void> {
     const title = `Flare Launcher ${release.version}`;
     gh(["release", "create", tag, ...files, "--draft", "--verify-tag", "--title", title, "--notes-file", notesFile]);
   }
-  const channel = release.prerelease ? ["--prerelease", "--latest=false"] : ["--prerelease=false", "--latest"];
+  // Building an older tag again leaves the newest stable release as GitHub's latest.
+  const latest = !release.prerelease && !(await newerPublished("latest.json", release.version));
+  const channel = [release.prerelease ? "--prerelease" : "--prerelease=false", latest ? "--latest" : "--latest=false"];
   gh(["release", "edit", tag, "--draft=false", ...channel]);
   console.log(`Published the release ${tag}`);
 }
@@ -262,27 +264,33 @@ function githubNotes(release: Release): string {
 
 /**
  * The channel file last, so the app never sees a version whose builds are not there yet. Beta players get a stable
- * release too, unless a newer beta is already out.
+ * release too, unless a newer beta is already out. A channel file already on a newer version is left alone, so
+ * building an older tag again doesn't take players back to it. The same version is written again, as its builds have
+ * new signatures.
  */
 async function publishFeed(release: Release): Promise<void> {
   const builds = `https://github.com/${repo}/releases/download/v${release.version}/`;
   const file = join(target, "github-release", channelFile(release));
   writeFileSync(file, JSON.stringify(manifest(release, builds), null, 2) + "\n");
-  const names = [channelFile(release)];
-  if (!release.prerelease) {
-    const beta = await publishedVersion("beta.json");
-    if (beta && compareVersions(release.version, beta) <= 0) {
-      console.log(`Left beta.json on ${beta}, which is newer than ${release.version}.`);
-    } else {
-      names.push("beta.json");
-    }
+  const names: string[] = [];
+  for (const name of release.prerelease ? ["beta.json"] : ["latest.json", "beta.json"]) {
+    const newer = await newerPublished(name, release.version);
+    if (newer) console.log(`Left ${name} on ${newer}, which is newer than ${release.version}.`);
+    else names.push(name);
   }
+  if (names.length === 0) return;
   for (const name of names) {
     const object = `${r2Bucket}/${r2Prefix}/${name}`;
     const flags = ["--file", file, "--remote", "--content-type", "application/json", "--cache-control", "no-cache"];
     run(process.execPath, [wrangler, "r2", "object", "put", object, ...flags]);
   }
   console.log(`Published ${release.version} to ${names.map((name) => `${feedUrl}${name}`).join(" and ")}`);
+}
+
+/** The version in a channel file on the live feed, if it is newer than `version`. */
+async function newerPublished(name: string, version: string): Promise<string | null> {
+  const published = await publishedVersion(name);
+  return published && compareVersions(published, version) > 0 ? published : null;
 }
 
 /** Version in a channel file on the live feed, or null if it has not been published. */
