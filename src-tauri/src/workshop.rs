@@ -21,6 +21,9 @@ use crate::steam::DAYZ_APP_ID;
 use crate::text;
 
 const POLL_INTERVAL: Duration = Duration::from_millis(250);
+/// How long a mod already on disk can stay looking installed before it counts as up to date. Steam flags one that needs
+/// an update within moments of being asked to download it, but may never report a download it didn't need.
+const UPDATE_NOTICE_TIMEOUT: Duration = Duration::from_secs(20);
 /// Public, and needs no key.
 const DETAILS_URL: &str = "https://api.steampowered.com/ISteamRemoteStorage/GetPublishedFileDetails/v1/";
 
@@ -148,7 +151,7 @@ fn download(ids: &[u64], cancelled: &AtomicBool, mut report: impl FnMut(&[ModPro
   let failed = Arc::new(Mutex::new(HashSet::new()));
   let finished = Arc::new(Mutex::new(HashSet::new()));
   // A mod already on disk is being updated. Steam can still call it installed before it notices the update, so it
-  // only counts once Steam reports the download done or the files change.
+  // only counts once Steam reports the download done, the files change or Steam has had time to notice.
   let updating: HashMap<u64, u32> =
     ids.iter().filter_map(|&id| Some((id, ugc.item_install_info(PublishedFileId(id))?.timestamp))).collect();
 
@@ -180,9 +183,11 @@ fn download(ids: &[u64], cancelled: &AtomicBool, mut report: impl FnMut(&[ModPro
     }
   }
 
+  let started = std::time::Instant::now();
   let mut last = Vec::new();
   loop {
     client.run_callbacks();
+    let noticing = started.elapsed() < UPDATE_NOTICE_TIMEOUT;
 
     let progress: Vec<ModProgress> = {
       let failed = failed.lock().unwrap();
@@ -194,6 +199,7 @@ fn download(ids: &[u64], cancelled: &AtomicBool, mut report: impl FnMut(&[ModPro
           let (downloaded, total) = ugc.item_download_info(item).unwrap_or_default();
           let mut status = status_of(ugc.item_state(item), failed.contains(&id));
           if status == ModStatus::Installed
+            && noticing
             && let Some(&before) = updating.get(&id)
             && !finished.contains(&id)
             && ugc.item_install_info(item).map(|info| info.timestamp) == Some(before)
