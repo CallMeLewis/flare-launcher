@@ -1,7 +1,6 @@
 # Changelog
 
-What changed in each version of Flare Launcher, newest first. Versions before 1.1.0 were released as DayZ Server
-Launcher.
+What changed in each version of Flare Launcher, newest first.
 
 ## 1.1.6 - 2026-10-06
 
@@ -56,7 +55,7 @@ Launcher.
 - Servers that stop answering now show as Offline, and favourite or recent servers that drop out of the server list stay in your lists marked Offline instead of disappearing.
 - Checking for, downloading and installing updates no longer show pop-up messages: the update button shows how it is going, and its tooltip explains anything that went wrong.
 - Settings > General is easier to read: settings are grouped like the rest of Settings, Interface size is a row of buttons, and it now says what an empty Character name does.
-- The launcher is now called Flare Launcher, with a new icon. Your settings, favourites and recent servers are kept, and on Windows the old DayZ Server Launcher shortcuts are replaced with Flare Launcher ones.
+- The launcher is now called Flare Launcher, with a new icon. Your settings, favourites and recent servers are kept, and on Windows the old shortcuts are replaced with Flare Launcher ones.
 - Favourites now always stay at the top of All servers, whatever filters are on; only the search narrows them.
 - Installing a beta version now moves the launcher to the Beta update channel, so you are offered the next beta too. You can switch back in Settings > About.
 - Fixed being kicked from a server for a corrupt or modified mod when that mod had been updated on the Workshop but Steam still had the old copy. Play and Load mods now download out-of-date mods as well as missing ones.
