@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { plural } from "@lingui/core/macro";
 import { Trans, useLingui } from "@lingui/react/macro";
 import {
@@ -99,9 +99,14 @@ export function ServerDetail({
   const unlisted = offline === "unlisted";
   const canCheckMods = install !== null && !unlisted;
 
+  // Only the latest check of which mods are installed counts, so a slow answer for the server selected before can't
+  // overwrite this one's.
+  const latestCheck = useRef(0);
+
   // Runs again when a refresh replaces the row, not just when another server is selected, so updated mods show.
   useEffect(() => {
     let cancelled = false;
+    latestCheck.current += 1;
     setMods(null);
     setInstalled(null);
     setModsFailed(false);
@@ -163,12 +168,14 @@ export function ServerDetail({
 
   const checkMods = useCallback(async () => {
     if (!mods || !canCheckMods) return;
+    const check = ++latestCheck.current;
     const ids = await backend
       .installedMods(
         dayzDir,
         mods.map((mod) => mod.steamWorkshopId),
       )
       .catch(() => null);
+    if (check !== latestCheck.current) return;
     setCheckFailed(!ids);
     if (ids) setInstalled(new Set(ids));
     // installVersion is a dependency so a finished download triggers a re-check.
