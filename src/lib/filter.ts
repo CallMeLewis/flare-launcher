@@ -23,7 +23,7 @@ export type Filters = {
   perspective: Perspective;
   timeOfDay: TimeOfDay;
   mods: ModsFilter;
-  /** Names of mods a server has to run, every one of them. */
+  /** Names of mods a server has to run, every one of them. Workshop mods sharing a name all count as that mod. */
   requiredMods: string[];
   noPassword: boolean;
   battlEye: boolean;
@@ -120,6 +120,15 @@ function modsMatching(modNames: readonly string[], term: string): Set<number> {
   return found;
 }
 
+/** Every position of a mod name: different Workshop mods, such as re-uploads, can share one. */
+function positionsNamed(modNames: readonly string[], name: string): Set<number> {
+  const found = new Set<number>();
+  modNames.forEach((other, position) => {
+    if (other === name) found.add(position);
+  });
+  return found;
+}
+
 /** What is known about a server's connection, for the ping filters. */
 export type Reachability = { pingMs: number | null; offline: boolean };
 
@@ -136,7 +145,7 @@ export function filterServers(
 ): ServerRow[] {
   const terms = searchTerms(filters.search);
   const modsByTerm = terms.map((term) => modsMatching(modNames, term));
-  const required = filters.requiredMods.map((name) => modNames.indexOf(name));
+  const required = filters.requiredMods.map((name) => positionsNamed(modNames, name));
   return rows.filter((row) => {
     if (filters.map && mapName(row.map) !== filters.map) return false;
     if (filters.version && row.version !== filters.version) return false;
@@ -156,7 +165,7 @@ export function filterServers(
     if (filters.mods === "vanilla" && row.modCount > 0) return false;
     if (filters.mods === "modded" && row.modCount === 0) return false;
     // A required mod no server in the list runs any more matches nothing.
-    if (required.some((position) => !row.mods.includes(position))) return false;
+    if (required.some((positions) => !row.mods.some((mod) => positions.has(mod)))) return false;
     if (filters.noPassword && row.password) return false;
     if (filters.battlEye && !row.battlEye) return false;
     if (terms.length === 0) return true;
@@ -303,12 +312,12 @@ export function activeFilterCount(filters: Filters): number {
   return Number(filters.search.trim() !== "") + filterChips(filters).length;
 }
 
-/** How many servers run each mod, busiest first. */
+/** How many servers run each mod, busiest first. Workshop mods sharing a name are counted as one. */
 export function modCounts(rows: ServerRow[], modNames: readonly string[]): Option[] {
-  const counts = new Map<number, number>();
-  for (const row of rows) for (const mod of row.mods) counts.set(mod, (counts.get(mod) ?? 0) + 1);
-  return [...counts]
-    .map(([position, count]) => ({ value: modNames[position], count }))
-    .filter((option) => option.value)
-    .sort((a, b) => b.count - a.count);
+  const counts = new Map<string, number>();
+  for (const row of rows) {
+    const names = new Set(row.mods.map((mod) => modNames[mod]).filter(Boolean));
+    for (const name of names) counts.set(name, (counts.get(name) ?? 0) + 1);
+  }
+  return [...counts].map(([value, count]) => ({ value, count })).sort((a, b) => b.count - a.count);
 }

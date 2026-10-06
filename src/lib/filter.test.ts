@@ -135,6 +135,18 @@ describe("filterServers", () => {
     expect(names(["Gone from the list"])).toEqual([]);
   });
 
+  it("counts every Workshop mod sharing a required mod's name", () => {
+    const modNames = ["Code Lock", "Code Lock"];
+    const modded = [
+      server({ id: "1.1.1.1:2303", name: "First", modCount: 1, mods: [0] }),
+      server({ id: "2.2.2.2:2303", name: "Second", modCount: 1, mods: [1] }),
+    ];
+    const names = filterServers(modded, { ...DEFAULT_FILTERS, requiredMods: ["Code Lock"] }, modNames).map(
+      (r) => r.name,
+    );
+    expect(names).toEqual(["First", "Second"]);
+  });
+
   it("keeps servers not pinged yet until their ping is known", () => {
     const reach = {
       "1.1.1.1:2303": { pingMs: 40, offline: false },
@@ -259,6 +271,11 @@ describe("filterChips", () => {
       { value: "Expansion", count: 2 },
       { value: "CF", count: 1 },
     ]);
+  });
+
+  it("counts Workshop mods sharing a name as one mod", () => {
+    const modded = [server({ id: "1.1.1.1:2303", mods: [0, 1] }), server({ id: "2.2.2.2:2303", mods: [1] })];
+    expect(modCounts(modded, ["Code Lock", "Code Lock"])).toEqual([{ value: "Code Lock", count: 2 }]);
   });
 });
 
