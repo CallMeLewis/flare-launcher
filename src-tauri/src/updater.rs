@@ -454,9 +454,13 @@ pub async fn download_update(app: AppHandle, updater: State<'_, Updater>) -> Res
   Ok(())
 }
 
+/// Runs away from the main thread: installing a .deb or .rpm waits for the system's password prompt, and the window
+/// would stop responding until it closed.
 #[tauri::command]
-pub fn install_update(app: AppHandle, updater: State<'_, Updater>) -> crate::error::Result<()> {
-  updater.install(&app)
+pub async fn install_update(app: AppHandle) -> crate::error::Result<()> {
+  tauri::async_runtime::spawn_blocking(move || app.state::<Updater>().install(&app))
+    .await
+    .map_err(|e| text!("The update failed: {error}", error = e))?
 }
 
 #[tauri::command]
