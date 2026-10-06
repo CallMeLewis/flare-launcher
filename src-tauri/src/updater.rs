@@ -118,6 +118,8 @@ struct Inner {
   offered: Option<Update>,
   /// A downloaded update waiting for the player to confirm the install.
   downloaded: Option<(Update, Vec<u8>)>,
+  /// Counts checks started, so only the latest one reports what it found.
+  latest_check: u64,
 }
 
 pub struct Updater {
@@ -135,7 +137,7 @@ impl Updater {
       None => None,
     };
     let status = if feed.is_some() { UpdateStatus::Idle } else { UpdateStatus::Unsupported };
-    Self { feed, inner: Mutex::new(Inner { status, settings: None, offered: None, downloaded: None }) }
+    Self { feed, inner: Mutex::new(Inner { status, settings: None, offered: None, downloaded: None, latest_check: 0 }) }
   }
 
   /// Checks now and then every few hours, unless the player turned that off.
@@ -165,11 +167,24 @@ impl Updater {
     let _ = app.emit(STATUS_EVENT, status);
   }
 
-  /// Reports what a check found, unless a download started while it was running.
-  fn finish_check(&self, app: &AppHandle, status: UpdateStatus, offered: Option<Update>) {
+  /// Marks a check as running, returning its number for `finish_check`.
+  fn start_check(&self, app: &AppHandle) -> u64 {
+    let check = {
+      let mut inner = self.inner.lock().unwrap();
+      inner.latest_check += 1;
+      inner.status = UpdateStatus::Checking;
+      inner.latest_check
+    };
+    let _ = app.emit(STATUS_EVENT, UpdateStatus::Checking);
+    check
+  }
+
+  /// Reports what a check found, unless a download started while it was running or a newer check (after switching
+  /// channel, say) replaced it.
+  fn finish_check(&self, app: &AppHandle, check: u64, status: UpdateStatus, offered: Option<Update>) {
     {
       let mut inner = self.inner.lock().unwrap();
-      if inner.status != UpdateStatus::Checking {
+      if inner.status != UpdateStatus::Checking || inner.latest_check != check {
         return;
       }
       if offered.is_some() {
@@ -237,12 +252,12 @@ impl Updater {
       _ => {}
     }
 
-    self.set(app, UpdateStatus::Checking);
+    let check = self.start_check(app);
     match self.fetch(app).await {
-      Ok(Some(update)) => self.finish_check(app, offered_status(&update), Some(update)),
-      Ok(None) => self.finish_check(app, UpdateStatus::UpToDate { checked_at: now_millis() }, None),
+      Ok(Some(update)) => self.finish_check(app, check, offered_status(&update), Some(update)),
+      Ok(None) => self.finish_check(app, check, UpdateStatus::UpToDate { checked_at: now_millis() }, None),
       Err(error) => {
-        self.finish_check(app, UpdateStatus::Error { message: friendly_error(&error, self.channel(app)) }, None)
+        self.finish_check(app, check, UpdateStatus::Error { message: friendly_error(&error, self.channel(app)) }, None)
       }
     }
     self.status()
