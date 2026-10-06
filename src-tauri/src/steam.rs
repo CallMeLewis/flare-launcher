@@ -268,7 +268,7 @@ pub fn detect_install(dayz_dir: Option<String>) -> Option<Install> {
   locate(dayz_dir.as_deref())
 }
 
-/// How many Workshop mods for DayZ are downloaded on this PC.
+/// How many Workshop mods for DayZ are downloaded on this computer.
 #[tauri::command]
 pub fn downloaded_mod_count(dayz_dir: Option<String>) -> Option<usize> {
   let install = locate(dayz_dir.as_deref())?;
