@@ -59,7 +59,7 @@ The launcher ships for both, and a feature, fix or release that only works on on
 - **Linux:** an AppImage, a `.deb` and an `.rpm`, all with the system title bar. Each install updates itself in its own
   format (`.deb` and `.rpm` updates ask for the password, as system packages do). Mods are linked with symlinks, and
   DayZ starts through `steam -applaunch`, so Steam runs it under Proton with BattlEye. Steam is found in
-  `~/.steam/steam`, `~/.local/share/Steam` and the Flatpak folder. On first run the AppImage offers to add itself to the
+  `~/.steam/steam`, `~/.local/share/Steam`, `~/.steam/debian-installation`, and the Flatpak and Snap folders. On first run the AppImage offers to add itself to the
   app menu (also in Settings > Launcher): it moves the AppImage to `~/Applications/Flare-Launcher.AppImage`, writes
   `~/.local/share/applications/flare-launcher.desktop` and an icon, then reopens from the new place.
 - Steam's library ships per platform: `src-tauri/steam_api64.dll` through `tauri.windows.conf.json` and

@@ -72,13 +72,26 @@ fn steam_roots() -> Vec<PathBuf> {
     .collect()
 }
 
+/// Flatpak's name for Steam.
+#[cfg(not(windows))]
+pub const FLATPAK_STEAM: &str = "com.valvesoftware.Steam";
+
 #[cfg(not(windows))]
 fn steam_roots() -> Vec<PathBuf> {
-  let Some(home) = std::env::home_dir() else { return Vec::new() };
+  std::env::home_dir().map(|home| steam_roots_in(&home)).unwrap_or_default()
+}
+
+/// Where each way of installing Steam keeps its files, the usual system package first.
+#[cfg(not(windows))]
+fn steam_roots_in(home: &Path) -> Vec<PathBuf> {
   vec![
     home.join(".steam/steam"),
     home.join(".local/share/Steam"),
-    home.join(".var/app/com.valvesoftware.Steam/.local/share/Steam"),
+    // Older Debian and Ubuntu packages.
+    home.join(".steam/debian-installation"),
+    home.join(format!(".var/app/{FLATPAK_STEAM}/.local/share/Steam")),
+    home.join(format!(".var/app/{FLATPAK_STEAM}/data/Steam")),
+    home.join("snap/steam/common/.local/share/Steam"),
   ]
 }
 
@@ -196,10 +209,19 @@ fn active_account() -> Option<u32> {
   key.get_value::<u32, _>("ActiveUser").ok().filter(|&account| account != 0)
 }
 
-/// The account Steam is signed in to right now, which Steam keeps in `~/.steam/registry.vdf` while it runs.
+/// The account Steam is signed in to right now, which Steam keeps in `~/.steam/registry.vdf` while it runs. Flatpak
+/// and Snap Steam keep theirs inside their own folders.
 #[cfg(not(windows))]
 fn active_account() -> Option<u32> {
-  let vdf = std::fs::read_to_string(std::env::home_dir()?.join(".steam/registry.vdf")).ok()?;
+  let home = std::env::home_dir()?;
+  [".steam", &format!(".var/app/{FLATPAK_STEAM}/.steam"), "snap/steam/common/.steam"].into_iter().find_map(|dir| {
+    let vdf = std::fs::read_to_string(home.join(dir).join("registry.vdf")).ok()?;
+    parse_active_account(&vdf)
+  })
+}
+
+#[cfg(not(windows))]
+fn parse_active_account(vdf: &str) -> Option<u32> {
   vdf.lines().find_map(|line| match quoted_tokens(line).as_slice() {
     [key, value] if key.eq_ignore_ascii_case("ActiveUser") => value.parse().ok().filter(|&account| account != 0),
     _ => None,
@@ -595,5 +617,38 @@ timestamp = 5250757174595880000;
     assert!(!install.is_mod_installed(333));
 
     std::fs::remove_dir_all(root).unwrap();
+  }
+
+  #[cfg(not(windows))]
+  #[test]
+  fn looks_in_every_way_steam_is_installed() {
+    let roots = steam_roots_in(Path::new("/home/survivor"));
+    let has = |path: &str| roots.contains(&PathBuf::from(path));
+    assert_eq!(roots[0], PathBuf::from("/home/survivor/.steam/steam"));
+    assert!(has("/home/survivor/.steam/debian-installation"));
+    assert!(has("/home/survivor/.var/app/com.valvesoftware.Steam/.local/share/Steam"));
+    assert!(has("/home/survivor/snap/steam/common/.local/share/Steam"));
+  }
+
+  #[cfg(not(windows))]
+  #[test]
+  fn reads_the_account_steam_is_signed_in_to() {
+    let vdf = "\"Registry\"
+{
+	\"HKCU\"
+	{
+		\"Software\"
+		{
+			\"Valve\"
+			{
+				\"Steam\"
+				{
+					\"ActiveProcess\"
+					{
+						\"ActiveUser\"		\"12345\"
+";
+    assert_eq!(parse_active_account(vdf), Some(12345));
+    // Steam writes 0 once the player signs out.
+    assert_eq!(parse_active_account("\"ActiveUser\"		\"0\""), None);
   }
 }
