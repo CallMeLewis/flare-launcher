@@ -79,6 +79,7 @@ pub fn run() {
       launch::launch,
       launch::wait_for_game,
       launch::open_workshop_page,
+      launch::low_map_count,
       workshop::download_mods,
       workshop::cancel_mod_download,
       workshop::unsubscribe_mods,

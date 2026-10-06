@@ -58,6 +58,9 @@ export const backend = {
   detectInstall: (dayzDir: string): Promise<Install | null> =>
     isPreview ? Promise.resolve(null) : invoke("detect_install", { dayzDir: dayzDir || null }),
 
+  /** On Linux, the system's memory map limit when it's too low for DayZ, or `null` when it's fine. */
+  lowMapCount: (): Promise<number | null> => (isPreview ? Promise.resolve(null) : invoke("low_map_count")),
+
   installedMods: (dayzDir: string, ids: number[]): Promise<number[]> =>
     isPreview ? Promise.resolve([]) : invoke("installed_mods", { dayzDir: dayzDir || null, ids }),
 

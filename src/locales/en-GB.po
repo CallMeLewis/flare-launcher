@@ -333,6 +333,7 @@ msgid "Clear selection"
 msgstr "Clear selection"
 
 #: src/components/game-start-dialog.tsx
+#: src/components/map-count-dialog.tsx
 #: src/components/release-notes.tsx
 #: src/components/title-bar.tsx
 #: src/components/ui/dialog.tsx
@@ -343,6 +344,10 @@ msgstr "Close"
 #: src/components/settings-dialog.tsx
 msgid "Close the launcher"
 msgstr "Close the launcher"
+
+#: src/components/map-count-dialog.tsx
+msgid "Commands copied"
+msgstr "Commands copied"
 
 #: src/components/filter-menu.tsx
 #: src/lib/filter.ts
@@ -356,6 +361,10 @@ msgstr "Connection"
 #: src/components/server-detail.tsx
 msgid "Copy address"
 msgstr "Copy address"
+
+#: src/components/map-count-dialog.tsx
+msgid "Copy the commands"
+msgstr "Copy the commands"
 
 #: src/hooks/use-app-menu-offer.ts
 msgid "Couldn't add Flare Launcher to the app menu"
@@ -372,6 +381,10 @@ msgstr "Couldn't check your mods"
 #: src/components/server-detail.tsx
 msgid "Couldn't copy the address"
 msgstr "Couldn't copy the address"
+
+#: src/components/map-count-dialog.tsx
+msgid "Couldn't copy the commands"
+msgstr "Couldn't copy the commands"
 
 #: src/App.tsx
 msgid "Couldn't download the mods"
@@ -492,6 +505,10 @@ msgstr "DayZ hasn't started yet"
 msgid "DayZ is open"
 msgstr "DayZ is open"
 
+#: src/components/server-detail.tsx
+msgid "DayZ may freeze on this computer because a system memory setting is too low. <0>How to fix it</0>"
+msgstr "DayZ may freeze on this computer because a system memory setting is too low. <0>How to fix it</0>"
+
 #: src/App.tsx
 #: src/components/mods-page.tsx
 msgid "DayZ wasn't found"
@@ -520,6 +537,10 @@ msgstr "Deselect every mod shown"
 #: src/components/settings-dialog.tsx
 msgid "Discord activity"
 msgstr "Discord activity"
+
+#: src/components/map-count-dialog.tsx
+msgid "Don't show again"
+msgstr "Don't show again"
 
 #: src/components/game-start-dialog.tsx
 msgid "Done"
@@ -1198,6 +1219,10 @@ msgstr "Restore down"
 msgid "Run setup again"
 msgstr "Run setup again"
 
+#: src/components/map-count-dialog.tsx
+msgid "Run these commands in a terminal. The first keeps the new limit after a restart, the second applies it straight away."
+msgstr "Run these commands in a terminal. The first keeps the new limit after a restart, the second applies it straight away."
+
 #: src/components/server-table.tsx
 msgid "Runs the mod {modMatch}"
 msgstr "Runs the mod {modMatch}"
@@ -1451,6 +1476,10 @@ msgstr "Steam will finish any repairs it had started."
 msgid "Steam will finish downloading these mods in the background."
 msgstr "Steam will finish downloading these mods in the background."
 
+#: src/components/map-count-dialog.tsx
+msgid "Stop DayZ freezing"
+msgstr "Stop DayZ freezing"
+
 #: src/lib/launch-options.ts
 msgid "Stops the game from pausing when you switch to another window."
 msgstr "Stops the game from pausing when you switch to another window."
@@ -1576,6 +1605,14 @@ msgstr "Theme"
 #: src/lib/backend-messages.ts
 msgid "There is no downloaded update to install."
 msgstr "There is no downloaded update to install."
+
+#: src/components/map-count-dialog.tsx
+msgid "They ask for your password. This warning goes away once the limit is raised."
+msgstr "They ask for your password. This warning goes away once the limit is raised."
+
+#: src/components/map-count-dialog.tsx
+msgid "This computer lets a program use up to {current} memory areas. DayZ needs more, so it can freeze in the main menu or soon after joining a server."
+msgstr "This computer lets a program use up to {current} memory areas. DayZ needs more, so it can freeze in the main menu or soon after joining a server."
 
 #: src/components/server-detail.tsx
 msgid "This is a vanilla server. No mods needed."

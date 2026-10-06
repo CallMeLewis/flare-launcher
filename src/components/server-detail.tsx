@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { CountryFlag } from "@/components/country-flag";
+import { MapCountDialog } from "@/components/map-count-dialog";
 import { PingValue } from "@/components/server-table";
 import { isNight, untilDayChange } from "@/lib/filter";
 import { Button } from "@/components/ui/button";
@@ -33,6 +34,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useLowMapCount } from "@/hooks/use-low-map-count";
 import type { PingResult } from "@/hooks/use-pings";
 import { backend, errorMessage } from "@/lib/backend";
 import { countryName } from "@/lib/countries";
@@ -100,6 +102,8 @@ export function ServerDetail({
   // When this copy of the server arrived, and the time now, to work out how far its clock has moved on since.
   const [receivedAt, setReceivedAt] = useState(Date.now);
   const [now, setNow] = useState(Date.now);
+  const lowMapCount = useLowMapCount();
+  const [mapCountOpen, setMapCountOpen] = useState(false);
 
   const unlisted = offline === "unlisted";
   const canCheckMods = install !== null && !unlisted;
@@ -392,6 +396,28 @@ export function ServerDetail({
               ? t`This server isn't in the server list right now, so it's probably offline. It comes back once the server is up again.`
               : t`This server isn't answering, so it's probably offline or restarting. You can still try to join.`}
           </Notice>
+        )}
+        {lowMapCount.limit !== null && (
+          <Notice>
+            <Trans>
+              DayZ may freeze on this computer because a system memory setting is too low.{" "}
+              <button
+                type="button"
+                onClick={() => setMapCountOpen(true)}
+                className="font-medium text-foreground underline underline-offset-2"
+              >
+                How to fix it
+              </button>
+            </Trans>
+          </Notice>
+        )}
+        {lowMapCount.limit !== null && (
+          <MapCountDialog
+            limit={lowMapCount.limit}
+            open={mapCountOpen}
+            onOpenChange={setMapCountOpen}
+            onDismiss={lowMapCount.dismiss}
+          />
         )}
         {install === null && (
           <Notice>

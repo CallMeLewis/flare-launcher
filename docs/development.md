@@ -61,9 +61,11 @@ The launcher ships for both, and a feature, fix or release that only works on on
   DayZ starts through `steam -applaunch`, so Steam runs it under Proton with BattlEye. Steam is found in
   `~/.steam/steam`, `~/.local/share/Steam`, `~/.steam/debian-installation`, and the Flatpak and Snap folders. When the
   game is in the Flatpak's library, or the Flatpak is the only Steam, it starts through
-  `flatpak run com.valvesoftware.Steam -applaunch` instead. On first run the AppImage offers to add itself to the app
-  menu (also in Settings > Launcher): it moves the AppImage to `~/Applications/Flare-Launcher.AppImage`, writes
-  `~/.local/share/applications/flare-launcher.desktop` and an icon, then reopens from the new place.
+  `flatpak run com.valvesoftware.Steam -applaunch` instead. DayZ can freeze under Proton when `vm.max_map_count` is
+  below 1048576, as on Ubuntu 22.04 and Debian 12, so the server panel warns then and shows the commands to raise it.
+  On first run the AppImage offers to add itself to the app menu (also in Settings > Launcher): it moves the AppImage
+  to `~/Applications/Flare-Launcher.AppImage`, writes `~/.local/share/applications/flare-launcher.desktop` and an icon,
+  then reopens from the new place.
 - Steam's library ships per platform: `src-tauri/steam_api64.dll` through `tauri.windows.conf.json` and
   `src-tauri/libsteam_api.so` through `tauri.linux.conf.json`. Both are Valve's redistributable Steamworks library,
   copied from the `steamworks-sys` crate.

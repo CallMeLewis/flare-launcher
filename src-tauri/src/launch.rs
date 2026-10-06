@@ -202,6 +202,25 @@ pub async fn wait_for_game(timeout_secs: u64) -> bool {
   false
 }
 
+/// The `vm.max_map_count` DayZ needs on Linux. Below it, the game can freeze in the main menu or soon after joining.
+/// Newer systems already use it by default; Ubuntu 22.04 and Debian 12 have 65530.
+const MAP_COUNT_NEEDED: u64 = 1_048_576;
+
+/// On Linux, the system's limit on how many memory areas a program may map, when it's too low for DayZ. `None` when it's
+/// high enough or can't be read, and always on Windows.
+#[tauri::command]
+pub fn low_map_count() -> Option<u64> {
+  #[cfg(target_os = "linux")]
+  return std::fs::read_to_string("/proc/sys/vm/max_map_count").ok().and_then(|value| too_low(&value));
+  #[cfg(not(target_os = "linux"))]
+  None
+}
+
+#[cfg_attr(not(target_os = "linux"), allow(dead_code))]
+fn too_low(map_count: &str) -> Option<u64> {
+  map_count.trim().parse().ok().filter(|&count| count < MAP_COUNT_NEEDED)
+}
+
 /// Opens a mod's Workshop page in the Steam client so it can be subscribed to.
 #[tauri::command]
 pub fn open_workshop_page(app: AppHandle, id: u64) -> Result<()> {
@@ -263,6 +282,27 @@ mod tests {
     // A shell whose arguments mention the game isn't it.
     assert!(!is_game(os("bash"), Some(os("bash"))));
     assert!(!is_game(os("enfMain"), None));
+  }
+
+  #[test]
+  fn spots_a_map_count_too_low_for_dayz() {
+    assert_eq!(
+      too_low(
+        "65530
+"
+      ),
+      Some(65530)
+    );
+    assert_eq!(
+      too_low(
+        "1048576
+"
+      ),
+      None
+    );
+    // SteamOS sets it far higher.
+    assert_eq!(too_low("2147483642"), None);
+    assert_eq!(too_low("not a number"), None);
   }
 
   #[test]
