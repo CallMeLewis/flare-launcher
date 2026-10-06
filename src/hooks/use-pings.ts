@@ -19,7 +19,7 @@ export type Pings = {
   get: (id: string) => PingResult | undefined;
   /** Queues servers to be pinged. `urgent` jumps the queue, for rows on screen. */
   request: (ids: string[], urgent?: boolean) => void;
-  /** Changes whenever new results arrive, for use as a memo dependency. */
+  /** Changes shortly after new results arrive, for use as a memo dependency. */
   version: number;
 };
 
@@ -28,6 +28,8 @@ const MAX_CHUNKS_IN_FLIGHT = 8;
 const STALE_AFTER_MS = 60_000;
 // A single unanswered request can be a lost packet, so a server is asked again soon before it counts as offline.
 const RETRY_AFTER_MS = 3_000;
+// New results are announced at most this often, as filtering and sorting by ping redo the whole list each time.
+const ANNOUNCE_EVERY_MS = 250;
 
 export function usePings(): Pings {
   const results = useRef(new Map<string, PingResult>());
@@ -35,6 +37,15 @@ export function usePings(): Pings {
   const queued = useRef(new Set<string>());
   const chunksInFlight = useRef(0);
   const [version, setVersion] = useState(0);
+  const announcing = useRef(false);
+  const announce = useRef(() => {
+    if (announcing.current) return;
+    announcing.current = true;
+    setTimeout(() => {
+      announcing.current = false;
+      setVersion((v) => v + 1);
+    }, ANNOUNCE_EVERY_MS);
+  });
 
   // Whether any server has answered a status request, so a network that blocks them doesn't mark every server offline.
   const anyAnswered = useRef(false);
@@ -55,7 +66,7 @@ export function usePings(): Pings {
             if (misses === 1) retry.push(id);
             results.current.set(id, { ...ping, misses, offline: misses >= 2 && anyAnswered.current, at });
           }
-          if (pings.length > 0) setVersion((v) => v + 1);
+          if (pings.length > 0) announce.current();
           if (retry.length > 0) setTimeout(() => enqueue.current(retry, true), RETRY_AFTER_MS);
         })
         .catch(() => {})
