@@ -345,10 +345,6 @@ msgstr ""
 msgid "Close the launcher"
 msgstr ""
 
-#: src/components/map-count-dialog.tsx
-msgid "Commands copied"
-msgstr ""
-
 #: src/components/filter-menu.tsx
 #: src/lib/filter.ts
 msgid "Community"
@@ -356,6 +352,14 @@ msgstr ""
 
 #: src/components/filter-menu.tsx
 msgid "Connection"
+msgstr ""
+
+#: src/components/map-count-dialog.tsx
+msgid "Copied"
+msgstr ""
+
+#: src/components/map-count-dialog.tsx
+msgid "Copy"
 msgstr ""
 
 #: src/components/server-detail.tsx
@@ -1490,6 +1494,10 @@ msgstr ""
 
 #: src/components/game-start-dialog.tsx
 msgid "Taking longer than usual"
+msgstr ""
+
+#: src/components/map-count-dialog.tsx
+msgid "Terminal"
 msgstr ""
 
 #: src/lib/backend-messages.ts

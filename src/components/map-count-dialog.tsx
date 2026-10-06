@@ -1,6 +1,6 @@
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Trans, useLingui } from "@lingui/react/macro";
-import { Copy } from "lucide-react";
+import { Check, Copy } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -32,11 +32,19 @@ export function MapCountDialog({
   const { t, i18n } = useLingui();
   const current = i18n.number(limit);
   const copyButton = useRef<HTMLButtonElement>(null);
+  // Shows on the button for a moment after copying.
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    if (!copied) return;
+    const timer = setTimeout(() => setCopied(false), 2000);
+    return () => clearTimeout(timer);
+  }, [copied]);
 
   async function copy() {
     try {
       await navigator.clipboard.writeText(COMMANDS);
-      toast.success(t`Commands copied`);
+      setCopied(true);
     } catch {
       toast.error(t`Couldn't copy the commands`);
     }
@@ -46,7 +54,7 @@ export function MapCountDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         className="sm:max-w-xl"
-        // Not Don't show again, which comes first: pressing Enter shouldn't turn the warning off for good.
+        // Not Don't show again: pressing Enter shouldn't turn the warning off for good.
         onOpenAutoFocus={(event) => {
           event.preventDefault();
           copyButton.current?.focus();
@@ -70,9 +78,25 @@ export function MapCountDialog({
               straight away.
             </Trans>
           </p>
-          <pre className="data selectable overflow-x-auto rounded-md border bg-card p-3 text-xs leading-relaxed">
-            {COMMANDS}
-          </pre>
+          <div className="overflow-hidden rounded-md border bg-card">
+            <div className="flex h-8 items-center justify-between border-b pr-1 pl-3">
+              <span className="text-xs text-muted-foreground">
+                <Trans>Terminal</Trans>
+              </span>
+              <Button
+                ref={copyButton}
+                variant="ghost"
+                size="xs"
+                onClick={copy}
+                aria-label={t`Copy the commands`}
+                className="text-muted-foreground"
+              >
+                {copied ? <Check className="text-success" aria-hidden /> : <Copy aria-hidden />}
+                <span aria-live="polite">{copied ? t`Copied` : t`Copy`}</span>
+              </Button>
+            </div>
+            <pre className="data selectable overflow-x-auto p-3 text-xs leading-relaxed">{COMMANDS}</pre>
+          </div>
           <p className="text-xs text-muted-foreground">
             <Trans>They ask for your password. This warning goes away once the limit is raised.</Trans>
           </p>
@@ -87,11 +111,7 @@ export function MapCountDialog({
           >
             {t`Don't show again`}
           </Button>
-          <Button ref={copyButton} variant="secondary" onClick={copy}>
-            <Copy aria-hidden />
-            <Trans>Copy the commands</Trans>
-          </Button>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button variant="secondary" onClick={() => onOpenChange(false)}>
             <Trans>Close</Trans>
           </Button>
         </DialogFooter>

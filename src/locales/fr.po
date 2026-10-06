@@ -345,10 +345,6 @@ msgstr "Fermer"
 msgid "Close the launcher"
 msgstr "Fermer le lanceur"
 
-#: src/components/map-count-dialog.tsx
-msgid "Commands copied"
-msgstr "Commandes copiées"
-
 #: src/components/filter-menu.tsx
 #: src/lib/filter.ts
 msgid "Community"
@@ -357,6 +353,14 @@ msgstr "Communautaire"
 #: src/components/filter-menu.tsx
 msgid "Connection"
 msgstr "Connexion"
+
+#: src/components/map-count-dialog.tsx
+msgid "Copied"
+msgstr "Copié"
+
+#: src/components/map-count-dialog.tsx
+msgid "Copy"
+msgstr "Copier"
 
 #: src/components/server-detail.tsx
 msgid "Copy address"
@@ -1491,6 +1495,10 @@ msgstr "Système"
 #: src/components/game-start-dialog.tsx
 msgid "Taking longer than usual"
 msgstr "Plus long que d’habitude"
+
+#: src/components/map-count-dialog.tsx
+msgid "Terminal"
+msgstr "Terminal"
 
 #: src/lib/backend-messages.ts
 msgid "That server is no longer in the list. Refresh and try again."
