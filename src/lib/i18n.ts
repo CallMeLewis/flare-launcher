@@ -7,6 +7,7 @@ export const LOCALES: { value: Locale; name: string }[] = [
   { value: "en-US", name: "English (US)" },
   { value: "fr", name: "Français" },
   { value: "de", name: "Deutsch" },
+  { value: "es", name: "Español" },
 ];
 /** What the interface is written in, and what any other language falls back to. */
 const SOURCE_LOCALE: Locale = "en-GB";

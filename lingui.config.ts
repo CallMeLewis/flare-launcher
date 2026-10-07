@@ -5,7 +5,7 @@ import { formatter } from "@lingui/format-po";
 // so the American catalogue only needs the strings spelled differently.
 export default defineConfig({
   sourceLocale: "en-GB",
-  locales: ["en-GB", "en-US", "fr", "de"],
+  locales: ["en-GB", "en-US", "fr", "de", "es"],
   fallbackLocales: { default: "en-GB" },
   catalogs: [{ path: "<rootDir>/src/locales/{locale}", include: ["src"], exclude: ["**/*.test.ts"] }],
   // Files without line numbers, so moving code doesn't change every catalogue.

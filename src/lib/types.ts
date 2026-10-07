@@ -101,7 +101,7 @@ export type LaunchRequest = {
 export type Theme = "light" | "dark" | "system";
 
 /** A language the launcher comes in. */
-export type Locale = "en-GB" | "en-US" | "fr" | "de";
+export type Locale = "en-GB" | "en-US" | "fr" | "de" | "es";
 /** A language, or System to follow the computer's. */
 export type Language = Locale | "system";
 

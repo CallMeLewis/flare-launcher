@@ -99,14 +99,14 @@ Snap packages.
 ## Languages
 
 The interface is translated with [Lingui](https://lingui.dev). It's written in British English (`en-GB`), which is
-also what any other language falls back to, and comes in American English (`en-US`), French (`fr`) and German (`de`)
-too. Each language's catalogue is a file in `src/locales/`, packaged with the app as a file of its own and loaded when
-chosen in Settings > Launcher. System, the default, uses the computer's language when the launcher has it.
+also what any other language falls back to, and comes in American English (`en-US`), French (`fr`), German (`de`)
+and Spanish (`es`) too. Each language's catalogue is a file in `src/locales/`, packaged with the app as a file of its
+own and loaded when chosen in Settings > Launcher. System, the default, uses the computer's language when the launcher has it.
 
 - To add a language, add it to `locales` in `lingui.config.ts`, to `Locale` in `src/lib/types.ts` and to `LOCALES` in
   `src/lib/i18n.ts` (named in itself), run `pnpm i18n`, then translate every entry of its new `.po` file. A test fails
   while any message is untranslated or a translation drops a placeholder or tag.
-- French addresses the player as "vous", German as "du".
+- French addresses the player as "vous", German as "du" and Spanish as "tú".
 
 - Mark interface text where it's written: `<Trans>Refresh</Trans>` in JSX, and `t` from `useLingui()` for
   attributes, toasts and other strings. Use `msg` for labels kept in module-level constants and translate them when

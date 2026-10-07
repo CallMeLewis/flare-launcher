@@ -11,19 +11,20 @@ describe("resolveLocale", () => {
 
   it("follows the computer's first language the launcher has", () => {
     expect(resolveLocale("system", ["en-US", "en-GB"])).toBe("en-US");
-    expect(resolveLocale("system", ["es-ES", "en-us"])).toBe("en-US");
+    expect(resolveLocale("system", ["it-IT", "en-us"])).toBe("en-US");
     expect(resolveLocale("system", ["fr-FR", "en-US"])).toBe("fr");
   });
 
   it("uses a language the launcher has from another region", () => {
     expect(resolveLocale("system", ["fr-CA"])).toBe("fr");
     expect(resolveLocale("system", ["de-AT"])).toBe("de");
+    expect(resolveLocale("system", ["es-MX"])).toBe("es");
     expect(resolveLocale("system", ["en-AU"])).toBe("en-GB");
     expect(resolveLocale("system", ["en"])).toBe("en-GB");
   });
 
   it("uses British English for languages it doesn't have", () => {
-    expect(resolveLocale("system", ["es-ES", "it-IT"])).toBe("en-GB");
+    expect(resolveLocale("system", ["it-IT", "pt-BR"])).toBe("en-GB");
     expect(resolveLocale("system", [])).toBe("en-GB");
   });
 });
