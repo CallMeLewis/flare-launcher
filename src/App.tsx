@@ -309,10 +309,16 @@ export function App() {
   const sortingByPing = sort.key === "ping";
   const pingVersion = sortingByPing ? pings.version : 0;
   const sorted = useMemo(
-    () => sortServers(filtered, sort, (id) => getPing(id)?.pingMs),
+    () =>
+      sortServers(
+        filtered,
+        sort,
+        (id) => getPing(id)?.pingMs,
+        (code) => countryName(code, i18n.locale),
+      ),
     // pingVersion is a dependency so the order updates as results arrive.
     // oxlint-disable-next-line react-hooks/exhaustive-deps
-    [filtered, sort, getPing, pingVersion],
+    [filtered, sort, getPing, pingVersion, i18n.locale],
   );
   // On the full list, favourites sit at the top in the chosen order.
   const listed = useMemo(

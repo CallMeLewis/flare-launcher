@@ -219,14 +219,23 @@ export function matchedMod(row: ServerRow, search: string, modNames: readonly st
 
 /**
  * Sorts a copy of the rows. Servers with no ping result yet always sink to the
- * bottom when sorting by ping, whichever direction is chosen.
+ * bottom when sorting by ping, whichever direction is chosen. Countries sort by
+ * `countryName`, the name shown for each code, as in the Filters menu.
  */
 export function sortServers(
   rows: ServerRow[],
   sort: Sort,
   pingOf: (id: string) => number | null | undefined,
+  countryName: (code: string) => string = (code) => code,
 ): ServerRow[] {
   const direction = sort.descending ? -1 : 1;
+  // Naming a country is slow next to a comparison, so each is named once.
+  const countryNames = new Map<string, string>();
+  const nameOf = (code: string): string => {
+    let name = countryNames.get(code);
+    if (name === undefined) countryNames.set(code, (name = countryName(code)));
+    return name;
+  };
   const compare = (a: ServerRow, b: ServerRow): number => {
     switch (sort.key) {
       case "name":
@@ -236,7 +245,7 @@ export function sortServers(
       case "country":
         // Servers with no country sink to the bottom either way.
         if (!a.country || !b.country) return (a.country ? 0 : 1) - (b.country ? 0 : 1);
-        return direction * a.country.localeCompare(b.country);
+        return direction * nameOf(a.country).localeCompare(nameOf(b.country), undefined, { sensitivity: "base" });
       case "players":
         return direction * (a.players - b.players);
       case "time":

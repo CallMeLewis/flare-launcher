@@ -314,6 +314,16 @@ describe("countries", () => {
     ]);
   });
 
+  it("sorts countries by their names", () => {
+    const sorted = sortServers(
+      placed,
+      { key: "country", descending: false },
+      () => null,
+      (code) => names[code],
+    );
+    expect(sorted.map((r) => r.id)).toEqual(["2.2.2.2:2303", "1.1.1.1:2303", "3.3.3.3:2303", "4.4.4.4:2303"]);
+  });
+
   it("sorts servers with no country last either way", () => {
     for (const descending of [false, true])
       expect(sortServers(placed, { key: "country", descending }, () => null).at(-1)?.id).toBe("4.4.4.4:2303");
