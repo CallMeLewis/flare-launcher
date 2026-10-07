@@ -2,10 +2,11 @@ import { useLingui } from "@lingui/react/macro";
 import { countryName } from "@/lib/countries";
 import { cn } from "@/lib/utils";
 
-// Each flag is its own file in the build, so only the flags on screen load.
+// Each flag is its own file in the build, so only the flags on screen load. Only countries' flags are taken: the
+// regions' flags, such as GB-SCT, would otherwise be read as other countries' codes.
 const FLAGS = Object.fromEntries(
   Object.entries(
-    import.meta.glob<string>("/node_modules/country-flag-icons/3x2/*.svg", {
+    import.meta.glob<string>("/node_modules/country-flag-icons/3x2/[A-Z][A-Z].svg", {
       eager: true,
       query: "?url",
       import: "default",
