@@ -672,7 +672,9 @@ function Stat({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div className="min-w-0">
       <dt className="text-xs text-muted-foreground">{label}</dt>
-      <dd className="truncate text-[13px]">{children}</dd>
+      <dd className="truncate text-[13px]" title={typeof children === "string" ? children : undefined}>
+        {children}
+      </dd>
     </div>
   );
 }
