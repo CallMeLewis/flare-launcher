@@ -262,7 +262,7 @@ function ChipStrip({
 
   const hidden = chips.length - fit.shown;
   return (
-    <div ref={strip} className="relative flex min-w-52 flex-1 items-center overflow-hidden pl-1">
+    <div ref={strip} className="relative flex min-w-28 flex-1 basis-52 items-center overflow-hidden pl-1">
       <ul aria-label={t`Filters on`} className="flex items-center gap-1.5 whitespace-nowrap">
         {chips.slice(0, fit.shown).map((chip) => (
           <Chip key={chip.key} chip={chip} onRemove={() => onRemove(chip)} />
