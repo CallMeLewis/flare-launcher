@@ -4,6 +4,10 @@
 #
 # Caches are only saved from main: GitHub lets tags and pull requests read main's caches but not each other's, so main is
 # what keeps release builds warm.
+#
+# Third-party actions are pinned to a commit, with its version as a comment, so a moved tag can't change what runs in
+# Release next to the signing key; GitHub's own actions follow their major version tags. To update a pin, take the
+# commit of a release that has been out for a week or more.
 name: Build
 
 on:
@@ -25,7 +29,7 @@ jobs:
       - uses: actions/checkout@v5
         with:
           ref: ${{ inputs.ref }}
-      - uses: pnpm/action-setup@v6
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
       - uses: actions/setup-node@v5
         with:
           node-version: 24
@@ -71,7 +75,7 @@ jobs:
             libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev libssl-dev libxdo-dev
       - name: Install Rust (the version in rust-toolchain.toml)
         run: rustup toolchain install
-      - uses: Swatinem/rust-cache@v2
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
         with:
           workspaces: src-tauri
           save-if: ${{ github.ref == 'refs/heads/main' }}
@@ -91,14 +95,14 @@ jobs:
       - uses: actions/checkout@v5
         with:
           ref: ${{ inputs.ref }}
-      - uses: pnpm/action-setup@v6
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
       - uses: actions/setup-node@v5
         with:
           node-version: 24
           cache: pnpm
       - name: Install Rust (the version in rust-toolchain.toml)
         run: rustup toolchain install
-      - uses: Swatinem/rust-cache@v2
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
         with:
           workspaces: src-tauri
           save-if: ${{ github.ref == 'refs/heads/main' }}
@@ -130,7 +134,7 @@ jobs:
       # The build runs in a container, but the cache is keyed on the runner's Rust, which is the same pinned version.
       - name: Install Rust (the version in rust-toolchain.toml)
         run: rustup toolchain install
-      - uses: Swatinem/rust-cache@v2
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
         with:
           workspaces: src-tauri -> target/linux
           save-if: ${{ github.ref == 'refs/heads/main' }}
