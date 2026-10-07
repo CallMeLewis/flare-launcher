@@ -654,7 +654,7 @@ msgstr "Wird gesucht…"
 
 #: src/components/server-detail.tsx
 msgid "First and third person"
-msgstr "Ego- und Third-Person"
+msgstr "Ego und Third Person"
 
 #: src/components/server-detail.tsx
 #: src/components/server-table.tsx
@@ -675,7 +675,7 @@ msgstr "Flare Launcher wurde von einer anderen App zu deinem App-Menü hinzugef�
 
 #: src/lib/backend-messages.ts
 msgid "Flare Launcher is in your app menu, but couldn't reopen: {error}"
-msgstr "Flare Launcher ist jetzt im App-Menü, konnte sich aber nicht neu öffnen: {error}"
+msgstr "Flare Launcher ist jetzt im App-Menü, konnte aber nicht neu gestartet werden: {error}"
 
 #: src/components/settings-dialog.tsx
 msgid "Flare Launcher is in your app menu."
@@ -779,7 +779,7 @@ msgstr "Wie der Launcher auf diesem Computer aussieht und sich verhält."
 
 #: src/components/server-detail.tsx
 msgid "If it’s wrong, the server turns you away once DayZ has loaded."
-msgstr "Ist es falsch, weist dich der Server ab, sobald DayZ geladen hat."
+msgstr "Ist es falsch, weist dich der Server ab, sobald DayZ geladen ist."
 
 #: src/components/first-run-dialog.tsx
 #: src/components/settings-dialog.tsx
@@ -812,7 +812,7 @@ msgstr "Oberflächengröße"
 
 #: src/components/game-start-dialog.tsx
 msgid "It hasn't opened yet. It may still be loading; if it doesn't open, check Steam for a message."
-msgstr "DayZ ist noch nicht offen. Vielleicht lädt es noch; falls es sich nicht öffnet, schau in Steam nach einer Meldung."
+msgstr "DayZ hat sich noch nicht geöffnet. Vielleicht lädt es noch; falls es sich nicht öffnet, schau in Steam nach einer Meldung."
 
 #: src/App.tsx
 msgid "It isn't in the server list right now. It comes back once the server is up again."
@@ -875,7 +875,7 @@ msgstr "Hell"
 #: src/components/first-run-dialog.tsx
 #: src/components/settings-dialog.tsx
 msgid "Light or dark, or System to match this computer."
-msgstr "Hell oder Dunkel, oder System für die Einstellung dieses Computers."
+msgstr "Hell, Dunkel oder System für die Einstellung dieses Computers."
 
 #: src/components/server-detail.tsx
 msgid "Load mods"
@@ -1665,11 +1665,11 @@ msgstr "Tageszeit"
 
 #: src/components/mods-page.tsx
 msgid "Try a different name or Workshop ID."
-msgstr "Versuch einen anderen Namen oder eine andere Workshop-ID."
+msgstr "Versuch es mit einem anderen Namen oder einer anderen Workshop-ID."
 
 #: src/App.tsx
 msgid "Try a different search or fewer filters."
-msgstr "Versuch eine andere Suche oder weniger Filter."
+msgstr "Versuch es mit einer anderen Suche oder weniger Filtern."
 
 #: src/App.tsx
 #: src/components/mods-page.tsx
@@ -1815,7 +1815,7 @@ msgstr "Wartet"
 #: src/components/mods-page.tsx
 #: src/components/server-detail.tsx
 msgid "Waiting for Steam"
-msgstr "Warte auf Steam"
+msgstr "Wartet auf Steam"
 
 #: src/components/server-detail.tsx
 msgid "Waiting to download"

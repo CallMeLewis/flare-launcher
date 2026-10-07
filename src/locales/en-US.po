@@ -1225,7 +1225,7 @@ msgstr ""
 
 #: src/components/map-count-dialog.tsx
 msgid "Run these commands in a terminal. The first keeps the new limit after a restart, the second applies it straight away."
-msgstr ""
+msgstr "Run these commands in a terminal. The first keeps the new limit after a restart, the second applies it right away."
 
 #: src/components/server-table.tsx
 msgid "Runs the mod {modMatch}"
@@ -1278,7 +1278,7 @@ msgstr ""
 
 #: src/App.tsx
 msgid "Select one to see its mods. Double-click to join straight away."
-msgstr ""
+msgstr "Select one to see its mods. Double-click to join right away."
 
 #: src/components/filter-menu.tsx
 #: src/components/server-table.tsx
@@ -1482,7 +1482,7 @@ msgstr ""
 
 #: src/components/map-count-dialog.tsx
 msgid "Stop DayZ freezing"
-msgstr ""
+msgstr "Stop DayZ from freezing"
 
 #: src/lib/launch-options.ts
 msgid "Stops the game from pausing when you switch to another window."

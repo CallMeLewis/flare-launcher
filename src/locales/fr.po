@@ -691,7 +691,7 @@ msgstr "Dossiers"
 
 #: src/components/join-address-dialog.tsx
 msgid "For a server that isn't in the list. Enter its address and the launcher finds it and shows it on the right, ready to join."
-msgstr "Pour un serveur absent de la liste. Saisissez son adresse : le lanceur le trouve et l’affiche à droite, prêt à rejoindre."
+msgstr "Pour un serveur absent de la liste. Saisissez son adresse : le lanceur le trouve et l’affiche à droite, prêt à être rejoint."
 
 #: src/components/settings-dialog.tsx
 msgid "Found automatically from Steam"
@@ -862,7 +862,7 @@ msgstr "Lanceur"
 
 #: src/components/settings-dialog.tsx
 msgid "Lets your Discord friends see you're using Flare Launcher and when you're in game. Never which server you're on."
-msgstr "Permet à vos amis Discord de voir que vous utilisez Flare Launcher et quand vous êtes en jeu. Jamais sur quel serveur vous êtes."
+msgstr "Permet à vos amis Discord de voir que vous utilisez Flare Launcher et quand vous êtes en jeu, mais jamais sur quel serveur vous jouez."
 
 #: src/components/settings-dialog.tsx
 msgid "Lets your Discord friends see you're using Flare Launcher. It closes when DayZ starts, so they won't see when you're in game."
@@ -961,7 +961,7 @@ msgstr "Des mods sont déjà en cours de téléchargement."
 
 #: src/lib/backend-messages.ts
 msgid "Mods are being downloaded. Try again once they've finished."
-msgstr "Des mods sont en cours de téléchargement. Réessayez une fois qu’ils sont terminés."
+msgstr "Des mods sont en cours de téléchargement. Réessayez une fois le téléchargement terminé."
 
 #: src/App.tsx
 #: src/components/game-start-dialog.tsx
@@ -1291,7 +1291,7 @@ msgstr "Adresse du serveur"
 
 #: src/components/settings-dialog.tsx
 msgid "Server countries come from IP Geolocation by DB-IP (db-ip.com), under CC BY 4.0."
-msgstr "Les pays des serveurs proviennent de IP Geolocation by DB-IP (db-ip.com), sous licence CC BY 4.0."
+msgstr "Les pays des serveurs proviennent d’IP Geolocation by DB-IP (db-ip.com), sous licence CC BY 4.0."
 
 #: src/components/server-detail.tsx
 msgid "Server details"
@@ -1426,7 +1426,7 @@ msgstr "Impossible de joindre Steam. Vérifiez que Steam est ouvert et que vous 
 
 #: src/lib/backend-messages.ts
 msgid "Steam couldn't be reached. With the Flatpak version of Steam, the launcher may not be able to download mods: subscribe to them in the Steam Workshop instead, then try again."
-msgstr "Impossible de joindre Steam. Avec la version Flatpak de Steam, le lanceur ne peut peut-être pas télécharger les mods : abonnez-vous-y plutôt dans le Workshop Steam, puis réessayez."
+msgstr "Impossible de joindre Steam. Avec la version Flatpak de Steam, le lanceur risque de ne pas pouvoir télécharger les mods : abonnez-vous plutôt à ces mods dans le Workshop Steam, puis réessayez."
 
 #: src/lib/backend-messages.ts
 msgid "Steam couldn't download {failures, plural, one {# mod} other {# mods}}. Check your connection and disk space, then try again."
@@ -1591,7 +1591,7 @@ msgstr "Le Workshop Steam est injoignable, les mises à jour de vos mods n’ont
 
 #: src/lib/backend-messages.ts
 msgid "The update failed a security check, so it wasn't installed."
-msgstr "La mise à jour n’a pas passé un contrôle de sécurité, elle n’a donc pas été installée."
+msgstr "La mise à jour a échoué à un contrôle de sécurité, elle n’a donc pas été installée."
 
 #: src/lib/backend-messages.ts
 msgid "The update failed: {error}"
@@ -1846,7 +1846,7 @@ msgstr "Au lancement de DayZ"
 
 #: src/components/settings-dialog.tsx
 msgid "When the launcher starts and every few hours."
-msgstr "Au démarrage du lanceur, puis toutes les quelques heures."
+msgstr "Au démarrage du lanceur, puis à quelques heures d’intervalle."
 
 #: src/components/mods-page.tsx
 msgid "When the mod was last updated on the Workshop."
