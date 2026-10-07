@@ -139,6 +139,7 @@ own and loaded when chosen in Settings > Launcher. System, the default, uses the
 - `src-tauri/src/app_menu.rs`: on Linux, moves the AppImage to `~/Applications` and adds it to the app menu.
 - `src-tauri/windows/installer-hooks.nsh`: removes an install made under the launcher's old name.
 - `scripts/`: the release tooling. `CHANGELOG.md` holds every version's notes, read through `scripts/changelog.ts`.
+- `docs/scope.md`: what the launcher is for, what it won't do, and how to judge a new feature.
 - `docs/design.md`: the visual rules the launcher follows.
 - `docs/commit-messages.md`: how commit messages are written.
 - `src-tauri/icons/source.svg`: the icon artwork. Regenerate the icon set with `pnpm tauri icon src-tauri/icons/source.svg`.
