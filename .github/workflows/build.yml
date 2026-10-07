@@ -145,8 +145,9 @@ jobs:
       # Without it the build still works: it builds the container here instead of pulling it.
       - name: Sign in to the container registry
         continue-on-error: true
-        run: echo "$TOKEN" | podman login ghcr.io --username "${{ github.actor }}" --password-stdin
+        run: echo "$TOKEN" | podman login ghcr.io --username "$ACTOR" --password-stdin
         env:
+          ACTOR: ${{ github.actor }}
           TOKEN: ${{ github.token }}
       # Builds in the same Ubuntu 22.04 container as on a desktop (scripts/build-linux.ts), with the runner's podman.
       # The release notes are checked by the frontend job, so this skips `pnpm dist:linux`'s own check.
