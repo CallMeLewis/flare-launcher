@@ -654,12 +654,12 @@ msgstr "Recherche…"
 
 #: src/components/server-detail.tsx
 msgid "First and third person"
-msgstr "Première et troisième personne"
+msgstr "1re et 3e personne"
 
 #: src/components/server-detail.tsx
 #: src/components/server-table.tsx
 msgid "First person only"
-msgstr "Première personne uniquement"
+msgstr "1re personne uniquement"
 
 #: src/components/settings-dialog.tsx
 msgid "First-time setup"
