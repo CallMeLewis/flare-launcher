@@ -14,14 +14,29 @@ const FLAGS = Object.fromEntries(
   ).map(([path, url]) => [path.slice(-6, -4), url]),
 );
 
-/** A country's flag, named on hover and to screen readers. Its code when there is no flag for it. */
-export function CountryFlag({ code, className }: { code: string; className?: string }) {
+/**
+ * A country's flag, named on hover and to screen readers. Its code when there is no flag for it. `decorative` is for
+ * a flag shown beside the country's name, which screen readers then skip so the name isn't read twice.
+ */
+export function CountryFlag({
+  code,
+  decorative = false,
+  className,
+}: {
+  code: string;
+  decorative?: boolean;
+  className?: string;
+}) {
   const { i18n } = useLingui();
   const name = countryName(code, i18n.locale);
   const flag = FLAGS[code];
   if (!flag) {
     return (
-      <span title={name} className={cn("data text-xs text-muted-foreground", className)}>
+      <span
+        title={name}
+        aria-hidden={decorative || undefined}
+        className={cn("data text-xs text-muted-foreground", className)}
+      >
         {code}
       </span>
     );
@@ -29,7 +44,7 @@ export function CountryFlag({ code, className }: { code: string; className?: str
   return (
     <img
       src={flag}
-      alt={name}
+      alt={decorative ? "" : name}
       title={name}
       draggable={false}
       // The outline keeps white flags visible on a light background.

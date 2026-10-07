@@ -294,7 +294,7 @@ export function ServerDetail({
         <Stat label={t`Country`}>
           {server.country ? (
             <span className="flex items-center gap-1.5">
-              <CountryFlag code={server.country} />
+              <CountryFlag code={server.country} decorative />
               <span className="truncate" title={countryName(server.country, i18n.locale)}>
                 {countryName(server.country, i18n.locale)}
               </span>

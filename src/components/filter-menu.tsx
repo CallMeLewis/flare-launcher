@@ -88,7 +88,7 @@ export function FilterMenu({ filters, onChange, maps, versions, countries, mods,
                   <SelectValue>
                     {filters.country ? (
                       <span className="flex min-w-0 items-center gap-2">
-                        <CountryFlag code={filters.country} />
+                        <CountryFlag code={filters.country} decorative />
                         <span className="truncate">{countryName(filters.country, i18n.locale)}</span>
                       </span>
                     ) : (
@@ -102,7 +102,7 @@ export function FilterMenu({ filters, onChange, maps, versions, countries, mods,
                   </SelectItem>
                   {countries.map(({ value, count: servers }) => (
                     <SelectItem key={value} value={value}>
-                      <CountryFlag code={value} />
+                      <CountryFlag code={value} decorative />
                       {countryName(value, i18n.locale)}
                       <span className="data ml-1 text-xs text-muted-foreground">{i18n.number(servers)}</span>
                     </SelectItem>
