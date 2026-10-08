@@ -159,6 +159,19 @@ when it is newer than the latest beta. Builds are signed with the update signing
 repository secret `TAURI_SIGNING_PRIVATE_KEY`. The launcher refuses an update whose signature or signed version doesn't
 match the public key in `src-tauri/tauri.conf.json`.
 
+The version number tells players how much has changed, so choose it by what the release notes say:
+
+- **Major** (`2.0.0`) only when players have to do something, or something they rely on stops working: a release with
+  an "Action needed:" bullet, a removed feature with no alternative, or dropping support for a system the launcher
+  ran on. Not because a release is large.
+- **Minor** (`1.3.0`) when there's something new to find or something behaves differently: an Added or Changed bullet,
+  such as a new feature, setting, column, filter or language.
+- **Patch** (`1.2.1`) for everything else: fixes, speed, clearer wording and translations.
+
+Updates only ever offer a higher version, so a number can't be taken back once it's released. A beta takes the number
+of the release it leads to (`1.3.0-beta.1` before `1.3.0`), and when it's unclear which a release is, choose the
+smaller bump.
+
 1. `pnpm bump <version>` sets the version in `package.json` (which `tauri.conf.json` reads), `Cargo.toml` and
    `Cargo.lock`, and adds a dated section for it at the top of `CHANGELOG.md`. `1.2.0` is stable, `1.2.0-beta.1` is
    beta.
