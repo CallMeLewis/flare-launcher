@@ -2,6 +2,12 @@
 
 What changed in each version of Flare Launcher, newest first.
 
+## 1.2.1 - 2026-10-10
+
+- Fixed some servers showing another country's flag, such as Bolivia's servers showing Bonaire's.
+- Fixed the Country column sorting in an order that looked random: it now sorts by country name, matching the Filters menu.
+- Fixed screen readers reading a server's country twice in the server panel and the Filters menu.
+
 ## 1.2.0 - 2026-10-07
 
 - New Country column in the server list, showing each server's flag with the country's name on hover; filter by country in the Filters menu, and see it in the server panel.
