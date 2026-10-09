@@ -233,8 +233,16 @@ impl Updater {
 
   async fn fetch(&self, app: &AppHandle) -> Result<Option<Update>, tauri_plugin_updater::Error> {
     let feed = self.feed.as_deref().unwrap_or(FEED_URL);
-    let url = format!("{feed}{}", self.channel(app).feed_file()).parse()?;
-    let update = app.updater_builder().endpoints(vec![url])?.timeout(CHECK_TIMEOUT).build()?.check().await?;
+    let channel = self.channel(app);
+    let url = format!("{feed}{}", channel.feed_file()).parse()?;
+    let update = app
+      .updater_builder()
+      .endpoints(vec![url])?
+      .header("User-Agent", user_agent(&app.package_info().version.to_string(), channel))?
+      .timeout(CHECK_TIMEOUT)
+      .build()?
+      .check()
+      .await?;
     // The timeout is for the check only: a slow connection can take far longer to download the installer.
     Ok(update.map(|mut update| {
       update.timeout = None;
@@ -375,6 +383,24 @@ fn notes_text(notes: Option<&str>) -> Option<String> {
   notes.map(str::trim).filter(|text| !text.is_empty()).map(String::from)
 }
 
+/// Names the launcher to the update server, so its traffic stats can tell launchers from bots and the download page,
+/// and show which versions, platforms and channels are in use. Nothing in it identifies a player or a computer.
+fn user_agent(version: &str, channel: UpdateChannel) -> String {
+  use tauri::utils::config::BundleType;
+  let format = match tauri::utils::platform::bundle_type() {
+    Some(BundleType::Nsis) => "nsis",
+    Some(BundleType::AppImage) => "appimage",
+    Some(BundleType::Deb) => "deb",
+    Some(BundleType::Rpm) => "rpm",
+    _ => "unknown",
+  };
+  let channel = match channel {
+    UpdateChannel::Stable => "stable",
+    UpdateChannel::Beta => "beta",
+  };
+  format!("Flare-Launcher/{version} ({}; {format}; {channel})", std::env::consts::OS)
+}
+
 fn now_millis() -> u64 {
   SystemTime::now().duration_since(UNIX_EPOCH).map(|d| d.as_millis() as u64).unwrap_or(0)
 }
@@ -512,6 +538,17 @@ mod tests {
     assert_eq!((old.settings.channel, old.settings.auto_check, old.version), (UpdateChannel::Stable, false, None));
     assert_eq!(UpdateChannel::Beta.feed_file(), "beta.json");
     assert_eq!(UpdateChannel::Stable.feed_file(), "latest.json");
+  }
+
+  #[test]
+  fn user_agent_names_the_version_platform_and_channel() {
+    // Test builds aren't bundled, so their format is unknown.
+    let os = std::env::consts::OS;
+    assert_eq!(user_agent("1.2.0", UpdateChannel::Stable), format!("Flare-Launcher/1.2.0 ({os}; unknown; stable)"));
+    assert_eq!(
+      user_agent("1.3.0-beta.1", UpdateChannel::Beta),
+      format!("Flare-Launcher/1.3.0-beta.1 ({os}; unknown; beta)")
+    );
   }
 
   #[test]
