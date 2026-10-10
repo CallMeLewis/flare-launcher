@@ -8,6 +8,9 @@
 //                                                    `pnpm exec wrangler login`, or a Cloudflare API token in CI)
 //   node scripts/publish-update.ts feed <dir> [url]  sign local builds and write a feed to <dir> instead of
 //                                                    publishing, for testing; [url] is where <dir> will be served
+//   node scripts/publish-update.ts check             (CI) go through publishing as far as it can without the signing
+//                                                    key or uploading: find the builds, read the notes, sign with a
+//                                                    throwaway key and write the feed and the GitHub release notes
 //   node scripts/publish-update.ts keygen            create the signing key (once) and print its public key
 //
 // The update feed is on Cloudflare R2, at https://updates.darkzone.dev/dayz-server-launcher/: the app's stable channel
@@ -19,8 +22,8 @@
 // whose signature does not match the public key in src-tauri/tauri.conf.json or whose signed version differs from the
 // one the feed announces, so a tampered feed cannot push another installer.
 import { spawnSync } from "node:child_process";
-import { copyFileSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
-import { homedir } from "node:os";
+import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { homedir, tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { compareVersions, notesFor } from "./changelog.ts";
@@ -109,6 +112,8 @@ try {
     for (const build of release.builds) copyFileSync(build.file, join(out, build.uploadName));
     writeFileSync(join(out, channelFile(release)), JSON.stringify(manifest(release, url), null, 2) + "\n");
     console.log(`Wrote ${channelFile(release)} and ${release.builds.map((b) => b.uploadName).join(", ")} to ${out}`);
+  } else if (command === "check") {
+    check();
   } else if (command === "release") {
     const version = checkReady();
     tagRelease(version);
@@ -152,12 +157,35 @@ function releaseNotes(version: string): string {
   return items.map((item) => `- ${item}`).join("\n");
 }
 
-/** Checks the builds and their notes, then signs each build for this version. */
-function prepare(): Release {
+/**
+ * Publishing up to the upload, so a release script that no longer fits the builds or the changelog fails on an ordinary
+ * push rather than on release day. Signs with a throwaway key, since the real one is only given to the Release
+ * workflow, and removes the signatures again.
+ */
+function check(): void {
+  const scratch = mkdtempSync(join(tmpdir(), "flare-launcher-release-check-"));
+  try {
+    const key = join(scratch, "key");
+    run(process.execPath, [tauri, "signer", "generate", "--ci", "--password", "", "--write-keys", key]);
+    const release = prepare({ path: key, pubkey: readFileSync(`${key}.pub`, "utf8").trim() });
+    for (const build of release.builds) rmSync(`${build.file}.sig`);
+    const feed = JSON.stringify(manifest(release, `https://github.com/${repo}/releases/download/v${release.version}/`));
+    console.log(`\n${channelFile(release)}:\n${feed}\n\nGitHub release notes:\n${githubNotes(release)}`);
+    console.log(`\nReady to publish ${release.version}.`);
+  } finally {
+    rmSync(scratch, { recursive: true, force: true });
+  }
+}
+
+/**
+ * Checks the builds and their notes, then signs each build for this version: with the update signing key, or with
+ * `testKey` and its public key when checking.
+ */
+function prepare(testKey?: { path: string; pubkey: string }): Release {
   const version = packageVersion();
   const notes = releaseNotes(version);
   const config: TauriConfig = JSON.parse(readFileSync(join(root, "src-tauri", "tauri.conf.json"), "utf8"));
-  if (!keyFromEnv && !existsSync(keyPath)) {
+  if (!testKey && !keyFromEnv && !existsSync(keyPath)) {
     throw new Error(`No signing key at ${keyPath}. Run: node scripts/publish-update.ts keygen`);
   }
 
@@ -168,12 +196,13 @@ function prepare(): Release {
     throw new Error(`Not built for ${version} yet. Build first:\n${steps}`);
   }
 
-  const key = keyFromEnv ? [] : ["--private-key-path", keyPath];
+  const key = testKey ? ["--private-key-path", testKey.path] : keyFromEnv ? [] : ["--private-key-path", keyPath];
+  const pubkey = testKey?.pubkey ?? config.plugins?.updater?.pubkey ?? "";
   const builds = found.map(({ platform, file: built, uploadName }) => {
     const file = built!; // Every build was found, or the check above stopped.
     run(process.execPath, [tauri, "signer", "sign", ...key, "--password", "", "--app-version", version, file]);
     const signature = readFileSync(`${file}.sig`, "utf8").trim();
-    if (keyId(signature) !== keyId(config.plugins?.updater?.pubkey ?? "")) {
+    if (keyId(signature) !== keyId(pubkey)) {
       throw new Error("The signing key does not match plugins.updater.pubkey in src-tauri/tauri.conf.json.");
     }
     console.log(`Signed ${platform} build for ${version}`);

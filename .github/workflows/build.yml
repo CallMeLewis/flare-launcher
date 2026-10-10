@@ -1,6 +1,7 @@
-# Checks the repo, builds the Windows installer and the Linux packages from it, and starts each build to check it stays
-# open. Called by CI on every push and pull request, and by Release before it publishes. The checks and builds run side
-# by side, to finish sooner; Release only publishes once every one of them has passed.
+# Checks the repo and builds the Windows installer and the Linux packages from it, starts each build to check it stays
+# open, and checks the release scripts against them. Called by CI on every push and pull request, and by Release before
+# it publishes. The checks and builds run side by side, to finish sooner; Release only publishes once every one of them
+# has passed.
 #
 # Caches are only saved from main: GitHub lets tags and pull requests read main's caches but not each other's, so main is
 # what keeps release builds warm.
@@ -171,3 +172,31 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y --no-install-recommends xvfb
       - name: Starts and stays open
         run: xvfb-run --auto-servernum node scripts/smoke-test.ts src-tauri/target/linux/release/bundle/appimage/*.AppImage
+
+  # Goes through publishing with both builds, as far as it can without the signing key, so a release script that no
+  # longer fits the builds or the changelog shows up here rather than on release day.
+  release:
+    name: Check the release
+    needs: [windows, linux]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ inputs.ref }}
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # Where Release's publish job puts them too.
+      - uses: actions/download-artifact@v8
+        with:
+          name: windows
+          path: src-tauri/target/release/bundle/nsis
+      - uses: actions/download-artifact@v8
+        with:
+          name: linux
+          path: src-tauri/target/linux/release/bundle
+      - run: node scripts/publish-update.ts check

@@ -51,7 +51,9 @@ changes it publishes the new one there.
 Each build stops if `CHANGELOG.md` has no section for the version being built (see [Releasing](#releasing)).
 
 CI also tries out each build: it installs the Windows build silently and starts it, starts the Linux AppImage under
-Xvfb, and fails if either closes within 20 seconds (`scripts/smoke-test.ts`).
+Xvfb, and fails if either closes within 20 seconds (`scripts/smoke-test.ts`). Then `node scripts/publish-update.ts
+check` goes through publishing with both builds as far as it can without the signing key, so a release script that no
+longer fits the builds or the changelog fails on an ordinary push rather than on release day.
 
 ## Windows and Linux
 
