@@ -50,6 +50,9 @@ changes it publishes the new one there.
 
 Each build stops if `CHANGELOG.md` has no section for the version being built (see [Releasing](#releasing)).
 
+CI also tries out each build: it installs the Windows build silently and starts it, starts the Linux AppImage under
+Xvfb, and fails if either closes within 20 seconds (`scripts/smoke-test.ts`).
+
 ## Windows and Linux
 
 The launcher ships for both, and a feature, fix or release that only works on one of them is not finished.
