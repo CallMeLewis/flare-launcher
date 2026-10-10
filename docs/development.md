@@ -182,8 +182,10 @@ smaller bump.
    `Cargo.lock`, and adds a dated section for it at the top of `CHANGELOG.md`. `1.2.0` is stable, `1.2.0-beta.1` is
    beta.
 2. Write the release notes in that section, following [release-notes.md](release-notes.md).
-3. Commit and push, then `pnpm release`. It checks the release notes, tags the commit `v<version>` and pushes the tag,
-   which starts the workflow. It refuses to run with uncommitted or unpushed changes. Follow the build with `gh run watch`.
+3. Commit and push, then `pnpm release`. It checks the release notes, waits for CI to pass on the commit, tags it
+   `v<version>` and pushes the tag, which starts the workflow. It refuses to run with uncommitted or unpushed changes,
+   and doesn't tag a commit CI failed on, since a pushed tag can't be reused for a fix. Follow the build with
+   `gh run watch`.
 
 To build a tag again (after a failed run, say), run the Release workflow from the Actions tab on `main` and enter the tag
 (or `gh workflow run release.yml -f tag=v<version>`). The workflow comes from `main`, so fixes to it apply, and the code

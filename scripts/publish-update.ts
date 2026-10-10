@@ -1,7 +1,8 @@
 // Publishes releases to GitHub. The builds are made and published by the Release workflow
 // (.github/workflows/release.yml), which runs when a v<version> tag is pushed.
 //
-//   node scripts/publish-update.ts release           (pnpm release) check the version is ready, tag the commit
+//   node scripts/publish-update.ts release           (pnpm release) check the version is ready and CI passed on the
+//                                                    commit (waiting for it if it's still running), tag the commit
 //                                                    v<version> and push the tag, which starts the workflow
 //   node scripts/publish-update.ts publish           (the workflow) sign the builds, publish them as the GitHub release
 //                                                    v<version>, then update the channel file on the update feed (needs
@@ -25,6 +26,7 @@ import { spawnSync } from "node:child_process";
 import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { homedir, tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
+import { setTimeout as sleep } from "node:timers/promises";
 import { fileURLToPath } from "node:url";
 import { compareVersions, notesFor } from "./changelog.ts";
 
@@ -116,6 +118,7 @@ try {
     check();
   } else if (command === "release") {
     const version = checkReady();
+    await waitForCi();
     tagRelease(version);
     console.log(`\nThe Release workflow is now building ${version}. Follow it with: gh run watch`);
   } else if (command === "publish") {
@@ -347,6 +350,47 @@ function checkReady(): string {
     throw new Error(`Tag v${version} already points at another commit. Bump the version before releasing.`);
   }
   return version;
+}
+
+/**
+ * Waits for CI on this commit, and refuses to tag it if CI failed. Release checks everything again itself, but by then
+ * the tag is pushed, and a tag on a broken commit uses up its version: the fix is a new commit, which needs a new one.
+ */
+async function waitForCi(): Promise<void> {
+  const commit = git(["rev-parse", "HEAD"]);
+  // A run can take a few seconds to appear after a push.
+  let found = ciRun(commit);
+  for (let tries = 0; !found && tries < 12; tries++) {
+    await sleep(5000);
+    found = ciRun(commit);
+  }
+  if (!found) {
+    throw new Error(
+      `CI hasn't run on ${commit.slice(0, 7)}. It checks the newest commit of each push, unless only docs changed. ` +
+        "Release from a commit CI has checked.",
+    );
+  }
+  if (found.status !== "completed") {
+    console.log(`Waiting for CI to finish on ${commit.slice(0, 7)}: ${found.url}`);
+    spawnSync("gh", ["run", "watch", String(found.databaseId), "--interval", "10", "--repo", repo], {
+      stdio: "inherit",
+    });
+    found = ciRun(commit)!;
+  }
+  if (found.conclusion !== "success") {
+    throw new Error(
+      `CI didn't pass on this commit (${found.conclusion}), so it wasn't tagged: ${found.url}\n` +
+        "Fix it in a new commit, push it, then run pnpm release again.",
+    );
+  }
+  console.log(`CI passed on ${commit.slice(0, 7)}.`);
+}
+
+/** The latest CI run on a commit, if there is one yet. */
+function ciRun(commit: string): { databaseId: number; status: string; conclusion: string; url: string } | undefined {
+  const fields = "databaseId,status,conclusion,url";
+  const runs = gh(["run", "list", "--workflow", "ci.yml", "--commit", commit, "--limit", "1", "--json", fields]);
+  return JSON.parse(runs)[0];
 }
 
 /**
