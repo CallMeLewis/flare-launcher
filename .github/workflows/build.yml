@@ -168,8 +168,12 @@ jobs:
             src-tauri/target/linux/release/bundle/rpm/*.rpm
           if-no-files-found: error
           retention-days: 14
-      - name: Install a virtual display
-        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends xvfb
+      # AppImages leave the graphics libraries to the system, as each computer needs its own drivers. Desktops have them;
+      # the runner doesn't, so it gets Mesa's, which draw without a graphics card.
+      - name: Install a virtual display and graphics libraries
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends xvfb libegl1 libgl1 libgles2 libgbm1 libgl1-mesa-dri
       - name: Starts and stays open
         run: xvfb-run --auto-servernum node scripts/smoke-test.ts src-tauri/target/linux/release/bundle/appimage/*.AppImage
 
