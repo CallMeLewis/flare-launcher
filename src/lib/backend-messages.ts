@@ -47,6 +47,7 @@ export const BACKEND_MESSAGES = [
   msg({ message: "Steam is out of date. Restart Steam so it can update, then try again." }),
   msg({ message: "Steam wasn't found on this computer. Install Steam, then try again." }),
   msg({ message: "That server is no longer in the list. Refresh and try again." }),
+  msg({ message: "The browser couldn't be opened: {error}" }),
   msg({ message: "The download couldn't be started: {error}" }),
   msg({ message: "The download stopped unexpectedly. Try again." }),
   msg({ message: "The download stopped unexpectedly: {error}" }),

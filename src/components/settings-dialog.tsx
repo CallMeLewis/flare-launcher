@@ -3,6 +3,7 @@ import {
   CircleAlert,
   CircleCheck,
   Download,
+  ExternalLink,
   FolderOpen,
   Info,
   LoaderCircle,
@@ -51,6 +52,8 @@ import { cn } from "@/lib/utils";
 import appIcon from "../../src-tauri/icons/128x128@2x.png";
 
 const SCALES = [0.9, 1, 1.1, 1.25, 1.5];
+/** Shown in Settings > About. A name, so it's left out of translation. */
+const AUTHOR = "CallMeLewis";
 export const THEMES: { value: Theme; label: MessageDescriptor; icon: LucideIcon }[] = [
   { value: "light", label: msg`Light`, icon: Sun },
   { value: "dark", label: msg`Dark`, icon: Moon },
@@ -585,6 +588,12 @@ function AboutSection() {
     void backend.updateSettings().then(setUpdateSettings);
   }, []);
 
+  function openProjectPage() {
+    backend.openProjectPage().catch((e) => {
+      toast.error(t`Couldn't open GitHub`, { description: errorMessage(e) });
+    });
+  }
+
   function changeChannel(value: string) {
     const channel = value as UpdateChannel;
     const previous = updateSettings;
@@ -609,12 +618,19 @@ function AboutSection() {
     <>
       <div className="flex items-center gap-4 rounded-lg border bg-card p-4">
         <img src={appIcon} alt="" className="size-14 shrink-0" />
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <p className="text-base font-semibold">Flare Launcher</p>
           <p className="text-[13px] text-muted-foreground">
             <Trans>Find a DayZ server, get its mods and play.</Trans>
           </p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            <Trans>Made by {AUTHOR}</Trans>
+          </p>
         </div>
+        <Button variant="outline" size="sm" className="shrink-0" onClick={openProjectPage}>
+          <ExternalLink aria-hidden />
+          <Trans>View on GitHub</Trans>
+        </Button>
       </div>
 
       <SettingsGroup title={t`Updates`}>

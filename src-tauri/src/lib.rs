@@ -35,6 +35,23 @@ async fn set_window_theme(window: tauri::WebviewWindow, theme: Option<tauri::The
   Ok(())
 }
 
+/// Opens the launcher's GitHub page in the browser.
+#[tauri::command]
+fn open_project_page(app: tauri::AppHandle) -> error::Result<()> {
+  let url = env!("CARGO_PKG_REPOSITORY");
+  #[cfg(target_os = "linux")]
+  let opened = {
+    let _ = app;
+    desktop::open(url).map_err(|e| e.to_string())
+  };
+  #[cfg(not(target_os = "linux"))]
+  let opened = {
+    use tauri_plugin_opener::OpenerExt;
+    app.opener().open_url(url, None::<&str>).map_err(|e| e.to_string())
+  };
+  opened.map_err(|e| text!("The browser couldn't be opened: {error}", error = e).into())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
   #[cfg(target_os = "linux")]
@@ -91,6 +108,7 @@ pub fn run() {
       updater::set_auto_update_check,
       updater::set_update_channel,
       set_window_theme,
+      open_project_page,
       app_menu::app_menu_status,
       app_menu::add_to_app_menu,
       app_menu::remove_from_app_menu,

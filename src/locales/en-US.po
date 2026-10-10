@@ -407,6 +407,10 @@ msgid "Couldn't load this server's mods."
 msgstr ""
 
 #: src/components/settings-dialog.tsx
+msgid "Couldn't open GitHub"
+msgstr ""
+
+#: src/components/settings-dialog.tsx
 msgid "Couldn't open the folder"
 msgstr ""
 
@@ -887,6 +891,10 @@ msgstr ""
 
 #: src/components/mods-page.tsx
 msgid "Loading your mods"
+msgstr ""
+
+#: src/components/settings-dialog.tsx
+msgid "Made by {AUTHOR}"
 msgstr ""
 
 #: src/components/settings-dialog.tsx
@@ -1512,6 +1520,10 @@ msgstr ""
 msgid "The anti-cheat DayZ uses"
 msgstr ""
 
+#: src/lib/backend-messages.ts
+msgid "The browser couldn't be opened: {error}"
+msgstr ""
+
 #: src/components/settings-dialog.tsx
 msgid "The changes in the update waiting for you."
 msgstr ""
@@ -1801,6 +1813,10 @@ msgstr ""
 
 #: src/components/settings-dialog.tsx
 msgid "Version, updates and release notes."
+msgstr ""
+
+#: src/components/settings-dialog.tsx
+msgid "View on GitHub"
 msgstr ""
 
 #: src/App.tsx

@@ -407,6 +407,10 @@ msgid "Couldn't load this server's mods."
 msgstr "No se pudieron cargar los mods de este servidor."
 
 #: src/components/settings-dialog.tsx
+msgid "Couldn't open GitHub"
+msgstr "No se pudo abrir GitHub"
+
+#: src/components/settings-dialog.tsx
 msgid "Couldn't open the folder"
 msgstr "No se pudo abrir la carpeta"
 
@@ -888,6 +892,10 @@ msgstr "Cargando servidores"
 #: src/components/mods-page.tsx
 msgid "Loading your mods"
 msgstr "Cargando tus mods"
+
+#: src/components/settings-dialog.tsx
+msgid "Made by {AUTHOR}"
+msgstr "Creado por {AUTHOR}"
 
 #: src/components/settings-dialog.tsx
 msgid "Makes text and controls larger or smaller."
@@ -1512,6 +1520,10 @@ msgstr "La dirección y el puerto de conexión. Si no indicas el puerto, se prob
 msgid "The anti-cheat DayZ uses"
 msgstr "El antitrampas que usa DayZ"
 
+#: src/lib/backend-messages.ts
+msgid "The browser couldn't be opened: {error}"
+msgstr "No se pudo abrir el navegador: {error}"
+
 #: src/components/settings-dialog.tsx
 msgid "The changes in the update waiting for you."
 msgstr "Las novedades de la actualización que te espera."
@@ -1802,6 +1814,10 @@ msgstr "La versión {version} está lista para instalarse. El launcher se reinic
 #: src/components/settings-dialog.tsx
 msgid "Version, updates and release notes."
 msgstr "Versión, actualizaciones y notas de la versión."
+
+#: src/components/settings-dialog.tsx
+msgid "View on GitHub"
+msgstr "Ver en GitHub"
 
 #: src/App.tsx
 msgid "Wait for the mods to finish downloading, then try again."

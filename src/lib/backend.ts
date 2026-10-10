@@ -200,6 +200,13 @@ export const backend = {
     window.open(`https://steamcommunity.com/sharedfiles/filedetails/?id=${id}`, "_blank", "noopener");
     return Promise.resolve();
   },
+
+  /** Opens the launcher's GitHub page in the browser. */
+  openProjectPage: (): Promise<void> => {
+    if (!isPreview) return invoke("open_project_page");
+    window.open("https://github.com/CallMeLewis/flare-launcher", "_blank", "noopener");
+    return Promise.resolve();
+  },
 };
 
 const isBackendText = (value: unknown): value is BackendText =>
