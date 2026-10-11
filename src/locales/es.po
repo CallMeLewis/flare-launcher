@@ -264,6 +264,7 @@ msgstr "Ver servidores"
 
 #: src/components/join-address-dialog.tsx
 #: src/components/mods-page.tsx
+#: src/components/report-dialog.tsx
 #: src/components/server-detail.tsx
 msgid "Cancel"
 msgstr "Cancelar"
@@ -542,9 +543,17 @@ msgstr "DayZ_x64.exe no está en esa carpeta. Elige la carpeta donde está insta
 msgid "Deselect every mod shown"
 msgstr "Deseleccionar todos los mods mostrados"
 
+#: src/components/report-dialog.tsx
+msgid "Details to send"
+msgstr "Detalles que se enviarán"
+
 #: src/components/settings-dialog.tsx
 msgid "Discord activity"
 msgstr "Actividad en Discord"
+
+#: src/components/report-dialog.tsx
+msgid "Don't include passwords or personal details."
+msgstr "No incluyas contraseñas ni datos personales."
 
 #: src/components/map-count-dialog.tsx
 msgid "Don't show again"
@@ -1211,6 +1220,10 @@ msgstr "Quitar de favoritos"
 msgid "Removed from the app menu"
 msgstr "Quitado del menú de aplicaciones"
 
+#: src/components/report-dialog.tsx
+msgid "Report sent"
+msgstr "Informe enviado"
+
 #: src/components/filter-menu.tsx
 msgid "Reset filters"
 msgstr "Restablecer filtros"
@@ -1287,6 +1300,25 @@ msgstr "Seleccionar todos los mods mostrados"
 #: src/App.tsx
 msgid "Select one to see its mods. Double-click to join straight away."
 msgstr "Selecciona uno para ver sus mods. Haz doble clic para unirte directamente."
+
+#: src/components/report-dialog.tsx
+msgid "Send a report"
+msgstr "Enviar un informe"
+
+#: src/components/game-start-dialog.tsx
+#: src/components/report-dialog.tsx
+#: src/components/settings-dialog.tsx
+#: src/lib/report.ts
+msgid "Send report"
+msgstr "Enviar informe"
+
+#: src/components/report-dialog.tsx
+msgid "Sending…"
+msgstr "Enviando…"
+
+#: src/components/report-dialog.tsx
+msgid "Sends the details below to the launcher's developer to help fix the problem. Server names and addresses are left out."
+msgstr "Envía la información que aparece a continuación al desarrollador del launcher para ayudar a solucionar el problema. No se incluyen los nombres ni las direcciones de los servidores."
 
 #: src/components/filter-menu.tsx
 #: src/components/server-table.tsx
@@ -1508,6 +1540,10 @@ msgstr "Está tardando más de lo habitual"
 msgid "Terminal"
 msgstr "Terminal"
 
+#: src/components/report-dialog.tsx
+msgid "Thank you. It helps fix problems like this one."
+msgstr "Gracias. Tu informe ayuda a solucionar problemas como este."
+
 #: src/lib/backend-messages.ts
 msgid "That server is no longer in the list. Refresh and try again."
 msgstr "Ese servidor ya no está en la lista. Actualiza y vuelve a intentarlo."
@@ -1576,6 +1612,10 @@ msgstr "No se pudo usar el gestor de contraseñas: {error}"
 #: src/lib/backend-messages.ts
 msgid "The port after the colon has to be a number."
 msgstr "El puerto que va después de los dos puntos tiene que ser un número."
+
+#: src/lib/backend-messages.ts
+msgid "The report couldn't be sent: {error}"
+msgstr "No se pudo enviar el informe: {error}"
 
 #: src/components/settings-dialog.tsx
 msgid "The server address, its mods and your character name are added automatically."
@@ -1845,6 +1885,10 @@ msgstr "Te damos la bienvenida a Flare Launcher"
 #: src/components/settings-dialog.tsx
 msgid "What the launcher does once the game is running."
 msgstr "Qué hace el launcher una vez que el juego está en marcha."
+
+#: src/components/report-dialog.tsx
+msgid "What were you doing? (optional)"
+msgstr "¿Qué estabas haciendo? (opcional)"
 
 #: src/components/release-notes.tsx
 #: src/components/update-button.tsx

@@ -315,6 +315,8 @@ pub mod helper {
     /// `true` once every mod is installed, `false` if cancelled.
     Done(bool),
     Failed(Text),
+    /// The helper's log lines, sent before it says how it ended, so a problem report holds them.
+    Log(Vec<String>),
   }
 
   /// The launcher's own text passes back as it is, to be translated; anything else as a value in a template.
@@ -345,6 +347,7 @@ pub mod helper {
         Ok(()) => (HelperMessage::Done(true), 0),
         Err(e) => (HelperMessage::Failed(helper_failure(e)), 1),
       };
+      send(&mut out, &HelperMessage::Log(crate::report::recent_lines()));
       send(&mut out, &message);
       return Some(code);
     }
@@ -363,6 +366,7 @@ pub mod helper {
       Ok(finished) => (HelperMessage::Done(finished), 0),
       Err(e) => (HelperMessage::Failed(helper_failure(e)), 1),
     };
+    send(&mut out, &HelperMessage::Log(crate::report::recent_lines()));
     send(&mut out, &message);
     Some(code)
   }
@@ -374,6 +378,7 @@ pub mod helper {
         Ok(HelperMessage::Progress(progress)) => report(&progress),
         Ok(HelperMessage::Done(finished)) => return Ok(finished),
         Ok(HelperMessage::Failed(text)) => return Err(text.into()),
+        Ok(HelperMessage::Log(lines)) => lines.into_iter().for_each(crate::report::record_line),
         // Anything Steam printed.
         Err(_) => {}
       }
@@ -441,6 +446,15 @@ pub mod helper {
       send(&mut output, &HelperMessage::Failed(text!("Steam couldn't be reached.")));
       assert_eq!(read_outcome(output.as_slice(), |_| {}).unwrap_err().to_string(), "Steam couldn't be reached.");
       assert!(read_outcome(b"Steam crashed\n".as_slice(), |_| {}).is_err());
+    }
+
+    #[test]
+    fn keeps_the_helpers_log_for_reports() {
+      let mut output = Vec::new();
+      send(&mut output, &HelperMessage::Log(vec!["WARN Steam did not accept a download request for mod 9".into()]));
+      send(&mut output, &HelperMessage::Done(true));
+      assert!(read_outcome(output.as_slice(), |_| {}).unwrap());
+      assert!(crate::report::recent_lines().iter().any(|line| line.ends_with("for mod 9")));
     }
   }
 }

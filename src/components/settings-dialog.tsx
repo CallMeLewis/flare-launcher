@@ -38,6 +38,7 @@ import { useUpdateStatus } from "@/hooks/use-update-status";
 import { LOCALES } from "@/lib/i18n";
 import { LAUNCH_OPTIONS, launchArgs } from "@/lib/launch-options";
 import { releaseNoteItems, runningVersionNotes } from "@/lib/release-notes";
+import { openReport } from "@/lib/report";
 import type {
   AppMenu,
   Install,
@@ -668,6 +669,18 @@ function AboutSection() {
               >
                 {status.state === "error" && <CircleAlert className="mr-1 inline size-3.5 align-[-2px]" aria-hidden />}
                 {describeUpdate(status, i18n)}
+                {status.state === "error" && (
+                  <>
+                    {" "}
+                    <Button
+                      variant="link"
+                      className="h-auto p-0 text-xs font-normal"
+                      onClick={() => openReport("update", status.message)}
+                    >
+                      <Trans>Send report</Trans>
+                    </Button>
+                  </>
+                )}
                 {updateVersion && updateNotes.length > 0 && (
                   <>
                     {" "}

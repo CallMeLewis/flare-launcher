@@ -5,6 +5,7 @@ import { Circle, CircleAlert, CircleCheck, CircleX, Loader2 } from "lucide-react
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { mapName } from "@/lib/maps";
+import { openReport } from "@/lib/report";
 import type { ServerRow } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -18,6 +19,8 @@ export type GameStart = {
   /** `slow` when the game hasn't opened in time, `failed` when it couldn't be started. */
   stage: "starting" | "running" | "slow" | "failed";
   error?: string;
+  /** What the failed command rejected with, for a problem report. */
+  failure?: unknown;
 };
 
 /** How long the finished dialog stays up before closing itself. */
@@ -86,7 +89,18 @@ export function GameStartDialog({ start, onClose }: { start: GameStart | null; o
           />
         </ol>
 
-        <div className="flex justify-end">
+        <div className="flex justify-end gap-2">
+          {(stage === "failed" || stage === "slow") && (
+            <Button
+              variant="outline"
+              onClick={() => {
+                onClose();
+                openReport(stage === "failed" ? "join" : "slowStart", start.failure ?? null);
+              }}
+            >
+              <Trans>Send report</Trans>
+            </Button>
+          )}
           <Button variant="outline" onClick={onClose}>
             {stage === "starting" ? <Trans>Hide</Trans> : <Trans>Close</Trans>}
           </Button>

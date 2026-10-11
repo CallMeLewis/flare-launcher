@@ -148,6 +148,24 @@ export type UpdateStatus =
  */
 export type BackendText = { message: string; values: Record<string, string | number> };
 
+/** What the player was doing when something failed, for a problem report. */
+export type Problem = "join" | "slowStart" | "modDownload" | "modUpdate" | "modVerify" | "unsubscribe" | "update";
+
+/** A problem report, built by the backend and shown to the player before it's sent. */
+export type Report = {
+  problem: Problem;
+  error: BackendText | string | null;
+  version: string;
+  platform: string;
+  installFormat: string;
+  channel: UpdateChannel;
+  system: string;
+  steam: string | null;
+  dayzFound: boolean;
+  lowMapCount: number | null;
+  log: string[];
+};
+
 /** Whether the launcher is in the Linux app menu. Only an AppImage can add itself; elsewhere `supported` is false. */
 export interface AppMenu {
   supported: boolean;

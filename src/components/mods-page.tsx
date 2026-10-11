@@ -43,6 +43,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import type { SubscribedModsState } from "@/hooks/use-subscribed-mods";
 import { backend, errorMessage } from "@/lib/backend";
+import { reportable } from "@/lib/report";
 import { downloadFraction, formatBytes } from "@/lib/format";
 import {
   canVerify,
@@ -430,7 +431,7 @@ export function ModsPage({
               { description: t`Steam removes the files from this computer shortly.` },
             );
           } catch (e) {
-            toast.error(t`Couldn't unsubscribe`, { description: errorMessage(e) });
+            toast.error(t`Couldn't unsubscribe`, reportable("unsubscribe", e, errorMessage(e)));
           } finally {
             setConfirming((current) => ({ ...current, open: false }));
           }

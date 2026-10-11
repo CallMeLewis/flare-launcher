@@ -8,6 +8,7 @@ import { FirstRunDialog } from "@/components/first-run-dialog";
 import { GameStartDialog, type GameStart } from "@/components/game-start-dialog";
 import { JoinAddressDialog } from "@/components/join-address-dialog";
 import { ModsPage } from "@/components/mods-page";
+import { ReportDialog } from "@/components/report-dialog";
 import { ServerDetail } from "@/components/server-detail";
 import { ServerTable } from "@/components/server-table";
 import { ServerToolbar } from "@/components/server-toolbar";
@@ -25,6 +26,7 @@ import { backend, errorMessage } from "@/lib/backend";
 import { followLanguage } from "@/lib/i18n";
 import { launchArgs } from "@/lib/launch-options";
 import { serverCounts, type ModJob } from "@/lib/mods";
+import { reportable } from "@/lib/report";
 import { followTheme } from "@/lib/theme";
 import {
   DEFAULT_FILTERS,
@@ -429,9 +431,10 @@ export function App() {
         if (!started) {
           if (gameStartShown.current) showGameStart({ ...start, stage: "slow" });
           else
-            toast.info(t`DayZ hasn't started yet`, {
-              description: t`It may still be loading. If it doesn't open, check Steam for a message.`,
-            });
+            toast.info(
+              t`DayZ hasn't started yet`,
+              reportable("slowStart", null, t`It may still be loading. If it doesn't open, check Steam for a message.`),
+            );
         } else if (settings.afterLaunch === "keep") {
           if (gameStartShown.current) showGameStart({ ...start, stage: "running" });
         } else {
@@ -443,11 +446,12 @@ export function App() {
       } catch (e) {
         setInstallVersion((version) => version + 1);
         if (gameStartShown.current) {
-          setGameStart((current) => current && { ...current, stage: "failed", error: errorMessage(e) });
+          setGameStart((current) => current && { ...current, stage: "failed", error: errorMessage(e), failure: e });
         } else {
-          toast.error(startGame ? t`Couldn't start DayZ` : t`Couldn't download the mods`, {
-            description: errorMessage(e),
-          });
+          toast.error(
+            startGame ? t`Couldn't start DayZ` : t`Couldn't download the mods`,
+            reportable(startGame ? "join" : "modDownload", e, errorMessage(e)),
+          );
         }
       } finally {
         playing.current = false;
@@ -486,9 +490,10 @@ export function App() {
           });
         }
       } catch (e) {
-        toast.error(kind === "verify" ? t`Couldn't verify the mods` : t`Couldn't update the mods`, {
-          description: errorMessage(e),
-        });
+        toast.error(
+          kind === "verify" ? t`Couldn't verify the mods` : t`Couldn't update the mods`,
+          reportable(kind === "verify" ? "modVerify" : "modUpdate", e, errorMessage(e)),
+        );
       } finally {
         playing.current = false;
         setModJob(null);
@@ -682,6 +687,8 @@ export function App() {
       </div>
 
       <GameStartDialog start={gameStart} onClose={hideGameStart} />
+
+      <ReportDialog dayzDir={settings.dayzDir} />
 
       <FirstRunDialog
         open={setupOpen}

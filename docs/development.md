@@ -141,6 +141,10 @@ own and loaded when chosen in Settings > Launcher. System, the default, uses the
 - `src-tauri/src/discord.rs`: shows the Discord status, the launcher and whether DayZ is running, never the server.
   Its art comes from the Flare Launcher application in Discord's developer portal, as the asset `logo`.
 - `src-tauri/src/updater.rs`: checks for, downloads and installs launcher updates.
+- `src-tauri/src/report.rs`: builds and sends the problem report a player can choose to send when something fails,
+  with the launcher's last few log lines (kept in memory, never on disk). Reports go to the stats dashboard
+  (stats.darkzone.dev), kept separately, where they're read and worked through on its Reports page; a debug build
+  sends them to `DZSL_REPORT_URL` instead when it's set.
 - `src-tauri/src/app_menu.rs`: on Linux, moves the AppImage to `~/Applications` and adds it to the app menu.
 - `src-tauri/windows/installer-hooks.nsh`: removes an install made under the launcher's old name.
 - `scripts/`: the release tooling. `CHANGELOG.md` holds every version's notes, read through `scripts/changelog.ts`.

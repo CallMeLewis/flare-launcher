@@ -28,6 +28,9 @@ These ideas come up, and the answer is no unless this document is changed first:
 - No mod authoring, packing or publishing.
 - No news, adverts, promoted servers or anything that ranks servers for reasons other than the player's own filters.
 - No support for games other than DayZ.
+- No telemetry or usage tracking. When something fails, the player can choose to send a report they've seen in full:
+  what failed and how the launcher and Steam are set up, never server names, addresses or anything that identifies
+  them.
 - No features that only work on one platform, unless the other platform has no equivalent need.
 
 ## Questions to ask of a new feature

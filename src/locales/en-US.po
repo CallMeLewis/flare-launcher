@@ -264,6 +264,7 @@ msgstr ""
 
 #: src/components/join-address-dialog.tsx
 #: src/components/mods-page.tsx
+#: src/components/report-dialog.tsx
 #: src/components/server-detail.tsx
 msgid "Cancel"
 msgstr ""
@@ -542,8 +543,16 @@ msgstr ""
 msgid "Deselect every mod shown"
 msgstr ""
 
+#: src/components/report-dialog.tsx
+msgid "Details to send"
+msgstr ""
+
 #: src/components/settings-dialog.tsx
 msgid "Discord activity"
+msgstr ""
+
+#: src/components/report-dialog.tsx
+msgid "Don't include passwords or personal details."
 msgstr ""
 
 #: src/components/map-count-dialog.tsx
@@ -1211,6 +1220,10 @@ msgstr "Remove from favorites"
 msgid "Removed from the app menu"
 msgstr ""
 
+#: src/components/report-dialog.tsx
+msgid "Report sent"
+msgstr ""
+
 #: src/components/filter-menu.tsx
 msgid "Reset filters"
 msgstr ""
@@ -1287,6 +1300,25 @@ msgstr ""
 #: src/App.tsx
 msgid "Select one to see its mods. Double-click to join straight away."
 msgstr "Select one to see its mods. Double-click to join right away."
+
+#: src/components/report-dialog.tsx
+msgid "Send a report"
+msgstr ""
+
+#: src/components/game-start-dialog.tsx
+#: src/components/report-dialog.tsx
+#: src/components/settings-dialog.tsx
+#: src/lib/report.ts
+msgid "Send report"
+msgstr ""
+
+#: src/components/report-dialog.tsx
+msgid "Sending…"
+msgstr ""
+
+#: src/components/report-dialog.tsx
+msgid "Sends the details below to the launcher's developer to help fix the problem. Server names and addresses are left out."
+msgstr ""
 
 #: src/components/filter-menu.tsx
 #: src/components/server-table.tsx
@@ -1508,6 +1540,10 @@ msgstr ""
 msgid "Terminal"
 msgstr ""
 
+#: src/components/report-dialog.tsx
+msgid "Thank you. It helps fix problems like this one."
+msgstr ""
+
 #: src/lib/backend-messages.ts
 msgid "That server is no longer in the list. Refresh and try again."
 msgstr ""
@@ -1575,6 +1611,10 @@ msgstr ""
 
 #: src/lib/backend-messages.ts
 msgid "The port after the colon has to be a number."
+msgstr ""
+
+#: src/lib/backend-messages.ts
+msgid "The report couldn't be sent: {error}"
 msgstr ""
 
 #: src/components/settings-dialog.tsx
@@ -1844,6 +1884,10 @@ msgstr ""
 #: src/components/first-run-dialog.tsx
 #: src/components/settings-dialog.tsx
 msgid "What the launcher does once the game is running."
+msgstr ""
+
+#: src/components/report-dialog.tsx
+msgid "What were you doing? (optional)"
 msgstr ""
 
 #: src/components/release-notes.tsx

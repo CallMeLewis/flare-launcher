@@ -386,19 +386,23 @@ fn notes_text(notes: Option<&str>) -> Option<String> {
 /// Names the launcher to the update server, so its traffic stats can tell launchers from bots and the download page,
 /// and show which versions, platforms and channels are in use. Nothing in it identifies a player or a computer.
 fn user_agent(version: &str, channel: UpdateChannel) -> String {
+  let channel = match channel {
+    UpdateChannel::Stable => "stable",
+    UpdateChannel::Beta => "beta",
+  };
+  format!("Flare-Launcher/{version} ({}; {}; {channel})", std::env::consts::OS, install_format())
+}
+
+/// How this copy was installed: `nsis`, `appimage`, `deb` or `rpm`, or `unknown` for a development build.
+pub fn install_format() -> &'static str {
   use tauri::utils::config::BundleType;
-  let format = match tauri::utils::platform::bundle_type() {
+  match tauri::utils::platform::bundle_type() {
     Some(BundleType::Nsis) => "nsis",
     Some(BundleType::AppImage) => "appimage",
     Some(BundleType::Deb) => "deb",
     Some(BundleType::Rpm) => "rpm",
     _ => "unknown",
-  };
-  let channel = match channel {
-    UpdateChannel::Stable => "stable",
-    UpdateChannel::Beta => "beta",
-  };
-  format!("Flare-Launcher/{version} ({}; {format}; {channel})", std::env::consts::OS)
+  }
 }
 
 fn now_millis() -> u64 {

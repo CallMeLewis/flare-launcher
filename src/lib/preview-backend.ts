@@ -1,7 +1,7 @@
 // Development only: stands in for the Rust backend when the UI runs in a
 // browser. Mirrors `src-tauri/src/servers.rs`.
 
-import type { Mod, ServerList, ServerRow, SubscribedMod } from "./types";
+import type { BackendText, Mod, Problem, Report, ServerList, ServerRow, SubscribedMod } from "./types";
 
 const LIST_URL = "https://dayzsalauncher.com/api/v1/launcher/servers/dayz";
 
@@ -119,4 +119,25 @@ export async function subscribedMods(): Promise<SubscribedMod[]> {
 
 export async function unsubscribeMods(ids: number[]): Promise<void> {
   subscribed = subscribed.filter((mod) => !ids.includes(mod.id));
+}
+
+/** A report like the backend builds, to work on the report dialog in a browser. */
+export async function prepareReport(problem: Problem, error: unknown): Promise<Report> {
+  return {
+    problem,
+    error: (error as BackendText | string | null) ?? null,
+    version: __APP_VERSION__,
+    platform: "linux",
+    installFormat: "unknown",
+    channel: "stable",
+    system: "Linux (Ubuntu 24.04), kernel 6.8.0",
+    steam: "native",
+    dayzFound: true,
+    lowMapCount: null,
+    log: ["WARN could not connect to Steam: Steam is not running (NoSteamClient)"],
+  };
+}
+
+export async function sendReport(): Promise<void> {
+  await new Promise((resolve) => setTimeout(resolve, 600));
 }

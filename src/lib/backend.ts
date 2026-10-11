@@ -13,6 +13,8 @@ import type {
   Mod,
   ModProgress,
   Ping,
+  Problem,
+  Report,
   ServerList,
   ServerRow,
   SubscribedMod,
@@ -200,6 +202,18 @@ export const backend = {
     window.open(`https://steamcommunity.com/sharedfiles/filedetails/?id=${id}`, "_blank", "noopener");
     return Promise.resolve();
   },
+
+  /** Builds a report of a failure for the player to look over. `error` is what the failed command rejected with. */
+  prepareReport: (problem: Problem, error: unknown, dayzDir: string): Promise<Report> => {
+    const sent = error instanceof Error ? error.message : (error ?? null);
+    return isPreview
+      ? preview().then((p) => p.prepareReport(problem, sent))
+      : invoke("prepare_report", { problem, error: sent, dayzDir: dayzDir || null });
+  },
+
+  /** Sends a report the player has looked over, with their note. */
+  sendReport: (report: Report, note: string): Promise<void> =>
+    isPreview ? preview().then((p) => p.sendReport()) : invoke("send_report", { report, note }),
 
   /** Opens the launcher's GitHub page in the browser. */
   openProjectPage: (): Promise<void> => {

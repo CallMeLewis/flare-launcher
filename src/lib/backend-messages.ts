@@ -55,6 +55,7 @@ export const BACKEND_MESSAGES = [
   msg({ message: "The installer already added Flare Launcher to the Start menu." }),
   msg({ message: "The password store couldn't be used: {error}" }),
   msg({ message: "The port after the colon has to be a number." }),
+  msg({ message: "The report couldn't be sent: {error}" }),
   msg({ message: "The server answered but didn't send its details. Try again in a moment." }),
   msg({ message: "The server list wasn't in the expected format: {error}" }),
   msg({ message: "The settings folder couldn't be found." }),

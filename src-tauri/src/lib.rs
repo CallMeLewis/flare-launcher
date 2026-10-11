@@ -8,6 +8,7 @@ mod error;
 mod lan;
 mod launch;
 mod query;
+mod report;
 mod servers;
 mod steam;
 mod updater;
@@ -54,6 +55,7 @@ fn open_project_page(app: tauri::AppHandle) -> error::Result<()> {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+  report::keep_log();
   #[cfg(target_os = "linux")]
   if let Some(code) = workshop::helper::run_helper() {
     std::process::exit(code);
@@ -117,6 +119,8 @@ pub fn run() {
       credentials::save_password,
       credentials::forget_password,
       discord::set_discord_presence,
+      report::prepare_report,
+      report::send_report,
     ])
     .setup(|app| {
       // The window is built here rather than from the config alone so Linux can keep the system title bar: Linux
@@ -135,9 +139,6 @@ pub fn run() {
         .build()?;
       updater::Updater::start(app.handle());
       app.manage(discord::Presence::start());
-      if cfg!(debug_assertions) {
-        app.handle().plugin(tauri_plugin_log::Builder::default().level(log::LevelFilter::Info).build())?;
-      }
       Ok(())
     })
     .run(tauri::generate_context!())

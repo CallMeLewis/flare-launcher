@@ -133,6 +133,30 @@ pub fn only_flatpak_steam() -> bool {
   flatpak_steam_root().is_some() && !on_path("steam")
 }
 
+/// How Steam was found, for a problem report: through the registry on Windows; on Linux, which Steam starts the game.
+/// `None` when no Steam was found.
+#[cfg(windows)]
+pub fn steam_kind(_install: Option<&Install>) -> Option<&'static str> {
+  (!steam_roots().is_empty()).then_some("registry")
+}
+
+#[cfg(not(windows))]
+pub fn steam_kind(install: Option<&Install>) -> Option<&'static str> {
+  let home = std::env::home_dir()?;
+  let snap_root = home.join("snap/steam/common/.local/share/Steam");
+  match install {
+    Some(install) if snap_root.is_dir() && in_libraries_of(&snap_root, &install.dayz_dir) => Some("snap"),
+    Some(install) => Some(match client_for(install) {
+      SteamClient::Native => "native",
+      SteamClient::Flatpak => "flatpak",
+    }),
+    None if on_path("steam") => Some("native"),
+    None if flatpak_steam_root().is_some() => Some("flatpak"),
+    None if snap_root.is_dir() => Some("snap"),
+    None => None,
+  }
+}
+
 /// Whether a folder is inside one of a Steam install's libraries.
 #[cfg(not(windows))]
 fn in_libraries_of(steam_root: &Path, dir: &Path) -> bool {
