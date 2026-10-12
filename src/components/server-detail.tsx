@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } fro
 import { plural } from "@lingui/core/macro";
 import { Trans, useLingui } from "@lingui/react/macro";
 import {
+  Check,
   ChevronDown,
   CircleAlert,
   CircleCheck,
@@ -12,6 +13,7 @@ import {
   ExternalLink,
   Eye,
   EyeOff,
+  Globe,
   Loader2,
   Lock,
   Play,
@@ -104,6 +106,8 @@ export function ServerDetail({
   const [now, setNow] = useState(Date.now);
   const lowMapCount = useLowMapCount();
   const [mapCountOpen, setMapCountOpen] = useState(false);
+  // Shows on the address for a moment after copying it.
+  const [copied, setCopied] = useState(false);
 
   const unlisted = offline === "unlisted";
   const canCheckMods = install !== null && !unlisted;
@@ -139,6 +143,16 @@ export function ServerDetail({
     setReceivedAt(Date.now());
     setNow(Date.now());
   }, [server]);
+
+  useEffect(() => {
+    setCopied(false);
+  }, [server.id]);
+
+  useEffect(() => {
+    if (!copied) return;
+    const timer = setTimeout(() => setCopied(false), 2000);
+    return () => clearTimeout(timer);
+  }, [copied]);
 
   useEffect(() => {
     const timer = setInterval(() => setNow(Date.now()), 30_000);
@@ -236,7 +250,7 @@ export function ServerDetail({
   async function copyAddress() {
     try {
       await navigator.clipboard.writeText(address);
-      toast.success(t`Address copied`);
+      setCopied(true);
     } catch {
       toast.error(t`Couldn't copy the address`);
     }
@@ -266,12 +280,32 @@ export function ServerDetail({
             <Star className="size-4" fill={favourite ? "currentColor" : "none"} aria-hidden />
           </Button>
         </div>
-        <div className="flex items-center gap-1">
-          <code className="data selectable text-xs text-muted-foreground">{address}</code>
-          <Button variant="ghost" size="icon-xs" aria-label={t`Copy address`} onClick={copyAddress}>
-            <Copy aria-hidden />
-          </Button>
-        </div>
+        <button
+          type="button"
+          title={t`Copy address`}
+          onClick={copyAddress}
+          className="group flex h-8 w-full items-stretch overflow-hidden rounded-md border border-input bg-background text-left transition-colors duration-150 outline-none hover:bg-muted focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+        >
+          <span className="flex min-w-0 flex-1 items-center gap-2 px-2.5">
+            <Globe className="size-3.5 shrink-0 text-muted-foreground" aria-hidden />
+            <span className="data flex min-w-0 text-xs">
+              <span className="truncate">{server.ip}</span>
+              <span className="text-muted-foreground">:{server.gamePort}</span>
+            </span>
+          </span>
+          <span
+            className={cn(
+              "flex shrink-0 items-center gap-1.5 border-l px-2.5 text-xs font-medium text-muted-foreground transition-colors duration-150 group-hover:text-foreground",
+              copied && "text-success group-hover:text-success",
+            )}
+          >
+            {copied ? <Check className="size-3.5" aria-hidden /> : <Copy className="size-3.5" aria-hidden />}
+            {copied ? t`Copied` : t`Copy`}
+          </span>
+        </button>
+        <span className="sr-only" aria-live="polite">
+          {copied ? t`Address copied` : ""}
+        </span>
       </header>
 
       <dl className="grid grid-cols-2 gap-x-4 gap-y-3 border-b p-4">

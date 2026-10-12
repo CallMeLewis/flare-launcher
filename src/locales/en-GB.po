@@ -356,10 +356,12 @@ msgid "Connection"
 msgstr "Connection"
 
 #: src/components/map-count-dialog.tsx
+#: src/components/server-detail.tsx
 msgid "Copied"
 msgstr "Copied"
 
 #: src/components/map-count-dialog.tsx
+#: src/components/server-detail.tsx
 msgid "Copy"
 msgstr "Copy"
 
