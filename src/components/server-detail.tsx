@@ -275,7 +275,7 @@ export function ServerDetail({
             aria-label={favourite ? t`Remove from favourites` : t`Add to favourites`}
             aria-pressed={favourite}
             onClick={() => onToggleFavourite(server.id)}
-            className={cn("-mt-1 -mr-1 shrink-0", favourite && "text-warning hover:text-warning")}
+            className={cn("-mt-1.5 -mr-1 shrink-0", favourite && "text-warning hover:text-warning")}
           >
             <Star className="size-4" fill={favourite ? "currentColor" : "none"} aria-hidden />
           </Button>
