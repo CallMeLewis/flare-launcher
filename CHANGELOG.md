@@ -2,6 +2,12 @@
 
 What changed in each version of Flare Launcher, newest first.
 
+## 1.3.0 - 2026-10-13
+
+- New Send report button when something fails, such as joining a server or downloading mods: you see the whole report and can add a note before sending it, and it never includes server names or addresses.
+- New in Settings > About: who made the launcher, and a View on GitHub button.
+- Improved the server address in the server panel: click anywhere on it to copy it, and it shows Copied once it's done.
+
 ## 1.2.1 - 2026-10-10
 
 - Fixed some servers showing another country's flag, such as Bolivia's servers showing Bonaire's.
