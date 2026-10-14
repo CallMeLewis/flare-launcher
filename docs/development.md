@@ -168,6 +168,14 @@ when it is newer than the latest beta. Builds are signed with the update signing
 repository secret `TAURI_SIGNING_PRIVATE_KEY`. The launcher refuses an update whose signature or signed version doesn't
 match the public key in `src-tauri/tauri.conf.json`.
 
+The Windows build is also signed with a code signing certificate, so Windows names the publisher instead of warning
+about an unknown one. The certificate is kept in Certum's cloud and reached through SimplySign Desktop, which the
+Windows build job installs and signs in to with the repository secrets `CERTUM_USERNAME` (the SimplySign account's
+email) and `CERTUM_TOTP_SECRET` (the `secret=` value of the `otpauth://` link SimplySign gave when the account was
+activated). Tauri signs the launcher, its uninstaller and the installer while bundling, before the update signature is
+added. The certificate expires on 2027-10-14; renewing it changes its thumbprint, which is in `build.yml`. To check
+signing without releasing, run the CI workflow from the Actions tab with "Sign the Windows build".
+
 The version number tells players how much has changed, so choose it by what the release notes say:
 
 - **Major** (`2.0.0`) only when players have to do something, or something they rely on stops working: a release with

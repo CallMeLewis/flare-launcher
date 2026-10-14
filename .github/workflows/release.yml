@@ -3,8 +3,9 @@
 # Runs when `pnpm release` pushes a v<version> tag. To build a tag again, run it from the Actions tab on main and enter
 # the tag: the workflow then comes from main, with any fixes, and the code from the tag.
 #
-# Needs the repository secrets TAURI_SIGNING_PRIVATE_KEY (the contents of the update signing key), and
-# CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID for writing the feed to R2.
+# Needs the repository secrets TAURI_SIGNING_PRIVATE_KEY (the contents of the update signing key),
+# CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID for writing the feed to R2, and CERTUM_USERNAME and CERTUM_TOTP_SECRET
+# for signing the Windows build with the code signing certificate (see build.yml).
 name: Release
 
 on:
@@ -50,7 +51,8 @@ jobs:
             exit 1
           fi
 
-  # Checks the repo, then builds both platforms (build.yml), the same as CI.
+  # Checks the repo, then builds both platforms (build.yml), the same as CI, with the Windows build signed. The update
+  # signature is added after, in publish, since signing the installer changes it.
   build:
     name: Build
     needs: version
@@ -61,6 +63,10 @@ jobs:
     uses: ./.github/workflows/build.yml
     with:
       ref: ${{ inputs.tag || github.ref_name }}
+      sign: true
+    secrets:
+      CERTUM_USERNAME: ${{ secrets.CERTUM_USERNAME }}
+      CERTUM_TOTP_SECRET: ${{ secrets.CERTUM_TOTP_SECRET }}
 
   publish:
     name: Publish
