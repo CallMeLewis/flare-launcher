@@ -2,6 +2,12 @@
 
 What changed in each version of Flare Launcher, newest first.
 
+## 1.4.0 - 2026-10-16
+
+- New warning in the server panel when the server runs a different version of one of your mods, usually because it hasn't restarted since the mod was updated: the mod is marked in the list, and the warning above Play says the server may turn you away until it restarts.
+- On Windows, the installer and the launcher are now signed, so Windows names the publisher instead of warning about an unknown one.
+- Right-clicking no longer opens a browser menu with Back, Reload and Inspect; text fields still have Cut, Copy and Paste.
+
 ## 1.3.0 - 2026-10-13
 
 - New Send report button when something fails, such as joining a server or downloading mods: you see the whole report and can add a note before sending it, and it never includes server names or addresses.
