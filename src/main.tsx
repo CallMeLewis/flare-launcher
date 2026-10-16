@@ -11,6 +11,14 @@ import "./globals.css";
 
 paintTheme(savedTheme());
 
+// The web view's own menu (Back, Reload, Inspect) has no place in a desktop app. Text fields keep theirs, for pasting
+// an address or password.
+document.addEventListener("contextmenu", (event) => {
+  const target = event.target;
+  const editable = target instanceof HTMLElement && target.closest("input, textarea, [contenteditable='true']");
+  if (!editable) event.preventDefault();
+});
+
 // The language is loaded before the first draw, so the interface never shows in another one first.
 void activateLocale(resolveLocale(savedLanguage())).then(() =>
   createRoot(document.getElementById("root")!).render(
