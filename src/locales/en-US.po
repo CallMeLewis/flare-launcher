@@ -15,6 +15,14 @@ msgstr ""
 msgid "{count, plural, one {# mod} other {# mods}} downloaded."
 msgstr ""
 
+#: src/components/server-detail.tsx
+msgid "{differingCount, plural, one {# differs from the server} other {# differ from the server}}"
+msgstr ""
+
+#: src/components/server-detail.tsx
+msgid "{differingCount, plural, one {The server has a different version of # mod than this computer, usually because it hasn't restarted since the mod was updated. It may turn you away until it does.} other {The server has a different version of # mods than this computer, usually because it hasn't restarted since they were updated. It may turn you away until it does.}}"
+msgstr ""
+
 #: src/components/mods-page.tsx
 #: src/components/server-detail.tsx
 msgid "{done} of {count}"
@@ -547,6 +555,10 @@ msgstr ""
 
 #: src/components/report-dialog.tsx
 msgid "Details to send"
+msgstr ""
+
+#: src/components/server-detail.tsx
+msgid "Different version from the server"
 msgstr ""
 
 #: src/components/settings-dialog.tsx

@@ -15,6 +15,14 @@ msgstr "{count, plural, one {# mod descargado} other {# mods descargados}} para 
 msgid "{count, plural, one {# mod} other {# mods}} downloaded."
 msgstr "{count, plural, one {# mod descargado} other {# mods descargados}}."
 
+#: src/components/server-detail.tsx
+msgid "{differingCount, plural, one {# differs from the server} other {# differ from the server}}"
+msgstr "{differingCount, plural, one {# difiere de la versión del servidor} other {# difieren de las versiones del servidor}}"
+
+#: src/components/server-detail.tsx
+msgid "{differingCount, plural, one {The server has a different version of # mod than this computer, usually because it hasn't restarted since the mod was updated. It may turn you away until it does.} other {The server has a different version of # mods than this computer, usually because it hasn't restarted since they were updated. It may turn you away until it does.}}"
+msgstr "{differingCount, plural, one {El servidor tiene una versión de # mod distinta a la de este equipo, normalmente porque no se ha reiniciado desde que se actualizó el mod. Puede que te impida entrar hasta que se reinicie.} other {El servidor tiene versiones de # mods distintas a las de este equipo, normalmente porque no se ha reiniciado desde que se actualizaron. Puede que te impida entrar hasta que se reinicie.}}"
+
 #: src/components/mods-page.tsx
 #: src/components/server-detail.tsx
 msgid "{done} of {count}"
@@ -548,6 +556,10 @@ msgstr "Deseleccionar todos los mods mostrados"
 #: src/components/report-dialog.tsx
 msgid "Details to send"
 msgstr "Detalles que se enviarán"
+
+#: src/components/server-detail.tsx
+msgid "Different version from the server"
+msgstr "Versión distinta a la del servidor"
 
 #: src/components/settings-dialog.tsx
 msgid "Discord activity"

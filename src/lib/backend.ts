@@ -66,6 +66,10 @@ export const backend = {
   installedMods: (dayzDir: string, ids: number[]): Promise<number[]> =>
     isPreview ? Promise.resolve([]) : invoke("installed_mods", { dayzDir: dayzDir || null, ids }),
 
+  /** Of the given installed mods, those the server runs a different version of. Empty when it can't be checked. */
+  modsDifferingFromServer: (dayzDir: string, serverId: string, ids: number[]): Promise<number[]> =>
+    isPreview ? Promise.resolve([]) : invoke("mods_differing_from_server", { dayzDir: dayzDir || null, serverId, ids }),
+
   /** The mods the player is subscribed to. Resolves to `null` when DayZ isn't found. */
   subscribedMods: (dayzDir: string): Promise<SubscribedMod[] | null> =>
     isPreview ? preview().then((p) => p.subscribedMods()) : invoke("subscribed_mods", { dayzDir: dayzDir || null }),

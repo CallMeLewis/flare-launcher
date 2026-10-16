@@ -18,6 +18,7 @@ import {
   Lock,
   Play,
   Star,
+  TriangleAlert,
 } from "lucide-react";
 import { toast } from "sonner";
 import { CountryFlag } from "@/components/country-flag";
@@ -90,6 +91,8 @@ export function ServerDetail({
   const { t, i18n } = useLingui();
   const [mods, setMods] = useState<Mod[] | null>(null);
   const [installed, setInstalled] = useState<ReadonlySet<number> | null>(null);
+  // Installed mods the server runs a different version of, usually because it hasn't restarted since they updated.
+  const [differing, setDiffering] = useState<ReadonlySet<number>>(new Set());
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [remember, setRemember] = useState(false);
@@ -122,6 +125,7 @@ export function ServerDetail({
     latestCheck.current += 1;
     setMods(null);
     setInstalled(null);
+    setDiffering(new Set());
     setModsFailed(false);
     setCheckFailed(false);
     // Only the server list knows a server's mods.
@@ -202,12 +206,13 @@ export function ServerDetail({
   const checkMods = useCallback(async () => {
     if (!mods || !canCheckMods) return;
     const check = ++latestCheck.current;
-    const ids = await backend
-      .installedMods(
-        dayzDir,
-        mods.map((mod) => mod.steamWorkshopId),
-      )
-      .catch(() => null);
+    const modIds = mods.map((mod) => mod.steamWorkshopId);
+    // Asks the server, so it can be slow: Play doesn't wait for it.
+    backend
+      .modsDifferingFromServer(dayzDir, server.id, modIds)
+      .then((ids) => check === latestCheck.current && setDiffering(new Set(ids)))
+      .catch(() => {});
+    const ids = await backend.installedMods(dayzDir, modIds).catch(() => null);
     if (check !== latestCheck.current) return;
     setCheckFailed(!ids);
     if (ids) setInstalled(new Set(ids));
@@ -226,6 +231,9 @@ export function ServerDetail({
   const progressById = useMemo(() => new Map(downloading?.map((p) => [p.id, p])), [downloading]);
 
   const missing = mods && installed ? mods.filter((mod) => !installed.has(mod.steamWorkshopId)).length : 0;
+  // A mod still to download is counted as missing, not as differing.
+  const differs = (id: number) => differing.has(id) && installed?.has(id) === true;
+  const differingCount = mods ? mods.filter((mod) => differs(mod.steamWorkshopId)).length : 0;
   const checking = canCheckMods && !checkFailed && (mods === null || (mods.length > 0 && installed === null));
   const address = `${server.ip}:${server.gamePort}`;
   const players = ping?.players ?? server.players;
@@ -376,10 +384,15 @@ export function ServerDetail({
             {mods && mods.length > 0 && <span className="data ml-1.5">{mods.length}</span>}
           </h3>
           {mods && mods.length > 0 && installed && !downloading && (
-            <p className={cn("text-xs", missing > 0 ? "text-warning" : "text-success")} aria-live="polite">
+            <p
+              className={cn("text-xs", missing > 0 || differingCount > 0 ? "text-warning" : "text-success")}
+              aria-live="polite"
+            >
               {missing > 0
                 ? t`${plural(missing, { one: "# to download", other: "# to download" })}`
-                : t`All up to date`}
+                : differingCount > 0
+                  ? t`${plural(differingCount, { one: "# differs from the server", other: "# differ from the server" })}`
+                  : t`All up to date`}
             </p>
           )}
         </div>
@@ -415,6 +428,7 @@ export function ServerDetail({
                   key={mod.steamWorkshopId}
                   mod={mod}
                   installed={installed ? installed.has(mod.steamWorkshopId) : null}
+                  differs={differs(mod.steamWorkshopId)}
                   progress={progressById.get(mod.steamWorkshopId)}
                 />
               ))}
@@ -429,6 +443,15 @@ export function ServerDetail({
             {unlisted
               ? t`This server isn't in the server list right now, so it's probably offline. It comes back once the server is up again.`
               : t`This server isn't answering, so it's probably offline or restarting. You can still try to join.`}
+          </Notice>
+        )}
+        {differingCount > 0 && !downloading && (
+          <Notice>
+            {t`${plural(differingCount, {
+              one: "The server has a different version of # mod than this computer, usually because it hasn't restarted since the mod was updated. It may turn you away until it does.",
+              other:
+                "The server has a different version of # mods than this computer, usually because it hasn't restarted since they were updated. It may turn you away until it does.",
+            })}`}
           </Notice>
         )}
         {lowMapCount.limit !== null && (
@@ -601,22 +624,28 @@ export function ServerDetail({
 function ModRow({
   mod,
   installed,
+  differs,
   progress,
 }: {
   mod: Mod;
   /** `null` while unknown. */
   installed: boolean | null;
+  /** Installed, but the server runs a different version. */
+  differs: boolean;
   progress: ModProgress | undefined;
 }) {
   const { t } = useLingui();
   const name = mod.name;
-  const status = progress?.status ?? (installed === null ? null : installed ? "installed" : "missing");
+  const status =
+    progress?.status ?? (installed === null ? null : !installed ? "missing" : differs ? "differs" : "installed");
   const percent = progress && progress.total > 0 ? Math.floor((progress.downloaded / progress.total) * 100) : null;
 
   return (
     <li className="group flex h-8 items-center gap-2 rounded-md px-2 text-[13px] hover:bg-accent/50">
       {status === "installed" ? (
         <CircleCheck className="size-3.5 shrink-0 text-success" aria-label={t`Installed`} />
+      ) : status === "differs" ? (
+        <TriangleAlert className="size-3.5 shrink-0 text-warning" aria-label={t`Different version from the server`} />
       ) : status === "missing" ? (
         <CircleAlert className="size-3.5 shrink-0 text-warning" aria-label={t`Missing or out of date`} />
       ) : status === "downloading" ? (

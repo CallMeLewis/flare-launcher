@@ -142,11 +142,12 @@ fn unescape(data: &[u8]) -> Vec<u8> {
   out
 }
 
-/// Reads the mods a DayZ server runs from the payload of its A2S_RULES reply (everything after the type byte).
+/// Reads the mods a DayZ server runs from the payload of its A2S_RULES reply (everything after the type byte), each with
+/// the hash of the server's copy (see [`crate::mod_hash`]).
 ///
 /// DayZ packs them into rules with two-byte keys that number the parts of one escaped binary blob. The blob holds a
 /// version, flags and a hash per DLC, then each mod's hash, Workshop id and name.
-fn parse_mods(payload: &[u8]) -> Option<Vec<Mod>> {
+fn parse_mods(payload: &[u8]) -> Option<Vec<(Mod, u32)>> {
   let mut reader = Reader(payload);
   let count = reader.u16()?;
   let mut parts = Vec::new();
@@ -169,14 +170,14 @@ fn parse_mods(payload: &[u8]) -> Option<Vec<Mod>> {
   let mod_count = reader.u8()?;
   let mut mods = Vec::with_capacity(mod_count.into());
   for _ in 0..mod_count {
-    reader.u32()?; // hash
+    let hash = reader.u32()?;
     // The low four bits give the id's length in bytes; the rest are flags.
     let id_len = usize::from(reader.u8()? & 0x0F);
     let mut id = [0u8; 8];
     id.get_mut(..id_len)?.copy_from_slice(reader.bytes(id_len)?);
     let name_len = reader.u8()?.into();
     let name = String::from_utf8_lossy(reader.bytes(name_len)?).trim().to_string();
-    mods.push(Mod { name, steam_workshop_id: u64::from_le_bytes(id) });
+    mods.push((Mod { name, steam_workshop_id: u64::from_le_bytes(id) }, hash));
   }
   Some(mods)
 }
@@ -256,7 +257,13 @@ pub async fn a2s_info(addr: SocketAddr) -> Option<(Duration, Info)> {
 /// Asks a DayZ server which mods it runs.
 pub async fn a2s_mods(addr: SocketAddr) -> Option<Vec<Mod>> {
   let (_, payload) = request(addr, RULES_REQUEST, Some(NO_CHALLENGE), RULES).await?;
-  parse_mods(&payload)
+  Some(parse_mods(&payload)?.into_iter().map(|(m, _)| m).collect())
+}
+
+/// Asks a DayZ server for the hash of its copy of each mod, by Workshop id.
+pub async fn a2s_mod_hashes(addr: SocketAddr) -> Option<HashMap<u64, u32>> {
+  let (_, payload) = request(addr, RULES_REQUEST, Some(NO_CHALLENGE), RULES).await?;
+  Some(parse_mods(&payload)?.into_iter().map(|(m, hash)| (m.steam_workshop_id, hash)).collect())
 }
 
 /// Sends one ICMP echo. Needs no elevated rights on Windows.
@@ -415,8 +422,10 @@ mod tests {
     blob.extend_from_slice(&2u16.to_le_bytes()); // one DLC
     blob.extend_from_slice(&[0xAA, 0x00, 0x01, 0xFF]);
     blob.push(2);
-    for (id, name) in [(1559212036u32, &b"Community Framework"[..]), (2116157322, b"DabsFramework")] {
-      blob.extend_from_slice(&[0x10, 0x20, 0x30, 0x40]);
+    for (id, name, hash) in
+      [(1559212036u32, &b"Community Framework"[..], 0xF425_9D21u32), (2116157322, b"DabsFramework", 0x0000_01FF)]
+    {
+      blob.extend_from_slice(&hash.to_le_bytes());
       blob.push(0x04);
       blob.extend_from_slice(&id.to_le_bytes());
       blob.push(name.len() as u8);
@@ -426,8 +435,8 @@ mod tests {
     assert_eq!(
       parse_mods(&rules_payload(&blob, 7)),
       Some(vec![
-        Mod { name: "Community Framework".into(), steam_workshop_id: 1559212036 },
-        Mod { name: "DabsFramework".into(), steam_workshop_id: 2116157322 },
+        (Mod { name: "Community Framework".into(), steam_workshop_id: 1559212036 }, 0xF425_9D21),
+        (Mod { name: "DabsFramework".into(), steam_workshop_id: 2116157322 }, 0x0000_01FF),
       ])
     );
   }

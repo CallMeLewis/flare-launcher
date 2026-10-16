@@ -7,6 +7,7 @@ mod discord;
 mod error;
 mod lan;
 mod launch;
+mod mod_hash;
 mod query;
 mod report;
 mod servers;
@@ -92,6 +93,7 @@ pub fn run() {
       lan::find_server,
       steam::detect_install,
       steam::installed_mods,
+      mod_hash::mods_differing_from_server,
       steam::downloaded_mod_count,
       steam::subscribed_mods,
       steam::open_folder,

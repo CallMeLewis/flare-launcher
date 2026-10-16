@@ -15,6 +15,14 @@ msgstr "{count, plural, one {# mod} other {# mods}} downloaded for {name}"
 msgid "{count, plural, one {# mod} other {# mods}} downloaded."
 msgstr "{count, plural, one {# mod} other {# mods}} downloaded."
 
+#: src/components/server-detail.tsx
+msgid "{differingCount, plural, one {# differs from the server} other {# differ from the server}}"
+msgstr "{differingCount, plural, one {# differs from the server} other {# differ from the server}}"
+
+#: src/components/server-detail.tsx
+msgid "{differingCount, plural, one {The server has a different version of # mod than this computer, usually because it hasn't restarted since the mod was updated. It may turn you away until it does.} other {The server has a different version of # mods than this computer, usually because it hasn't restarted since they were updated. It may turn you away until it does.}}"
+msgstr "{differingCount, plural, one {The server has a different version of # mod than this computer, usually because it hasn't restarted since the mod was updated. It may turn you away until it does.} other {The server has a different version of # mods than this computer, usually because it hasn't restarted since they were updated. It may turn you away until it does.}}"
+
 #: src/components/mods-page.tsx
 #: src/components/server-detail.tsx
 msgid "{done} of {count}"
@@ -548,6 +556,10 @@ msgstr "Deselect every mod shown"
 #: src/components/report-dialog.tsx
 msgid "Details to send"
 msgstr "Details to send"
+
+#: src/components/server-detail.tsx
+msgid "Different version from the server"
+msgstr "Different version from the server"
 
 #: src/components/settings-dialog.tsx
 msgid "Discord activity"
