@@ -70,13 +70,16 @@ try {
     "run",
     "--rm",
     "--volume", `${root}:/src`,
+    // The flare-common checkout beside this repo, where the launcher links to it.
+    "--volume", `${resolve(root, "..", "flare-common")}:/flare-common`,
     "--volume", "flare-launcher-node-modules:/src/node_modules",
     "--volume", "flare-launcher-cargo-registry:/usr/local/cargo/registry",
     "--volume", "flare-launcher-pnpm-store:/pnpm-store",
     "--env", "CARGO_TARGET_DIR=/src/src-tauri/target/linux",
     "--env", "COREPACK_ENABLE_DOWNLOAD_PROMPT=0",
     tagged,
-    "bash", "-c", "pnpm install --frozen-lockfile && pnpm tauri build --bundles appimage,deb,rpm",
+    // flare-common's packages too, for the shared theme's fonts.
+    "bash", "-c", "pnpm --dir /flare-common install --frozen-lockfile && pnpm install --frozen-lockfile && pnpm tauri build --bundles appimage,deb,rpm",
   ]);
   // Tauri's frontend build, a pnpm run inside another, leaves an empty pnpm index beside the project whatever the store
   // setting. Nothing outside the container uses it.

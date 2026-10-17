@@ -38,3 +38,4 @@ jobs:
     secrets:
       CERTUM_USERNAME: ${{ secrets.CERTUM_USERNAME }}
       CERTUM_TOTP_SECRET: ${{ secrets.CERTUM_TOTP_SECRET }}
+      FLARE_COMMON_DEPLOY_KEY: ${{ secrets.FLARE_COMMON_DEPLOY_KEY }}

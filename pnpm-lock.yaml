@@ -54,6 +54,9 @@ importers:
         specifier: 2.0.8
         version: 2.0.8(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
     devDependencies:
+      '@flare/release':
+        specifier: link:../flare-common/packages/release
+        version: link:../flare-common/packages/release
       '@lingui/cli':
         specifier: 6.9.0
         version: 6.9.0(esbuild@0.28.1)(rolldown@1.2.12)(supports-color@10.2.2)

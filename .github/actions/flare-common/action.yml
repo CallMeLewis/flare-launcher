@@ -1,0 +1,38 @@
+# Checks out flare-common, what the Flare apps share (the updater plugin, the interface and the release script), at the
+# tag in .flare-common-version, and puts it beside this repo, where the app links to it as it does on a desktop.
+# flare-common is private, so it's read with a deploy key: the FLARE_COMMON_DEPLOY_KEY secret, whose public half is a
+# read-only deploy key on CallMeLewis/flare-common.
+name: flare-common
+description: Check out flare-common beside this repo, at the version this repo uses
+
+inputs:
+  deploy-key:
+    description: The private half of flare-common's deploy key
+    required: true
+  install:
+    description: Install its packages too, for jobs that build or type-check the interface
+    default: "false"
+
+runs:
+  using: composite
+  steps:
+    - name: Read the version of flare-common to use
+      id: version
+      shell: bash
+      run: echo "ref=$(tr -d '[:space:]' < .flare-common-version)" >> "$GITHUB_OUTPUT"
+    - uses: actions/checkout@v5
+      with:
+        repository: CallMeLewis/flare-common
+        ref: ${{ steps.version.outputs.ref }}
+        path: .flare-common
+        ssh-key: ${{ inputs.deploy-key }}
+        persist-credentials: false
+    # Checkouts have to land inside the workspace, but the app looks for flare-common next to this repo.
+    - name: Put it beside this repo
+      shell: bash
+      run: mv .flare-common ../flare-common
+    - name: Install its packages
+      if: inputs.install == 'true'
+      shell: bash
+      working-directory: ../flare-common
+      run: pnpm install --frozen-lockfile

@@ -10,6 +10,9 @@
 # Release next to the signing key; GitHub's own actions follow their major version tags. To update a pin, take the
 # commit of a release that has been out for a week or more.
 #
+# Every job that builds or checks the launcher checks out flare-common beside this repo, at the version in
+# .flare-common-version (.github/actions/flare-common), with the deploy key in the FLARE_COMMON_DEPLOY_KEY secret.
+#
 # With `sign`, the Windows build is signed with the code signing certificate, which is kept in Certum's cloud and
 # reached through SimplySign Desktop. It needs the secrets CERTUM_USERNAME (the SimplySign account's email) and
 # CERTUM_TOTP_SECRET (the secret from the otpauth:// link SimplySign gave when the account was activated).
@@ -31,6 +34,8 @@ on:
         required: false
       CERTUM_TOTP_SECRET:
         required: false
+      FLARE_COMMON_DEPLOY_KEY:
+        required: true
 
 permissions:
   contents: read
@@ -49,6 +54,10 @@ jobs:
         with:
           node-version: 24
           cache: pnpm
+      - uses: ./.github/actions/flare-common
+        with:
+          deploy-key: ${{ secrets.FLARE_COMMON_DEPLOY_KEY }}
+          install: true
       - run: pnpm install --frozen-lockfile
       - name: Release notes are written
         run: pnpm changelog
@@ -83,6 +92,9 @@ jobs:
       - uses: actions/checkout@v5
         with:
           ref: ${{ inputs.ref }}
+      - uses: ./.github/actions/flare-common
+        with:
+          deploy-key: ${{ secrets.FLARE_COMMON_DEPLOY_KEY }}
       - name: Install the Linux libraries
         if: runner.os == 'Linux'
         run: |
@@ -117,6 +129,10 @@ jobs:
         with:
           node-version: 24
           cache: pnpm
+      - uses: ./.github/actions/flare-common
+        with:
+          deploy-key: ${{ secrets.FLARE_COMMON_DEPLOY_KEY }}
+          install: true
       - name: Install Rust (the version in rust-toolchain.toml)
         run: rustup toolchain install
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
@@ -193,6 +209,9 @@ jobs:
         with:
           ref: ${{ inputs.ref }}
       # Only runs the build script: pnpm runs inside the container, so there's no pnpm here to cache.
+      - uses: ./.github/actions/flare-common
+        with:
+          deploy-key: ${{ secrets.FLARE_COMMON_DEPLOY_KEY }}
       - uses: actions/setup-node@v5
         with:
           node-version: 24
@@ -251,6 +270,9 @@ jobs:
         with:
           node-version: 24
           cache: pnpm
+      - uses: ./.github/actions/flare-common
+        with:
+          deploy-key: ${{ secrets.FLARE_COMMON_DEPLOY_KEY }}
       - run: pnpm install --frozen-lockfile
       # Where Release's publish job puts them too.
       - uses: actions/download-artifact@v8

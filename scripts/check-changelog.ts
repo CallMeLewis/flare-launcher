@@ -6,7 +6,7 @@
 import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { notesFor } from "./changelog.ts";
+import { notesFor } from "@flare/release/changelog";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const { version }: { version: string } = JSON.parse(readFileSync(resolve(root, "package.json"), "utf8"));

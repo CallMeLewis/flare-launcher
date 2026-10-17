@@ -6,7 +6,7 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { compareVersions, parseChangelog } from "./changelog.ts";
+import { compareVersions, parseChangelog } from "@flare/release/changelog";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const path = (file: string) => resolve(root, file);

@@ -46,6 +46,7 @@
     "sonner": "2.0.8"
   },
   "devDependencies": {
+    "@flare/release": "link:../flare-common/packages/release",
     "@lingui/cli": "6.9.0",
     "@lingui/conf": "6.9.0",
     "@lingui/format-po": "6.9.0",

@@ -67,6 +67,7 @@ jobs:
     secrets:
       CERTUM_USERNAME: ${{ secrets.CERTUM_USERNAME }}
       CERTUM_TOTP_SECRET: ${{ secrets.CERTUM_TOTP_SECRET }}
+      FLARE_COMMON_DEPLOY_KEY: ${{ secrets.FLARE_COMMON_DEPLOY_KEY }}
 
   publish:
     name: Publish
@@ -88,6 +89,9 @@ jobs:
         with:
           node-version: 24
           cache: pnpm
+      - uses: ./.github/actions/flare-common
+        with:
+          deploy-key: ${{ secrets.FLARE_COMMON_DEPLOY_KEY }}
       - run: pnpm install --frozen-lockfile
       # Back where the builds would be on a desktop, which is where the release script looks for them.
       - uses: actions/download-artifact@v8

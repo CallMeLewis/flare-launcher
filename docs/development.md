@@ -8,7 +8,14 @@ Linux: see [Windows and Linux](#windows-and-linux).
 Needs Node.js 24, pnpm 11 and rustup, which installs the Rust version pinned in `rust-toolchain.toml` the first time
 it's used. On Linux, Tauri also needs the WebKitGTK development packages.
 
+The updater, much of the interface and the release script are shared by the Flare apps, in the private
+[flare-common](https://github.com/CallMeLewis/flare-common) repo, which the launcher links to from beside this one. Check
+it out next to this repo, on the tag in `.flare-common-version`, and install its packages first:
+
 ```sh
+git clone https://github.com/CallMeLewis/flare-common ../flare-common
+git -C ../flare-common checkout "$(cat .flare-common-version)"
+pnpm --dir ../flare-common install
 pnpm install
 pnpm app          # the desktop app, with hot reload
 pnpm dev          # the interface alone in a browser at http://127.0.0.1:5173
@@ -142,14 +149,16 @@ own and loaded when chosen in Settings > Launcher. System, the default, uses the
 - `src-tauri/src/workshop.rs`: subscribes to, downloads and unsubscribes from mods through Steamworks.
 - `src-tauri/src/discord.rs`: shows the Discord status, the launcher and whether DayZ is running, never the server.
   Its art comes from the Flare Launcher application in Discord's developer portal, as the asset `logo`.
-- `src-tauri/src/updater.rs`: checks for, downloads and installs launcher updates.
+- Updates come from `tauri-plugin-flare-updater`, the Flare apps' shared updater, in the flare-common repo beside this
+  one: it checks for, downloads and installs launcher updates.
 - `src-tauri/src/report.rs`: builds and sends the problem report a player can choose to send when something fails,
   with the launcher's last few log lines (kept in memory, never on disk). Reports go to the stats dashboard
   (stats.darkzone.dev), kept separately, where they're read and worked through on its Reports page; a debug build
   sends them to `DZSL_REPORT_URL` instead when it's set.
 - `src-tauri/src/app_menu.rs`: on Linux, moves the AppImage to `~/Applications` and adds it to the app menu.
 - `src-tauri/windows/installer-hooks.nsh`: removes an install made under the launcher's old name.
-- `scripts/`: the release tooling. `CHANGELOG.md` holds every version's notes, read through `scripts/changelog.ts`.
+- `scripts/`: the release tooling, which gives the Flare apps' shared release script (`@flare/release`, in flare-common)
+  the launcher's builds. `CHANGELOG.md` holds every version's notes, read through the same package.
 - `docs/scope.md`: what the launcher is for, what it won't do, and how to judge a new feature.
 - `docs/design.md`: the visual rules the launcher follows.
 - `docs/commit-messages.md`: how commit messages are written.
@@ -206,8 +215,8 @@ To build a tag again (after a failed run, say), run the Release workflow from th
 from the tag. It replaces that release's builds.
 
 To try the update flow without publishing, write a feed to a folder with `pnpm release:feed <dir> <url>`, serve the
-folder at `<url>`, and start a development build with `DZSL_UPDATE_TEST_URL=<url>`. Development builds otherwise don't
-check for updates.
+folder at `<url>`, and start a development build with `FLARE_UPDATE_TEST_URL=<url>`. Development builds otherwise walk
+through a pretend update in the window instead.
 
 ## The download page
 
