@@ -2,6 +2,10 @@
 
 What changed in each version of Flare Launcher, newest first.
 
+## 1.5.0 - 2026-10-17
+
+- New player count next to the server count above the server list: it adds up the players on the servers shown, so it changes as you filter or search.
+
 ## 1.4.0 - 2026-10-16
 
 - New warning in the server panel when the server runs a different version of one of your mods, usually because it hasn't restarted since the mod was updated: the mod is marked in the list, and the warning above Play says the server may turn you away until it restarts.
