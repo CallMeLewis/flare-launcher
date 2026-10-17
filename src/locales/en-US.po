@@ -7,6 +7,14 @@ msgstr ""
 "X-Generator: @lingui/cli\n"
 "Language: en-US\n"
 
+#: src/lib/shared-messages.ts
+msgid "{app} is up to date (checked at {time}). Select to check again."
+msgstr ""
+
+#: src/lib/shared-messages.ts
+msgid "{app} will close, install the update in the background and open again in a few seconds."
+msgstr ""
+
 #: src/App.tsx
 msgid "{count, plural, one {# mod} other {# mods}} downloaded for {name}"
 msgstr ""
@@ -37,6 +45,10 @@ msgstr ""
 msgid "{error}"
 msgstr ""
 
+#: src/lib/shared-messages.ts
+msgid "{error} Select to try again."
+msgstr ""
+
 #: src/components/server-toolbar.tsx
 msgid "{filtersOn, plural, one {Filters <0>#<1> on</1></0>} other {Filters <2>#<3> on</3></2>}}"
 msgstr ""
@@ -51,10 +63,6 @@ msgstr ""
 
 #: src/lib/format.ts
 msgid "{hours} h {rest} min"
-msgstr ""
-
-#: src/components/update-button.tsx
-msgid "{message} Select to try again."
 msgstr ""
 
 #: src/lib/backend-messages.ts
@@ -245,7 +253,7 @@ msgstr ""
 msgid "App menu"
 msgstr ""
 
-#: src/components/settings-dialog.tsx
+#: src/lib/shared-messages.ts
 msgid "Appearance"
 msgstr ""
 
@@ -258,7 +266,7 @@ msgstr ""
 msgid "Behaviour"
 msgstr "Behavior"
 
-#: src/components/settings-dialog.tsx
+#: src/lib/shared-messages.ts
 msgid "Beta"
 msgstr ""
 
@@ -281,7 +289,7 @@ msgstr ""
 msgid "Cancel"
 msgstr ""
 
-#: src/components/settings-dialog.tsx
+#: src/lib/shared-messages.ts
 msgid "Changes save as you make them."
 msgstr ""
 
@@ -290,12 +298,11 @@ msgstr ""
 msgid "Character name"
 msgstr ""
 
-#: src/components/settings-dialog.tsx
-#: src/components/update-button.tsx
+#: src/lib/shared-messages.ts
 msgid "Check for updates"
 msgstr ""
 
-#: src/components/settings-dialog.tsx
+#: src/lib/shared-messages.ts
 msgid "Check for updates automatically"
 msgstr ""
 
@@ -307,8 +314,7 @@ msgstr ""
 msgid "Checking files"
 msgstr ""
 
-#: src/components/settings-dialog.tsx
-#: src/components/update-button.tsx
+#: src/lib/shared-messages.ts
 msgid "Checking for updates…"
 msgstr ""
 
@@ -316,7 +322,7 @@ msgstr ""
 msgid "Checking mods"
 msgstr ""
 
-#: src/components/settings-dialog.tsx
+#: src/lib/shared-messages.ts
 msgid "Checking…"
 msgstr ""
 
@@ -347,9 +353,7 @@ msgstr ""
 
 #: src/components/game-start-dialog.tsx
 #: src/components/map-count-dialog.tsx
-#: src/components/release-notes.tsx
-#: src/components/title-bar.tsx
-#: src/components/ui/dialog.tsx
+#: src/lib/shared-messages.ts
 msgid "Close"
 msgstr ""
 
@@ -387,10 +391,6 @@ msgstr ""
 
 #: src/hooks/use-app-menu-offer.ts
 msgid "Couldn't add Flare Launcher to the app menu"
-msgstr ""
-
-#: src/components/settings-dialog.tsx
-msgid "Couldn't change the update channel"
 msgstr ""
 
 #: src/App.tsx
@@ -442,7 +442,7 @@ msgstr ""
 msgid "Couldn't reach the server list: {error}"
 msgstr ""
 
-#: src/lib/backend-messages.ts
+#: src/lib/shared-messages.ts
 msgid "Couldn't reach the update server."
 msgstr ""
 
@@ -456,10 +456,6 @@ msgstr ""
 
 #: src/components/settings-dialog.tsx
 msgid "Couldn't remove Flare Launcher from the app menu"
-msgstr ""
-
-#: src/components/settings-dialog.tsx
-msgid "Couldn't save the setting"
 msgstr ""
 
 #: src/App.tsx
@@ -490,6 +486,7 @@ msgid "Country"
 msgstr ""
 
 #: src/components/settings-dialog.tsx
+#: src/lib/shared-messages.ts
 msgid "Dark"
 msgstr ""
 
@@ -590,8 +587,7 @@ msgstr "Download canceled"
 msgid "Download failed"
 msgstr ""
 
-#: src/components/settings-dialog.tsx
-#: src/components/update-button.tsx
+#: src/lib/shared-messages.ts
 msgid "Download version {version}"
 msgstr ""
 
@@ -611,19 +607,19 @@ msgstr ""
 msgid "Downloading mods, then starting DayZ"
 msgstr ""
 
-#: src/components/update-button.tsx
+#: src/lib/shared-messages.ts
 msgid "Downloading update"
 msgstr ""
 
-#: src/components/update-button.tsx
+#: src/lib/shared-messages.ts
 msgid "Downloading update… {percent}%"
 msgstr ""
 
-#: src/components/settings-dialog.tsx
+#: src/lib/shared-messages.ts
 msgid "Downloading version {version}… {percent}%"
 msgstr ""
 
-#: src/components/settings-dialog.tsx
+#: src/lib/shared-messages.ts
 msgid "Downloading…"
 msgstr ""
 
@@ -710,10 +706,6 @@ msgstr ""
 
 #: src/components/settings-dialog.tsx
 msgid "Flare Launcher is in your app menu."
-msgstr ""
-
-#: src/components/install-update-dialog.tsx
-msgid "Flare Launcher will close, install the update in the background and open again in a few seconds. If DayZ is running, it will keep running."
 msgstr ""
 
 #: src/components/settings-dialog.tsx
@@ -808,6 +800,10 @@ msgstr ""
 msgid "How the launcher looks and behaves on this computer."
 msgstr ""
 
+#: src/components/shared-interface.tsx
+msgid "If DayZ is running, it will keep running."
+msgstr ""
+
 #: src/components/server-detail.tsx
 msgid "If it’s wrong, the server turns you away once DayZ has loaded."
 msgstr ""
@@ -825,11 +821,11 @@ msgstr ""
 msgid "In-game time"
 msgstr ""
 
-#: src/components/install-update-dialog.tsx
+#: src/lib/shared-messages.ts
 msgid "Install and restart"
 msgstr ""
 
-#: src/components/install-update-dialog.tsx
+#: src/lib/shared-messages.ts
 msgid "Install version {version}?"
 msgstr ""
 
@@ -837,7 +833,11 @@ msgstr ""
 msgid "Installed"
 msgstr ""
 
-#: src/components/settings-dialog.tsx
+#: src/lib/shared-messages.ts
+msgid "Installing…"
+msgstr ""
+
+#: src/lib/shared-messages.ts
 msgid "Interface size"
 msgstr ""
 
@@ -900,11 +900,12 @@ msgid "Lets your Discord friends see you're using Flare Launcher. It closes when
 msgstr ""
 
 #: src/components/settings-dialog.tsx
+#: src/lib/shared-messages.ts
 msgid "Light"
 msgstr ""
 
 #: src/components/first-run-dialog.tsx
-#: src/components/settings-dialog.tsx
+#: src/lib/shared-messages.ts
 msgid "Light or dark, or System to match this computer."
 msgstr ""
 
@@ -920,11 +921,11 @@ msgstr ""
 msgid "Loading your mods"
 msgstr ""
 
-#: src/components/settings-dialog.tsx
-msgid "Made by {AUTHOR}"
+#: src/lib/shared-messages.ts
+msgid "Made by {author}"
 msgstr ""
 
-#: src/components/settings-dialog.tsx
+#: src/lib/shared-messages.ts
 msgid "Makes text and controls larger or smaller."
 msgstr ""
 
@@ -940,11 +941,11 @@ msgstr ""
 msgid "Match this computer"
 msgstr ""
 
-#: src/components/title-bar.tsx
+#: src/lib/shared-messages.ts
 msgid "Maximise"
 msgstr "Maximize"
 
-#: src/components/title-bar.tsx
+#: src/lib/shared-messages.ts
 msgid "Minimise"
 msgstr "Minimize"
 
@@ -1028,6 +1029,10 @@ msgstr ""
 msgid "Needs a password store on this computer, such as GNOME Keyring or KWallet."
 msgstr ""
 
+#: src/lib/shared-messages.ts
+msgid "Needs attention"
+msgstr ""
+
 #: src/components/filter-menu.tsx
 #: src/components/server-detail.tsx
 #: src/components/server-table.tsx
@@ -1035,7 +1040,7 @@ msgstr ""
 msgid "Night"
 msgstr ""
 
-#: src/lib/backend-messages.ts
+#: src/lib/shared-messages.ts
 msgid "No beta release has been published yet."
 msgstr ""
 
@@ -1064,7 +1069,7 @@ msgstr ""
 msgid "No recent servers"
 msgstr ""
 
-#: src/lib/backend-messages.ts
+#: src/lib/shared-messages.ts
 msgid "No release has been published yet."
 msgstr ""
 
@@ -1088,8 +1093,8 @@ msgstr ""
 msgid "Not for vanilla servers"
 msgstr ""
 
-#: src/components/install-update-dialog.tsx
 #: src/hooks/use-app-menu-offer.ts
+#: src/lib/shared-messages.ts
 msgid "Not now"
 msgstr ""
 
@@ -1246,15 +1251,15 @@ msgstr ""
 msgid "Reset filters"
 msgstr ""
 
-#: src/components/settings-dialog.tsx
+#: src/lib/shared-messages.ts
 msgid "Restart to update"
 msgstr ""
 
-#: src/components/update-button.tsx
+#: src/lib/shared-messages.ts
 msgid "Restart to update to version {version}"
 msgstr ""
 
-#: src/components/title-bar.tsx
+#: src/lib/shared-messages.ts
 msgid "Restore down"
 msgstr ""
 
@@ -1303,7 +1308,7 @@ msgstr ""
 msgid "Searching…"
 msgstr ""
 
-#: src/components/settings-dialog.tsx
+#: src/lib/shared-messages.ts
 msgid "See what's new"
 msgstr ""
 
@@ -1325,8 +1330,8 @@ msgstr ""
 
 #: src/components/game-start-dialog.tsx
 #: src/components/report-dialog.tsx
-#: src/components/settings-dialog.tsx
 #: src/lib/report.ts
+#: src/lib/shared-messages.ts
 msgid "Send report"
 msgstr ""
 
@@ -1388,8 +1393,7 @@ msgstr ""
 msgid "Set the DayZ folder in Settings."
 msgstr ""
 
-#: src/components/app-sidebar.tsx
-#: src/components/settings-dialog.tsx
+#: src/lib/shared-messages.ts
 msgid "Settings"
 msgstr ""
 
@@ -1421,11 +1425,11 @@ msgstr ""
 msgid "Something went wrong."
 msgstr ""
 
-#: src/components/settings-dialog.tsx
+#: src/lib/shared-messages.ts
 msgid "Stable"
 msgstr ""
 
-#: src/components/settings-dialog.tsx
+#: src/lib/shared-messages.ts
 msgid "Stable releases, or beta builds with newer changes."
 msgstr ""
 
@@ -1547,6 +1551,7 @@ msgid "Stops the game from pausing when you switch to another window."
 msgstr ""
 
 #: src/components/settings-dialog.tsx
+#: src/lib/shared-messages.ts
 msgid "System"
 msgstr ""
 
@@ -1560,6 +1565,10 @@ msgstr ""
 
 #: src/components/report-dialog.tsx
 msgid "Thank you. It helps fix problems like this one."
+msgstr ""
+
+#: src/lib/shared-messages.ts
+msgid "That didn't save: {error}"
 msgstr ""
 
 #: src/lib/backend-messages.ts
@@ -1578,11 +1587,11 @@ msgstr ""
 msgid "The browser couldn't be opened: {error}"
 msgstr ""
 
-#: src/components/settings-dialog.tsx
+#: src/lib/shared-messages.ts
 msgid "The changes in the update waiting for you."
 msgstr ""
 
-#: src/components/settings-dialog.tsx
+#: src/lib/shared-messages.ts
 msgid "The changes in the version you are running."
 msgstr ""
 
@@ -1651,7 +1660,7 @@ msgstr ""
 msgid "The server list wasn't in the expected format: {error}"
 msgstr ""
 
-#: src/lib/backend-messages.ts
+#: src/lib/shared-messages.ts
 msgid "The settings folder couldn't be found."
 msgstr ""
 
@@ -1659,28 +1668,32 @@ msgstr ""
 msgid "The Steam Workshop couldn't be reached, so your mods weren't checked for updates."
 msgstr ""
 
-#: src/lib/backend-messages.ts
+#: src/lib/shared-messages.ts
 msgid "The update failed a security check, so it wasn't installed."
 msgstr ""
 
-#: src/lib/backend-messages.ts
+#: src/lib/shared-messages.ts
 msgid "The update failed: {error}"
 msgstr ""
 
-#: src/components/settings-dialog.tsx
+#: src/lib/shared-messages.ts
+msgid "The update settings couldn't be saved: {error}"
+msgstr ""
+
+#: src/lib/shared-messages.ts
 msgid "The version you're running."
 msgstr ""
 
-#: src/components/settings-dialog.tsx
+#: src/lib/shared-messages.ts
 msgid "The version you're running. This copy can't update itself."
 msgstr ""
 
 #: src/components/first-run-dialog.tsx
-#: src/components/settings-dialog.tsx
+#: src/lib/shared-messages.ts
 msgid "Theme"
 msgstr ""
 
-#: src/lib/backend-messages.ts
+#: src/lib/shared-messages.ts
 msgid "There is no downloaded update to install."
 msgstr ""
 
@@ -1744,7 +1757,7 @@ msgstr ""
 #: src/App.tsx
 #: src/components/mods-page.tsx
 #: src/components/server-detail.tsx
-#: src/components/settings-dialog.tsx
+#: src/lib/shared-messages.ts
 msgid "Try again"
 msgstr ""
 
@@ -1793,7 +1806,7 @@ msgid "Unsubscribing…"
 msgstr ""
 
 #: src/components/mods-page.tsx
-#: src/components/settings-dialog.tsx
+#: src/lib/shared-messages.ts
 msgid "Up to date"
 msgstr ""
 
@@ -1805,11 +1818,11 @@ msgstr ""
 msgid "Update cancelled"
 msgstr "Update canceled"
 
-#: src/components/settings-dialog.tsx
+#: src/lib/shared-messages.ts
 msgid "Update channel"
 msgstr ""
 
-#: src/components/settings-dialog.tsx
+#: src/lib/shared-messages.ts
 msgid "Update download progress"
 msgstr ""
 
@@ -1817,7 +1830,7 @@ msgstr ""
 msgid "Updated"
 msgstr ""
 
-#: src/components/settings-dialog.tsx
+#: src/lib/shared-messages.ts
 msgid "Updates"
 msgstr ""
 
@@ -1856,24 +1869,24 @@ msgstr ""
 
 #: src/components/server-detail.tsx
 #: src/components/server-toolbar.tsx
-#: src/components/settings-dialog.tsx
 #: src/lib/filter.ts
+#: src/lib/shared-messages.ts
 msgid "Version"
 msgstr ""
 
-#: src/components/settings-dialog.tsx
+#: src/lib/shared-messages.ts
 msgid "Version {version} is available."
 msgstr ""
 
-#: src/components/settings-dialog.tsx
-msgid "Version {version} is ready to install. The launcher restarts to finish."
+#: src/lib/shared-messages.ts
+msgid "Version {version} is ready to install. {app} restarts to finish."
 msgstr ""
 
 #: src/components/settings-dialog.tsx
 msgid "Version, updates and release notes."
 msgstr ""
 
-#: src/components/settings-dialog.tsx
+#: src/lib/shared-messages.ts
 msgid "View on GitHub"
 msgstr ""
 
@@ -1908,22 +1921,21 @@ msgstr ""
 msgid "What were you doing? (optional)"
 msgstr ""
 
-#: src/components/release-notes.tsx
-#: src/components/update-button.tsx
+#: src/lib/shared-messages.ts
 msgid "What's new"
 msgstr ""
 
-#: src/components/release-notes.tsx
+#: src/lib/shared-messages.ts
 msgid "What's new in version {version}"
+msgstr ""
+
+#: src/lib/shared-messages.ts
+msgid "When {app} starts and every few hours."
 msgstr ""
 
 #: src/components/first-run-dialog.tsx
 #: src/components/settings-dialog.tsx
 msgid "When DayZ starts"
-msgstr ""
-
-#: src/components/settings-dialog.tsx
-msgid "When the launcher starts and every few hours."
 msgstr ""
 
 #: src/components/mods-page.tsx
@@ -1954,7 +1966,7 @@ msgstr ""
 msgid "Workshop page"
 msgstr ""
 
-#: src/components/settings-dialog.tsx
+#: src/lib/shared-messages.ts
 msgid "You have the latest version. Last checked at {time}."
 msgstr ""
 

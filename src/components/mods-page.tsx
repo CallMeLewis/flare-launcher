@@ -34,13 +34,13 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
-import { Progress } from "@/components/ui/progress";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+} from "@flare/ui/ui/alert-dialog";
+import { Button } from "@flare/ui/ui/button";
+import { Checkbox } from "@flare/ui/ui/checkbox";
+import { Input } from "@flare/ui/ui/input";
+import { Progress } from "@flare/ui/ui/progress";
+import { Skeleton } from "@flare/ui/ui/skeleton";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@flare/ui/ui/tooltip";
 import type { SubscribedModsState } from "@/hooks/use-subscribed-mods";
 import { backend, errorMessage } from "@/lib/backend";
 import { reportable } from "@/lib/report";

@@ -1,7 +1,6 @@
 import { t } from "@lingui/core/macro";
 import { Channel, invoke, isTauri } from "@tauri-apps/api/core";
 import { getCurrentWebview } from "@tauri-apps/api/webview";
-import { listen } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { open } from "@tauri-apps/plugin-dialog";
 import { backendText } from "./backend-messages";
@@ -18,9 +17,6 @@ import type {
   ServerList,
   ServerRow,
   SubscribedMod,
-  UpdateChannel,
-  UpdateSettings,
-  UpdateStatus,
 } from "./types";
 
 /**
@@ -150,43 +146,6 @@ export const backend = {
   closeWindow: async (): Promise<void> => {
     if (!isPreview) await getCurrentWindow().close();
   },
-
-  toggleMaximiseWindow: async (): Promise<void> => {
-    if (!isPreview) await getCurrentWindow().toggleMaximize();
-  },
-
-  isWindowMaximised: async (): Promise<boolean> => (isPreview ? false : getCurrentWindow().isMaximized()),
-
-  /** Calls back whenever the window changes size. Resolves, once listening, to a function that stops it. */
-  onWindowResized: async (callback: () => void): Promise<() => void> => {
-    if (isPreview) return () => {};
-    return getCurrentWindow().onResized(callback);
-  },
-
-  updateStatus: (): Promise<UpdateStatus> =>
-    isPreview ? Promise.resolve({ state: "unsupported" }) : invoke("update_status"),
-
-  /** Calls back whenever the update status changes. Resolves, once listening, to a function that stops it. */
-  onUpdateStatus: async (callback: (status: UpdateStatus) => void): Promise<() => void> => {
-    if (isPreview) return () => {};
-    return listen<UpdateStatus>("update:status", (event) => callback(event.payload));
-  },
-
-  checkForUpdates: (): Promise<UpdateStatus> =>
-    isPreview ? Promise.resolve({ state: "unsupported" }) : invoke("check_for_updates"),
-
-  downloadUpdate: (): Promise<void> => (isPreview ? Promise.resolve() : invoke("download_update")),
-
-  installUpdate: (): Promise<void> => (isPreview ? Promise.resolve() : invoke("install_update")),
-
-  updateSettings: (): Promise<UpdateSettings> =>
-    isPreview ? Promise.resolve({ channel: "stable", autoCheck: true }) : invoke("update_settings"),
-
-  setAutoUpdateCheck: (enabled: boolean): Promise<UpdateStatus> =>
-    isPreview ? Promise.resolve({ state: "unsupported" }) : invoke("set_auto_update_check", { enabled }),
-
-  setUpdateChannel: (channel: UpdateChannel): Promise<UpdateStatus> =>
-    isPreview ? Promise.resolve({ state: "unsupported" }) : invoke("set_update_channel", { channel }),
 
   appMenuStatus: (): Promise<AppMenu> =>
     isPreview ? Promise.resolve({ supported: false, added: false, ours: false }) : invoke("app_menu_status"),

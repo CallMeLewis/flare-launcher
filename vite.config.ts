@@ -1,5 +1,5 @@
 /// <reference types="vitest/config" />
-import { defineConfig } from "vite";
+import { defineConfig, searchForWorkspaceRoot } from "vite";
 import react from "@vitejs/plugin-react";
 import { lingui } from "@lingui/vite-plugin";
 import tailwindcss from "@tailwindcss/vite";
@@ -17,7 +17,16 @@ export default defineConfig({
   // Flags stay separate files, so only the ones on screen load, rather than all of them inside the app's code.
   build: { assetsInlineLimit: (file) => (file.includes("country-flag-icons") ? false : undefined) },
   plugins: [react(), lingui({ macroTransform: true, failOnCompileError: true }), tailwindcss()],
-  resolve: { alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) } },
-  server: { watch: { ignored: ["**/src-tauri/**"] } },
+  resolve: {
+    alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) },
+    // The shared interface (@flare/ui) uses this app's copies of these, as it's linked from the flare-common checkout
+    // beside this repo, which has its own.
+    dedupe: ["react", "react-dom", "radix-ui", "lucide-react", "cn", "class-variance-authority", "@tauri-apps/api"],
+  },
+  server: {
+    watch: { ignored: ["**/src-tauri/**"] },
+    // The flare-common checkout serves the shared interface's fonts from its own node_modules.
+    fs: { allow: [searchForWorkspaceRoot(process.cwd()), fileURLToPath(new URL("../flare-common", import.meta.url))] },
+  },
   test: { setupFiles: ["src/test-setup.ts"] },
 });

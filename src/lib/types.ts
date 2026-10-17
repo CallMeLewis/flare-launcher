@@ -1,3 +1,5 @@
+import type { UpdateChannel } from "@flare/ui";
+
 export type ServerRow = {
   /** `ip:queryPort`, unique per server. */
   id: string;
@@ -123,25 +125,8 @@ export type Settings = {
   discordStatus: boolean;
 };
 
-export type UpdateChannel = "stable" | "beta";
-
-export type UpdateSettings = {
-  channel: UpdateChannel;
-  /** Whether the launcher checks on its own, at start and every few hours. */
-  autoCheck: boolean;
-};
-
-export type UpdateStatus =
-  /** Development builds, which cannot update themselves. */
-  | { state: "unsupported" }
-  | { state: "idle" }
-  | { state: "checking" }
-  | { state: "upToDate"; checkedAt: number }
-  // notes: the new version's release notes from the update feed, as plain text ("- " bullet lines).
-  | { state: "available"; version: string; releaseDate?: string | null; notes?: string | null }
-  | { state: "downloading"; version: string; percent: number; notes?: string | null }
-  | { state: "ready"; version: string; notes?: string | null }
-  | { state: "error"; message: BackendText };
+/** The update channel, from the Flare apps' shared updater. */
+export type { UpdateChannel };
 
 /**
  * Text from the backend: its English template and the values for its placeholders, translated with `backendText`.

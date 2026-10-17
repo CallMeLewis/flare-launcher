@@ -3,6 +3,8 @@ import { LoaderCircle, MousePointerClick, Network, SearchX, ServerCrash, Star } 
 import { toast } from "sonner";
 import { plural, t as translate } from "@lingui/core/macro";
 import { Trans, useLingui } from "@lingui/react/macro";
+import { AppShell } from "@flare/ui";
+import { AppMark } from "@/components/app-mark";
 import { AppSidebar, type View } from "@/components/app-sidebar";
 import { FirstRunDialog } from "@/components/first-run-dialog";
 import { GameStartDialog, type GameStart } from "@/components/game-start-dialog";
@@ -13,16 +15,15 @@ import { ServerDetail } from "@/components/server-detail";
 import { ServerTable } from "@/components/server-table";
 import { ServerToolbar } from "@/components/server-toolbar";
 import { SettingsDialog } from "@/components/settings-dialog";
-import { TitleBar } from "@/components/title-bar";
 import { Message } from "@/components/message";
-import { Button } from "@/components/ui/button";
+import { Button } from "@flare/ui/ui/button";
 import { useLan } from "@/hooks/use-lan";
 import { usePings } from "@/hooks/use-pings";
 import { useServers } from "@/hooks/use-servers";
 import { useAppMenuOffer } from "@/hooks/use-app-menu-offer";
 import { useStoredState } from "@/hooks/use-stored-state";
 import { useSubscribedMods } from "@/hooks/use-subscribed-mods";
-import { backend, errorMessage } from "@/lib/backend";
+import { backend, errorMessage, hasSystemTitleBar } from "@/lib/backend";
 import { followLanguage } from "@/lib/i18n";
 import { launchArgs } from "@/lib/launch-options";
 import { serverCounts, type ModJob } from "@/lib/mods";
@@ -525,11 +526,15 @@ export function App() {
   const selectedPing = selected && pings.get(selected.id);
 
   return (
-    <div className="flex h-full flex-col">
-      <TitleBar />
-      <div className="flex min-h-0 flex-1">
-        <AppSidebar view={view} onViewChange={setView} counts={counts} onOpenSettings={() => setSettingsOpen(true)} />
-
+    <>
+      <AppShell
+        mark={<AppMark className="size-3.5" />}
+        // Linux keeps the system title bar.
+        systemTitleBar={hasSystemTitleBar}
+        sidebar={
+          <AppSidebar view={view} onViewChange={setView} counts={counts} onOpenSettings={() => setSettingsOpen(true)} />
+        }
+      >
         {view === "mods" ? (
           <ModsPage
             state={{ ...subscribed, mods: subscribedMods }}
@@ -686,7 +691,7 @@ export function App() {
             )}
           </>
         )}
-      </div>
+      </AppShell>
 
       <GameStartDialog start={gameStart} onClose={hideGameStart} />
 
@@ -726,6 +731,6 @@ export function App() {
           setSetupOpen(true);
         }}
       />
-    </div>
+    </>
   );
 }

@@ -4,7 +4,7 @@ import { msg } from "@lingui/core/macro";
 import { Trans, useLingui } from "@lingui/react/macro";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { ArrowDown, ArrowUp, Lock, Moon, Puzzle, Star, Sun } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from "@flare/ui/ui/skeleton";
 import type { PingResult, Pings } from "@/hooks/use-pings";
 import { isNight, matchedMod, type Sort, type SortKey } from "@/lib/filter";
 import { CountryFlag } from "@/components/country-flag";

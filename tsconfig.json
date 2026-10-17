@@ -13,8 +13,14 @@
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
     "types": ["vite/client", "node"],
+    // React's types from this app, also for the shared interface (@flare/ui), as it's linked from the flare-common
+    // checkout beside this repo, which has its own, and two copies of them don't fit together.
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "react": ["./node_modules/@types/react"],
+      "react/*": ["./node_modules/@types/react/*"],
+      "react-dom": ["./node_modules/@types/react-dom"],
+      "react-dom/*": ["./node_modules/@types/react-dom/*"]
     }
   },
   "include": ["src", "vite.config.ts"]

@@ -1,73 +1,46 @@
-import { useEffect, useId, useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
+import {
+  AboutSection,
+  AppearanceSettings,
+  SettingRow,
+  SettingsDialog as FlareSettingsDialog,
+  SettingsGroup,
+} from "@flare/ui";
 import {
   CircleAlert,
   CircleCheck,
-  Download,
-  ExternalLink,
   FolderOpen,
   Info,
-  LoaderCircle,
   Monitor,
   Moon,
-  RefreshCw,
   Gamepad2,
-  RotateCcw,
   SlidersHorizontal,
   Sun,
   type LucideIcon,
 } from "lucide-react";
-import type { I18n, MessageDescriptor } from "@lingui/core";
+import type { MessageDescriptor } from "@lingui/core";
 import { msg } from "@lingui/core/macro";
 import { Plural, Trans, useLingui } from "@lingui/react/macro";
 import { toast } from "sonner";
-import { InstallUpdateDialog } from "@/components/install-update-dialog";
-import { ReleaseNotesLink } from "@/components/release-notes";
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Progress } from "@/components/ui/progress";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Button } from "@flare/ui/ui/button";
+import { Input } from "@flare/ui/ui/input";
+import { Label } from "@flare/ui/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@flare/ui/ui/select";
+import { Switch } from "@flare/ui/ui/switch";
 import { backend, errorMessage, isPreview } from "@/lib/backend";
-import { backendText } from "@/lib/backend-messages";
 import { addToAppMenu } from "@/hooks/use-app-menu-offer";
-import { useUpdateStatus } from "@/hooks/use-update-status";
 import { LOCALES } from "@/lib/i18n";
 import { LAUNCH_OPTIONS, launchArgs } from "@/lib/launch-options";
-import { releaseNoteItems, runningVersionNotes } from "@/lib/release-notes";
 import { openReport } from "@/lib/report";
-import type {
-  AppMenu,
-  Install,
-  Language,
-  Settings,
-  Theme,
-  UpdateChannel,
-  UpdateSettings,
-  UpdateStatus,
-} from "@/lib/types";
-import { cn } from "@/lib/utils";
+import type { AppMenu, Install, Language, Settings, Theme } from "@/lib/types";
 import appIcon from "../../src-tauri/icons/128x128@2x.png";
 
-const SCALES = [0.9, 1, 1.1, 1.25, 1.5];
 /** Shown in Settings > About. A name, so it's left out of translation. */
 const AUTHOR = "CallMeLewis";
 export const THEMES: { value: Theme; label: MessageDescriptor; icon: LucideIcon }[] = [
   { value: "light", label: msg`Light`, icon: Sun },
   { value: "dark", label: msg`Dark`, icon: Moon },
   { value: "system", label: msg`System`, icon: Monitor },
-];
-
-const SECTIONS: { value: string; label: MessageDescriptor; icon: LucideIcon; pinned?: boolean }[] = [
-  // Sorted by one question: does it change DayZ, or the launcher?
-  { value: "game", label: msg`Game`, icon: Gamepad2 },
-  { value: "launcher", label: msg`Launcher`, icon: SlidersHorizontal },
-  { value: "folders", label: msg`Folders`, icon: FolderOpen },
-  // Pinned to the bottom of the menu.
-  { value: "about", label: msg`About`, icon: Info, pinned: true },
 ];
 
 type Props = {
@@ -81,43 +54,23 @@ type Props = {
   onRunSetup: () => void;
 };
 
+/** Settings, in the dialog every Flare app shares. Its sections are sorted by one question: does it change DayZ, or the launcher? */
 export function SettingsDialog({ open, onOpenChange, settings, onChange, install, onRunSetup }: Props) {
   const { t, i18n } = useLingui();
   const set = (patch: Partial<Settings>) => onChange({ ...settings, ...patch });
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="h-[min(760px,calc(100vh-4rem))] gap-0 overflow-hidden p-0 sm:max-w-[60rem]">
-        <Tabs defaultValue="game" orientation="vertical" className="h-full min-h-0 gap-0">
-          <div className="flex w-52 shrink-0 flex-col border-r bg-background/40 p-3">
-            <div className="px-2 pt-2 pb-4">
-              <DialogTitle className="text-base">
-                <Trans>Settings</Trans>
-              </DialogTitle>
-              <DialogDescription className="mt-0.5 text-xs">
-                <Trans>Changes save as you make them.</Trans>
-              </DialogDescription>
-            </div>
-            <TabsList className="h-auto w-full flex-1 flex-col items-stretch justify-start gap-0.5 bg-transparent p-0">
-              {SECTIONS.map(({ value, label, icon: Icon, pinned }) => (
-                <TabsTrigger
-                  key={value}
-                  value={value}
-                  className={cn(
-                    pinned && "mt-auto",
-                    "h-9 flex-none justify-start gap-2.5 px-2.5 text-[13px] font-normal text-muted-foreground after:hidden hover:text-foreground data-[state=active]:bg-accent data-[state=active]:font-medium data-[state=active]:text-foreground data-[state=active]:shadow-none dark:data-[state=active]:border-transparent dark:data-[state=active]:bg-accent [&[data-state=active]>svg]:text-primary",
-                  )}
-                >
-                  <Icon className="size-4" aria-hidden />
-                  {i18n._(label)}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </div>
-
-          <div className="min-w-0 flex-1 overflow-y-auto">
-            <TabsContent value="game" className="flex flex-col gap-6 p-6 pr-14">
-              <SectionHeading title={t`Game`} description={t`How DayZ starts when you join a server.`} />
+    <FlareSettingsDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      sections={[
+        {
+          id: "game",
+          label: t`Game`,
+          icon: Gamepad2,
+          description: t`How DayZ starts when you join a server.`,
+          content: (
+            <>
               <SettingsGroup title={t`In game`}>
                 <SettingRow
                   id="profile-name"
@@ -188,14 +141,22 @@ export function SettingsDialog({ open, onOpenChange, settings, onChange, install
                   <Trans>The server address, its mods and your character name are added automatically.</Trans>
                 </p>
               </div>
-            </TabsContent>
-
-            <TabsContent value="launcher" className="flex flex-col gap-6 p-6 pr-14">
-              <SectionHeading
-                title={t`Launcher`}
-                description={t`How the launcher looks and behaves on this computer.`}
-              />
-              <SettingsGroup title={t`Appearance`}>
+            </>
+          ),
+        },
+        {
+          id: "launcher",
+          label: t`Launcher`,
+          icon: SlidersHorizontal,
+          description: t`How the launcher looks and behaves on this computer.`,
+          content: (
+            <>
+              <AppearanceSettings
+                theme={settings.theme}
+                onThemeChange={(theme) => set({ theme })}
+                scale={settings.uiScale}
+                onScaleChange={(uiScale) => set({ uiScale })}
+              >
                 <SettingRow id="language" label={t`Language`} description={t`The language the launcher is shown in.`}>
                   <Select value={settings.language} onValueChange={(value) => set({ language: value as Language })}>
                     <SelectTrigger id="language" aria-describedby="language-description" className="w-60 shrink-0">
@@ -213,63 +174,7 @@ export function SettingsDialog({ open, onOpenChange, settings, onChange, install
                     </SelectContent>
                   </Select>
                 </SettingRow>
-                <SettingRow
-                  id="theme"
-                  label={t`Theme`}
-                  description={t`Light or dark, or System to match this computer.`}
-                >
-                  <ToggleGroup
-                    type="single"
-                    aria-labelledby="theme-label"
-                    aria-describedby="theme-description"
-                    value={settings.theme}
-                    // Selecting the current theme again would clear it; a theme is always chosen.
-                    onValueChange={(value) => value && set({ theme: value as Theme })}
-                    className="shrink-0"
-                  >
-                    {THEMES.map(({ value, label, icon: Icon }) => (
-                      <ToggleGroupItem
-                        key={value}
-                        // The label clicks the chosen theme, which focuses it and leaves it chosen.
-                        id={value === settings.theme ? "theme" : undefined}
-                        value={value}
-                        className="gap-1.5"
-                      >
-                        <Icon className="size-3.5" aria-hidden />
-                        {i18n._(label)}
-                      </ToggleGroupItem>
-                    ))}
-                  </ToggleGroup>
-                </SettingRow>
-                <SettingRow
-                  id="ui-scale"
-                  label={t`Interface size`}
-                  description={t`Makes text and controls larger or smaller.`}
-                >
-                  {/* Every size on show, so the current one is clear and any other is one click away. */}
-                  <ToggleGroup
-                    type="single"
-                    aria-labelledby="ui-scale-label"
-                    aria-describedby="ui-scale-description"
-                    value={String(settings.uiScale)}
-                    // Selecting the current size again would clear it; a size is always chosen.
-                    onValueChange={(value) => value && set({ uiScale: Number(value) })}
-                    className="shrink-0"
-                  >
-                    {SCALES.map((scale) => (
-                      <ToggleGroupItem
-                        key={scale}
-                        // The label clicks the chosen size, which focuses it and leaves it chosen.
-                        id={scale === settings.uiScale ? "ui-scale" : undefined}
-                        value={String(scale)}
-                        className="data"
-                      >
-                        {Math.round(scale * 100)}%
-                      </ToggleGroupItem>
-                    ))}
-                  </ToggleGroup>
-                </SettingRow>
-              </SettingsGroup>
+              </AppearanceSettings>
               <SettingsGroup title={t`Behaviour`}>
                 <SettingRow
                   id="after-launch"
@@ -335,21 +240,26 @@ export function SettingsDialog({ open, onOpenChange, settings, onChange, install
                   </Button>
                 </SettingRow>
               </SettingsGroup>
-            </TabsContent>
-
-            <TabsContent value="folders" className="flex flex-col gap-6 p-6 pr-14">
-              <SectionHeading title={t`Folders`} description={t`Where DayZ and its mods live on this computer.`} />
-              <FoldersSection open={open} settings={settings} onChange={set} install={install} />
-            </TabsContent>
-
-            <TabsContent value="about" className="flex flex-col gap-6 p-6 pr-14">
-              <SectionHeading title={t`About`} description={t`Version, updates and release notes.`} />
-              <AboutSection />
-            </TabsContent>
-          </div>
-        </Tabs>
-      </DialogContent>
-    </Dialog>
+            </>
+          ),
+        },
+        {
+          id: "folders",
+          label: t`Folders`,
+          icon: FolderOpen,
+          description: t`Where DayZ and its mods live on this computer.`,
+          content: <FoldersSection open={open} settings={settings} onChange={set} install={install} />,
+        },
+        {
+          id: "about",
+          label: t`About`,
+          icon: Info,
+          description: t`Version, updates and release notes.`,
+          pinned: true,
+          content: <About />,
+        },
+      ]}
+    />
   );
 }
 
@@ -488,106 +398,8 @@ function FoldersSection({
   );
 }
 
-/** The line under the version: plain unless there is an update to act on or something went wrong. */
-function describeUpdate(status: UpdateStatus, i18n: I18n): string {
-  switch (status.state) {
-    case "unsupported":
-      return i18n._(msg`The version you're running. This copy can't update itself.`);
-    case "idle":
-      return i18n._(msg`The version you're running.`);
-    case "checking":
-      return i18n._(msg`Checking for updates…`);
-    case "upToDate": {
-      const time = i18n.date(new Date(status.checkedAt), { timeStyle: "short" });
-      return i18n._(msg`You have the latest version. Last checked at ${time}.`);
-    }
-    case "available": {
-      const { version } = status;
-      return i18n._(msg`Version ${version} is available.`);
-    }
-    case "downloading": {
-      const { version } = status;
-      const percent = Math.floor(status.percent);
-      return i18n._(msg`Downloading version ${version}… ${percent}%`);
-    }
-    case "ready": {
-      const { version } = status;
-      return i18n._(msg`Version ${version} is ready to install. The launcher restarts to finish.`);
-    }
-    case "error":
-      return backendText(status.message);
-  }
-}
-
-/**
- * The one button beside the version. It stays the same element as the update moves along, and is only marked
- * busy rather than disabled, so keyboard focus stays on it while it checks or downloads.
- */
-function UpdateAction({ status, onRestart }: { status: UpdateStatus; onRestart: () => void }) {
+function About() {
   const { t } = useLingui();
-  const busy = status.state === "checking" || status.state === "downloading";
-  let icon = <RefreshCw aria-hidden />;
-  let text = t`Check for updates`;
-  let action: () => void = () => void backend.checkForUpdates();
-  let primary = false;
-  switch (status.state) {
-    case "unsupported":
-      return null;
-    case "checking":
-      icon = <LoaderCircle className="animate-spin motion-reduce:animate-none" aria-hidden />;
-      text = t`Checking…`;
-      break;
-    case "upToDate":
-      // Still checks again when selected.
-      icon = <CircleCheck aria-hidden />;
-      text = t`Up to date`;
-      break;
-    case "error":
-      text = t`Try again`;
-      break;
-    case "available":
-      icon = <Download aria-hidden />;
-      text = t`Download version ${{ version: status.version }}`;
-      action = () => void backend.downloadUpdate();
-      primary = true;
-      break;
-    case "downloading":
-      icon = <LoaderCircle className="animate-spin motion-reduce:animate-none" aria-hidden />;
-      text = t`Downloading…`;
-      break;
-    case "ready":
-      icon = <RotateCcw aria-hidden />;
-      text = t`Restart to update`;
-      action = onRestart;
-      primary = true;
-      break;
-  }
-  return (
-    <Button
-      variant={primary ? "default" : "secondary"}
-      className="aria-disabled:cursor-default aria-disabled:opacity-60"
-      aria-disabled={busy || undefined}
-      onClick={() => {
-        if (!busy) action();
-      }}
-    >
-      {icon}
-      {text}
-    </Button>
-  );
-}
-
-function AboutSection() {
-  const { t, i18n } = useLingui();
-  const status = useUpdateStatus();
-  const [confirmOpen, setConfirmOpen] = useState(false);
-  const [updateSettings, setUpdateSettings] = useState<UpdateSettings | null>(null);
-  const updateNotes = "notes" in status ? releaseNoteItems(status.notes) : [];
-  const updateVersion = "version" in status ? status.version : undefined;
-
-  useEffect(() => {
-    void backend.updateSettings().then(setUpdateSettings);
-  }, []);
 
   function openProjectPage() {
     backend.openProjectPage().catch((e) => {
@@ -595,147 +407,20 @@ function AboutSection() {
     });
   }
 
-  function changeChannel(value: string) {
-    const channel = value as UpdateChannel;
-    const previous = updateSettings;
-    setUpdateSettings((current) => current && { ...current, channel });
-    // Saving also checks the new channel; the result shows in the status row.
-    backend.setUpdateChannel(channel).catch((e) => {
-      setUpdateSettings(previous);
-      toast.error(t`Couldn't change the update channel`, { description: errorMessage(e) });
-    });
-  }
-
-  function changeAutoCheck(autoCheck: boolean) {
-    const previous = updateSettings;
-    setUpdateSettings((current) => current && { ...current, autoCheck });
-    backend.setAutoUpdateCheck(autoCheck).catch((e) => {
-      setUpdateSettings(previous);
-      toast.error(t`Couldn't save the setting`, { description: errorMessage(e) });
-    });
-  }
-
   return (
-    <>
-      <div className="flex items-center gap-4 rounded-lg border bg-card p-4">
-        <img src={appIcon} alt="" className="size-14 shrink-0" />
-        <div className="min-w-0 flex-1">
-          <p className="text-base font-semibold">Flare Launcher</p>
-          <p className="text-[13px] text-muted-foreground">
-            <Trans>Find a DayZ server, get its mods and play.</Trans>
-          </p>
-          <p className="mt-1 text-xs text-muted-foreground">
-            <Trans>Made by {AUTHOR}</Trans>
-          </p>
-        </div>
-        <Button variant="outline" size="sm" className="shrink-0" onClick={openProjectPage}>
-          <ExternalLink aria-hidden />
-          <Trans>View on GitHub</Trans>
-        </Button>
-      </div>
-
-      <SettingsGroup title={t`Updates`}>
-        <SettingRow
-          id="auto-update-check"
-          label={t`Check for updates automatically`}
-          description={t`When the launcher starts and every few hours.`}
-        >
-          <Switch
-            id="auto-update-check"
-            aria-describedby="auto-update-check-description"
-            checked={updateSettings?.autoCheck ?? true}
-            disabled={!updateSettings}
-            onCheckedChange={changeAutoCheck}
-          />
-        </SettingRow>
-
-        <div className="flex flex-col gap-3 px-4 py-3.5">
-          <div className="flex items-center justify-between gap-6">
-            <div className="min-w-0">
-              <p className="flex flex-wrap items-baseline gap-x-2 text-[13px] font-medium">
-                <Trans>Version</Trans>
-                <span className="data selectable text-xs font-normal text-muted-foreground">{__APP_VERSION__}</span>
-                {runningVersionNotes.length > 0 && (
-                  <ReleaseNotesLink
-                    version={__APP_VERSION__}
-                    items={runningVersionNotes}
-                    description={t`The changes in the version you are running.`}
-                  />
-                )}
-              </p>
-              <p
-                className={cn("mt-0.5 text-xs", status.state === "error" ? "text-danger" : "text-muted-foreground")}
-                aria-live="polite"
-              >
-                {status.state === "error" && <CircleAlert className="mr-1 inline size-3.5 align-[-2px]" aria-hidden />}
-                {describeUpdate(status, i18n)}
-                {status.state === "error" && (
-                  <>
-                    {" "}
-                    <Button
-                      variant="link"
-                      className="h-auto p-0 text-xs font-normal"
-                      onClick={() => openReport("update", status.message)}
-                    >
-                      <Trans>Send report</Trans>
-                    </Button>
-                  </>
-                )}
-                {updateVersion && updateNotes.length > 0 && (
-                  <>
-                    {" "}
-                    <ReleaseNotesLink
-                      label={t`See what's new`}
-                      version={updateVersion}
-                      items={updateNotes}
-                      description={t`The changes in the update waiting for you.`}
-                    />
-                  </>
-                )}
-              </p>
-            </div>
-            <div className="shrink-0">
-              <UpdateAction status={status} onRestart={() => setConfirmOpen(true)} />
-              {status.state === "ready" && (
-                <InstallUpdateDialog version={status.version} open={confirmOpen} onOpenChange={setConfirmOpen} />
-              )}
-            </div>
-          </div>
-          {status.state === "downloading" && (
-            <Progress
-              value={status.percent}
-              className="h-2 [&>*]:duration-1000 [&>*]:ease-linear motion-reduce:[&>*]:transition-none"
-              aria-label={t`Update download progress`}
-            />
-          )}
-        </div>
-
-        <SettingRow
-          id="update-channel"
-          label={t`Update channel`}
-          description={t`Stable releases, or beta builds with newer changes.`}
-        >
-          <Select value={updateSettings?.channel} disabled={!updateSettings} onValueChange={changeChannel}>
-            <SelectTrigger id="update-channel" aria-describedby="update-channel-description" className="w-32 shrink-0">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="stable">
-                <Trans>Stable</Trans>
-              </SelectItem>
-              <SelectItem value="beta">
-                <Trans>Beta</Trans>
-              </SelectItem>
-            </SelectContent>
-          </Select>
-        </SettingRow>
-      </SettingsGroup>
-
-      <p className="text-xs text-muted-foreground">
-        {/* DB-IP's licence (CC BY 4.0) asks for this credit. */}
-        <Trans>Server countries come from IP Geolocation by DB-IP (db-ip.com), under CC BY 4.0.</Trans>
-      </p>
-    </>
+    <AboutSection
+      icon={appIcon}
+      tagline={t`Find a DayZ server, get its mods and play.`}
+      author={AUTHOR}
+      onOpenProject={openProjectPage}
+      onReport={(message) => openReport("update", message)}
+      credits={
+        // DB-IP's licence (CC BY 4.0) asks for this credit.
+        <p>
+          <Trans>Server countries come from IP Geolocation by DB-IP (db-ip.com), under CC BY 4.0.</Trans>
+        </p>
+      }
+    />
   );
 }
 
@@ -804,58 +489,6 @@ function AppMenuRow() {
         </Button>
       ) : null}
     </SettingRow>
-  );
-}
-
-function SectionHeading({ title, description }: { title: string; description: string }) {
-  return (
-    <div>
-      <h3 className="text-[15px] font-semibold">{title}</h3>
-      <p className="mt-0.5 text-[13px] text-muted-foreground">{description}</p>
-    </div>
-  );
-}
-
-/** A titled card of setting rows. */
-export function SettingsGroup({ title, children }: { title: string; children: ReactNode }) {
-  const id = useId();
-  return (
-    <section aria-labelledby={id} className="flex flex-col gap-2">
-      <h4 id={id} className="text-sm font-semibold">
-        {title}
-      </h4>
-      <div className="flex flex-col divide-y rounded-lg border bg-card">{children}</div>
-    </section>
-  );
-}
-
-/**
- * One setting: what it is and what it does on the left, its control on the right. The control is passed in, so it
- * points `aria-describedby` at `<id>-description` itself; a group of buttons uses `<id>-label` as its name.
- */
-export function SettingRow({
-  id,
-  label,
-  description,
-  children,
-}: {
-  id: string;
-  label: string;
-  description: ReactNode;
-  children: ReactNode;
-}) {
-  return (
-    <div className="flex items-center justify-between gap-6 px-4 py-3.5">
-      <div className="min-w-0">
-        <Label id={`${id}-label`} htmlFor={id} className="text-[13px]">
-          {label}
-        </Label>
-        <p id={`${id}-description`} className="mt-0.5 text-xs text-muted-foreground">
-          {description}
-        </p>
-      </div>
-      {children}
-    </div>
   );
 }
 

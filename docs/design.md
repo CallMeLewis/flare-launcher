@@ -8,7 +8,7 @@ Dark Mode (OLED) with Data-Dense Dashboard layout, plus a matching light theme. 
 
 ## Colour
 
-Tokens live in `src/globals.css`. Use the tokens, never raw hex in components.
+The tokens are the Flare apps' shared ones, in `@flare/ui` (`packages/ui/src/theme.css` in the flare-common repo beside this one), so every Flare app looks alike; change them there. `src/globals.css` adds only the launcher's own, the table rows. Use the tokens, never raw hex in components.
 
 Light is the `:root` set and dark the `.dark` set; the class goes on `<html>`. Light values keep text at WCAG AA (4.5:1) on every surface, which is why primary and the status colours are a shade darker than in dark. Field edges (`input`) reach 3:1 against the background in both, so they're too strong to fill a control with: fills use `control`.
 
@@ -40,7 +40,7 @@ Green means "good to go" and is reserved for that. Colour never carries meaning 
 
 - Table rows 36px, header 32px, toolbar controls 32px.
 - 8px gaps between controls, 16px panel padding.
-- Sidebar 192px, detail panel 400px, window minimum 1120×640.
+- Sidebar 224px (the Flare apps' shared one), detail panel 400px, window minimum 1120×640.
 - Layout widths are in CSS pixels, so the interface size setting moves the breakpoints: below 1280px the sidebar folds to icons and the detail panel narrows to 340px; below 1024px the Time column hides and the panel is 300px. 1536px and up widens the stat columns. Table rows stripe faintly to help follow long rows.
 
 ## Interaction
