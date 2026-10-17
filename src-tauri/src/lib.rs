@@ -12,7 +12,6 @@ mod query;
 mod report;
 mod servers;
 mod steam;
-mod updater;
 mod workshop;
 
 use std::sync::Arc;
@@ -72,7 +71,13 @@ pub fn run() {
   tauri::Builder::default()
     .plugin(tauri_plugin_opener::init())
     .plugin(tauri_plugin_dialog::init())
-    .plugin(tauri_plugin_updater::Builder::new().build())
+    .plugin(tauri_plugin_flare_updater::updater())
+    // The feed keeps the launcher's first name, so copies already installed keep finding their updates. Must match the
+    // feed in scripts/release.ts.
+    .plugin(
+      tauri_plugin_flare_updater::Builder::new("Flare-Launcher", "https://updates.darkzone.dev/dayz-server-launcher/")
+        .build(),
+    )
     // Remembers size and position, but not the window frame: on Windows the launcher draws its own title bar, and a
     // frame saved by an older version would otherwise come back and show two.
     .plugin(
@@ -83,7 +88,6 @@ pub fn run() {
     .manage(http)
     .manage(servers::ServerCache::default())
     .manage(Arc::new(workshop::Downloads::default()))
-    .manage(updater::Updater::new())
     .invoke_handler(tauri::generate_handler![
       servers::fetch_servers,
       servers::server_mods,
@@ -104,13 +108,6 @@ pub fn run() {
       workshop::download_mods,
       workshop::cancel_mod_download,
       workshop::unsubscribe_mods,
-      updater::update_status,
-      updater::check_for_updates,
-      updater::download_update,
-      updater::install_update,
-      updater::update_settings,
-      updater::set_auto_update_check,
-      updater::set_update_channel,
       set_window_theme,
       open_project_page,
       app_menu::app_menu_status,
@@ -139,7 +136,6 @@ pub fn run() {
         .decorations(cfg!(target_os = "linux"))
         .initialization_script(format!("window.__systemTitleBar = {};", cfg!(target_os = "linux")))
         .build()?;
-      updater::Updater::start(app.handle());
       app.manage(discord::Presence::start());
       Ok(())
     })

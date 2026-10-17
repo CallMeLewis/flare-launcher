@@ -31,7 +31,7 @@ ping-async = "1.0.2"
 steamworks = "0.13.1"
 tauri-plugin-window-state = "2.5.0"
 tauri-plugin-dialog = "2.8.1"
-tauri-plugin-updater = "2.13.1"
+tauri-plugin-flare-updater = { path = "../../flare-common/crates/tauri-plugin-flare-updater" }
 if-addrs = "0.15.0"
 sysinfo = { version = "0.38.4", default-features = false, features = ["system"] }
 keyring-core = "1.0.0"

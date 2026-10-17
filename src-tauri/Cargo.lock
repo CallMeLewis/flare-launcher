@@ -1167,8 +1167,8 @@ dependencies = [
  "tauri",
  "tauri-build",
  "tauri-plugin-dialog",
+ "tauri-plugin-flare-updater",
  "tauri-plugin-opener",
- "tauri-plugin-updater",
  "tauri-plugin-window-state",
  "thiserror 2.0.21",
  "tokio",
@@ -4415,6 +4415,18 @@ dependencies = [
  "tauri-plugin-fs",
  "thiserror 2.0.21",
  "url",
+]
+
+[[package]]
+name = "tauri-plugin-flare-updater"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
+ "tauri",
+ "tauri-plugin",
+ "tauri-plugin-updater",
+ "tokio",
 ]
 
 [[package]]

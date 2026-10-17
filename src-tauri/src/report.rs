@@ -54,7 +54,7 @@ pub struct Report {
   platform: String,
   /// How the launcher was installed: `nsis`, `appimage`, `deb`, `rpm` or `unknown` for a development build.
   install_format: String,
-  channel: crate::updater::UpdateChannel,
+  channel: tauri_plugin_flare_updater::UpdateChannel,
   /// The operating system's name and version.
   system: String,
   /// How Steam was found, or `None` when it wasn't.
@@ -131,8 +131,8 @@ pub async fn prepare_report(
     error: error.map(|error| scrub_error(error, &scrub)),
     version: app.package_info().version.to_string(),
     platform: std::env::consts::OS.to_string(),
-    install_format: crate::updater::install_format().to_string(),
-    channel: app.state::<crate::updater::Updater>().channel(&app),
+    install_format: tauri_plugin_flare_updater::install_format().to_string(),
+    channel: app.state::<tauri_plugin_flare_updater::Updater>().channel(&app),
     system: system_name(),
     steam: crate::steam::steam_kind(install.as_ref()).map(String::from),
     dayz_found: install.is_some(),

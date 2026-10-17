@@ -45,7 +45,8 @@ function install(installer: string): string {
 async function staysOpen(program: string): Promise<void> {
   if (process.platform !== "win32") chmodSync(program, 0o755);
   // Linux runners have no FUSE, which an AppImage normally mounts itself with; this unpacks it to a folder instead.
-  const env = { ...process.env, APPIMAGE_EXTRACT_AND_RUN: "1" };
+  // Without checking for updates on its own, so CI doesn't count as someone using the launcher.
+  const env = { ...process.env, APPIMAGE_EXTRACT_AND_RUN: "1", FLARE_NO_AUTO_UPDATE_CHECK: "1" };
   // Its own process group on Linux, so closing it also closes the web view's processes.
   const child = spawn(program, [], { stdio: "inherit", env, detached: process.platform !== "win32" });
   const exited = new Promise<string>((done) => {
