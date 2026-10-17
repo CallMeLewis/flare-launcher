@@ -327,6 +327,7 @@ export function App() {
     () => (view === "all" ? pinFavourites(sorted, favourites) : sorted),
     [view, sorted, favourites],
   );
+  const playersShown = useMemo(() => listed.reduce((sum, row) => sum + row.players, 0), [listed]);
 
   // Ordering by ping needs a result for every listed server, not just those on screen.
   useEffect(() => {
@@ -578,6 +579,7 @@ export function App() {
                     mods={mods}
                     shown={listed.length}
                     total={inView.length}
+                    players={playersShown}
                     refreshing={view === "lan" ? lan.searching : servers.refreshing}
                     onRefresh={view === "lan" ? lan.search : servers.refresh}
                     refreshLabel={view === "lan" ? t`Search the network again` : t`Refresh server list`}

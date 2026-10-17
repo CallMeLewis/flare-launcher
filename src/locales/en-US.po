@@ -93,6 +93,10 @@ msgstr ""
 msgid "{name}. Select Play in the panel on the right to join."
 msgstr ""
 
+#: src/components/server-toolbar.tsx
+msgid "{players, plural, one {<0>{playerCount}</0> player} other {<1>{playerCount}</1> players}}"
+msgstr ""
+
 #: src/lib/format.ts
 msgid "{rest} min"
 msgstr ""

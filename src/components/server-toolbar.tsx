@@ -2,7 +2,7 @@ import { useId, useLayoutEffect, useRef, useState } from "react";
 import type { MessageDescriptor } from "@lingui/core";
 import { msg, plural } from "@lingui/core/macro";
 import { Plural, Trans, useLingui } from "@lingui/react/macro";
-import { ListFilter, Plus, RefreshCw, Search, X } from "lucide-react";
+import { ListFilter, Plus, RefreshCw, Search, Server, Users, X } from "lucide-react";
 import { FilterMenu } from "@/components/filter-menu";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,6 +26,8 @@ type Props = {
   mods: Option[];
   shown: number;
   total: number;
+  /** Players on the servers shown. */
+  players: number;
   refreshing: boolean;
   onRefresh: () => void;
   /** What refreshing does in this list, for the button's label. */
@@ -44,6 +46,7 @@ export function ServerToolbar({
   mods,
   shown,
   total,
+  players,
   refreshing,
   onRefresh,
   refreshLabel,
@@ -55,6 +58,7 @@ export function ServerToolbar({
   const filtersOn = chips.length;
   const shownCount = i18n.number(shown);
   const totalCount = i18n.number(total);
+  const playerCount = i18n.number(players);
   const reset = () => onChange({ ...NO_FILTERS, search: filters.search });
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -136,37 +140,62 @@ export function ServerToolbar({
         )}
 
         <div className="ml-auto flex shrink-0 items-center gap-2 pl-2">
-          <p className="text-xs whitespace-nowrap text-muted-foreground" aria-live="polite">
-            {shown === total ? (
+          {/* One status, so a change is read out as the whole summary rather than a bare number. */}
+          <div
+            role="status"
+            aria-atomic="true"
+            className="flex items-center gap-2.5 text-xs whitespace-nowrap text-muted-foreground"
+          >
+            <span className="flex items-center gap-1.5">
+              <Server className="size-3.5 shrink-0" aria-hidden />
+              {shown === total ? (
+                <Plural
+                  value={total}
+                  one={
+                    <Trans>
+                      <span className="data text-foreground">{shownCount}</span> server
+                    </Trans>
+                  }
+                  other={
+                    <Trans>
+                      <span className="data text-foreground">{shownCount}</span> servers
+                    </Trans>
+                  }
+                />
+              ) : (
+                <Plural
+                  value={total}
+                  one={
+                    <Trans>
+                      <span className="data text-foreground">{shownCount}</span> of {totalCount} server
+                    </Trans>
+                  }
+                  other={
+                    <Trans>
+                      <span className="data text-foreground">{shownCount}</span> of {totalCount} servers
+                    </Trans>
+                  }
+                />
+              )}
+            </span>
+            <span className="h-4 w-px bg-border" aria-hidden />
+            <span className="flex items-center gap-1.5">
+              <Users className="size-3.5 shrink-0" aria-hidden />
               <Plural
-                value={total}
+                value={players}
                 one={
                   <Trans>
-                    <span className="data text-foreground">{shownCount}</span> server
+                    <span className="data text-foreground">{playerCount}</span> player
                   </Trans>
                 }
                 other={
                   <Trans>
-                    <span className="data text-foreground">{shownCount}</span> servers
+                    <span className="data text-foreground">{playerCount}</span> players
                   </Trans>
                 }
               />
-            ) : (
-              <Plural
-                value={total}
-                one={
-                  <Trans>
-                    <span className="data text-foreground">{shownCount}</span> of {totalCount} server
-                  </Trans>
-                }
-                other={
-                  <Trans>
-                    <span className="data text-foreground">{shownCount}</span> of {totalCount} servers
-                  </Trans>
-                }
-              />
-            )}
-          </p>
+            </span>
+          </div>
           {/* Folds to its icon when the toolbar is narrow, which depends on the window and on how long its words are. */}
           <Tooltip>
             <TooltipTrigger asChild>
