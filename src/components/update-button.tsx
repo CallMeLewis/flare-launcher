@@ -83,10 +83,12 @@ export function UpdateButton() {
           </Button>
         </TooltipTrigger>
         {notes.length > 0 ? (
+          // No arrow, like the menus: the card sits beside the button, and the arrow's tooltip colour would stand out
+          // against it.
           <TooltipContent
             side="right"
             align="end"
-            className="block max-w-sm bg-popover px-3.5 py-3 text-popover-foreground shadow-md ring-1 ring-border **:data-[slot=tooltip-arrow]:bg-popover **:data-[slot=tooltip-arrow]:fill-popover"
+            className="block max-w-sm bg-popover px-3.5 py-3 text-popover-foreground shadow-md ring-1 ring-border **:data-[slot=tooltip-arrow]:invisible"
           >
             <p className="font-semibold">{text}</p>
             <p className="mt-2 font-medium opacity-80">
