@@ -1958,6 +1958,10 @@ msgstr "Wo DayZ und seine Mods auf diesem Computer liegen."
 msgid "Windowed mode"
 msgstr "Fenstermodus"
 
+#: src/lib/shared-messages.ts
+msgid "Working"
+msgstr "Beschäftigt"
+
 #: src/components/settings-dialog.tsx
 msgid "Workshop mods"
 msgstr "Workshop-Mods"

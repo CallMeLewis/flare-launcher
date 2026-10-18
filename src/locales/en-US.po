@@ -1958,6 +1958,10 @@ msgstr ""
 msgid "Windowed mode"
 msgstr ""
 
+#: src/lib/shared-messages.ts
+msgid "Working"
+msgstr ""
+
 #: src/components/settings-dialog.tsx
 msgid "Workshop mods"
 msgstr ""

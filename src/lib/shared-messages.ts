@@ -67,6 +67,7 @@ export const SHARED_MESSAGES = [
   msg({ message: "What's new" }),
   msg({ message: "What's new in version {version}" }),
   msg({ message: "When {app} starts and every few hours." }),
+  msg({ message: "Working" }),
   msg({ message: "You have the latest version. Last checked at {time}." }),
   msg({ message: "{app} is up to date (checked at {time}). Select to check again." }),
   msg({ message: "{app} will close, install the update in the background and open again in a few seconds." }),
