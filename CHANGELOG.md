@@ -2,6 +2,13 @@
 
 What changed in each version of Flare Launcher, newest first.
 
+## 1.5.1 - 2026-10-18
+
+- Each Settings section's title now stays at the top while you scroll.
+- Dropdowns, such as Language in Settings > Launcher, now open below the box instead of on top of it.
+- The sidebar is now a little wider.
+- Fixed a mismatched arrow on the release notes card beside the update button.
+
 ## 1.5.0 - 2026-10-17
 
 - New player count next to the server count above the server list: it adds up the players on the servers shown, so it changes as you filter or search.
