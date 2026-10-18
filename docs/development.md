@@ -21,6 +21,10 @@ pnpm app          # the desktop app, with hot reload
 pnpm dev          # the interface alone in a browser at http://127.0.0.1:5173
 ```
 
+A change to the shared code is made in flare-common, and shows in the launcher straight away through the link. It
+reaches the launcher's releases once flare-common is tagged and `.flare-common-version` moves to the new tag: see
+flare-common's README.
+
 In a plain browser the interface loads the server list straight from its public API. Ping, mod checks and launching
 only work in the desktop app.
 
