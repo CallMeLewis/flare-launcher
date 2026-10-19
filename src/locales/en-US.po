@@ -289,10 +289,6 @@ msgstr ""
 msgid "Cancel"
 msgstr ""
 
-#: src/lib/shared-messages.ts
-msgid "Changes save as you make them."
-msgstr ""
-
 #: src/components/first-run-dialog.tsx
 #: src/components/settings-dialog.tsx
 msgid "Character name"

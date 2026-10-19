@@ -289,10 +289,6 @@ msgstr "Ver servidores"
 msgid "Cancel"
 msgstr "Cancelar"
 
-#: src/lib/shared-messages.ts
-msgid "Changes save as you make them."
-msgstr "Los cambios se guardan al momento."
-
 #: src/components/first-run-dialog.tsx
 #: src/components/settings-dialog.tsx
 msgid "Character name"

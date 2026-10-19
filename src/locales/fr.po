@@ -289,10 +289,6 @@ msgstr "Parcourir les serveurs"
 msgid "Cancel"
 msgstr "Annuler"
 
-#: src/lib/shared-messages.ts
-msgid "Changes save as you make them."
-msgstr "Les modifications sont enregistrées au fur et à mesure."
-
 #: src/components/first-run-dialog.tsx
 #: src/components/settings-dialog.tsx
 msgid "Character name"
