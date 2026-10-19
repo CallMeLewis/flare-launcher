@@ -8,7 +8,6 @@ import { msg } from "@lingui/core/macro";
 export const SHARED_MESSAGES = [
   msg({ message: "Appearance" }),
   msg({ message: "Beta" }),
-  msg({ message: "Changes save as you make them." }),
   msg({ message: "Check for updates" }),
   msg({ message: "Check for updates automatically" }),
   msg({ message: "Checking for updates…" }),
