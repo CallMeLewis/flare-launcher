@@ -20,6 +20,7 @@ export const BACKEND_MESSAGES = [
   msg({ message: "DayZ wasn't found. Set the DayZ folder in Settings." }),
   msg({ message: "Enter the server's address, such as {example}." }),
   msg({ message: "Flare Launcher is in your app menu, but couldn't reopen: {error}" }),
+  msg({ message: "Mods couldn't be linked into the DayZ folder: {error}" }),
   msg({ message: "Mods are already being downloaded." }),
   msg({ message: "Mods are being downloaded. Try again once they've finished." }),
   msg({
@@ -53,6 +54,7 @@ export const BACKEND_MESSAGES = [
   msg({ message: "The download stopped unexpectedly. Try again." }),
   msg({ message: "The download stopped unexpectedly: {error}" }),
   msg({ message: "The folder couldn't be opened: {error}" }),
+  msg({ message: "The launcher couldn't make the {folder} folder in the DayZ folder: {error}" }),
   msg({ message: "The installer already added Flare Launcher to the Start menu." }),
   msg({ message: "The password store couldn't be used: {error}" }),
   msg({ message: "The port after the colon has to be a number." }),
@@ -63,5 +65,9 @@ export const BACKEND_MESSAGES = [
   msg({ message: "Use Add or remove programs to take Flare Launcher off this computer." }),
   msg({ message: "Your home folder couldn't be found." }),
   msg({ message: "{error}" }),
+  msg({
+    message:
+      "{folder} in the DayZ folder isn't a link the launcher made, so it can't be replaced. Move or delete it, then try again.",
+  }),
   msg({ message: "{missing, plural, one {# required mod is} other {# required mods are}} not installed yet." }),
 ];

@@ -88,7 +88,10 @@ fn remove_link(link: &Path) -> std::io::Result<()> {
 
 fn link_mods(install: &Install, mod_ids: &[u64]) -> Result<()> {
   let link_dir = install.dayz_dir.join(LINK_DIR);
-  std::fs::create_dir_all(&link_dir)?;
+  std::fs::create_dir_all(&link_dir).map_err(|e| {
+    log::warn!("could not create {}: {e}", link_dir.display());
+    text!("The launcher couldn't make the {folder} folder in the DayZ folder: {error}", folder = LINK_DIR, error = e)
+  })?;
   for &id in mod_ids {
     let target = install.mod_dir(id);
     let link = link_dir.join(format!("@{id}"));
@@ -98,9 +101,19 @@ fn link_mods(install: &Install, mod_ids: &[u64]) -> Result<()> {
       continue;
     }
     if link.symlink_metadata().is_ok() {
-      remove_link(&link)?;
+      remove_link(&link).map_err(|e| {
+        log::warn!("could not replace {}: {e}", link.display());
+        // Most likely a real folder with files in it, put there by hand or by another program.
+        text!(
+          "{folder} in the DayZ folder isn't a link the launcher made, so it can't be replaced. Move or delete it, then try again.",
+          folder = format!("{LINK_DIR}{}@{id}", std::path::MAIN_SEPARATOR)
+        )
+      })?;
     }
-    create_link(&target, &link)?;
+    create_link(&target, &link).map_err(|e| {
+      log::warn!("could not link {} to {}: {e}", link.display(), target.display());
+      text!("Mods couldn't be linked into the DayZ folder: {error}", error = e)
+    })?;
   }
   Ok(())
 }
@@ -341,6 +354,34 @@ mod tests {
     assert_eq!(link.symlink_metadata().unwrap().ino(), first);
     assert_eq!(std::fs::read_link(&link).unwrap(), workshop_dir.join("111"));
     assert!(link.join("meta.cpp").is_file());
+
+    std::fs::remove_dir_all(root).unwrap();
+  }
+
+  // Junctions on Windows, symlinks elsewhere.
+  #[test]
+  fn links_mods_but_leaves_real_folders_alone() {
+    let root = std::env::temp_dir().join(format!("dzsl-real-folder-test-{}", std::process::id()));
+    let dayz_dir = root.join("steamapps/common/DayZ");
+    let workshop_dir = root.join("steamapps/workshop/content/221100");
+    for id in ["111", "222"] {
+      std::fs::create_dir_all(workshop_dir.join(id)).unwrap();
+      std::fs::write(workshop_dir.join(id).join("meta.cpp"), id).unwrap();
+    }
+    std::fs::create_dir_all(&dayz_dir).unwrap();
+    let install = Install { dayz_dir: dayz_dir.clone(), workshop_dir };
+
+    link_mods(&install, &[111]).unwrap();
+    link_mods(&install, &[111]).unwrap();
+    assert_eq!(std::fs::read_to_string(dayz_dir.join(LINK_DIR).join("@111").join("meta.cpp")).unwrap(), "111");
+
+    // A folder with files in it, made by someone else, is never deleted.
+    let real = dayz_dir.join(LINK_DIR).join("@222");
+    std::fs::create_dir_all(&real).unwrap();
+    std::fs::write(real.join("keep.txt"), "mine").unwrap();
+    let error = link_mods(&install, &[222]).unwrap_err().to_string();
+    assert!(error.contains("isn't a link the launcher made"), "{error}");
+    assert_eq!(std::fs::read_to_string(real.join("keep.txt")).unwrap(), "mine");
 
     std::fs::remove_dir_all(root).unwrap();
   }

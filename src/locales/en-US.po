@@ -53,6 +53,10 @@ msgstr ""
 msgid "{filtersOn, plural, one {Filters <0>#<1> on</1></0>} other {Filters <2>#<3> on</3></2>}}"
 msgstr ""
 
+#: src/lib/backend-messages.ts
+msgid "{folder} in the DayZ folder isn't a link the launcher made, so it can't be replaced. Move or delete it, then try again."
+msgstr ""
+
 #: src/components/server-toolbar.tsx
 msgid "{hidden, plural, one {# more filter on, open Filters} other {# more filters on, open Filters}}"
 msgstr ""
@@ -995,6 +999,10 @@ msgstr ""
 msgid "Mods are being downloaded. Try again once they've finished."
 msgstr ""
 
+#: src/lib/backend-messages.ts
+msgid "Mods couldn't be linked into the DayZ folder: {error}"
+msgstr ""
+
 #: src/App.tsx
 #: src/components/game-start-dialog.tsx
 msgid "Mods ready"
@@ -1629,6 +1637,10 @@ msgstr ""
 
 #: src/components/settings-dialog.tsx
 msgid "The language the launcher is shown in."
+msgstr ""
+
+#: src/lib/backend-messages.ts
+msgid "The launcher couldn't make the {folder} folder in the DayZ folder: {error}"
 msgstr ""
 
 #: src/components/crash-screen.tsx
