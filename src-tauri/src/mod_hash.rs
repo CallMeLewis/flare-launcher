@@ -3,6 +3,10 @@
 //! A server reports the hash of each of its mods in its rules. When the copy on this computer hashes differently, the
 //! two are different versions: usually the mod was updated on the Workshop and the server hasn't restarted since.
 //!
+//! One exception: a Linux server can hold the same PBO twice, with names that differ only in capitals, as when files
+//! are renamed to lowercase and a later update writes the original names again. That changes the hash but not the
+//! mod, so a server hash that matches this computer's PBOs with some counted twice is the same version.
+//!
 //! Every PBO ends with a SHA-1 of itself. A mod's hash is a SHA-1 of those, sorted and written in lowercase hex, cut
 //! down to 32 bits with the RS hash.
 
@@ -17,8 +21,8 @@ use sha1::{Digest, Sha1};
 /// The folders of a mod that hold its PBOs. Only their top level counts.
 const DATA_DIRS: [&str; 3] = ["dta", "addons", "bin"];
 
-/// The hash of the mod in `mod_dir`. `None` when its files can't be read.
-pub fn mod_hash(mod_dir: &Path) -> Option<u32> {
+/// The hashes of the PBOs in `mod_dir`, which make up its hash. `None` when its files can't be read.
+fn pbo_hashes(mod_dir: &Path) -> Option<Vec<[u8; 20]>> {
   let mut pbo_hashes = Vec::new();
   for dir in std::fs::read_dir(mod_dir).ok()?.flatten() {
     // Mods name the folder `addons` or `Addons`, which matters on Linux.
@@ -33,7 +37,27 @@ pub fn mod_hash(mod_dir: &Path) -> Option<u32> {
       }
     }
   }
-  Some(short_hash(&full_hash(pbo_hashes)))
+  Some(pbo_hashes)
+}
+
+/// The most PBOs a mod can have for [`same_version`] to look for ones the server has twice. Every combination is
+/// tried, so this keeps it to a few thousand hashes; a mod with more PBOs only matches exactly.
+const MAX_DOUBLED_SEARCH: usize = 12;
+
+/// Whether a server's hash is for the same files as `pbo_hashes`, this computer's copy of a mod: exactly, or with some
+/// of them twice.
+fn same_version(pbo_hashes: &[[u8; 20]], server: u32) -> bool {
+  if short_hash(&full_hash(pbo_hashes.to_vec())) == server {
+    return true;
+  }
+  if pbo_hashes.is_empty() || pbo_hashes.len() > MAX_DOUBLED_SEARCH {
+    return false;
+  }
+  // Each bit of `twice` doubles one PBO.
+  (1..1usize << pbo_hashes.len()).any(|twice| {
+    let doubled = pbo_hashes.iter().enumerate().filter(|(i, _)| twice & (1 << i) != 0).map(|(_, hash)| *hash);
+    short_hash(&full_hash(pbo_hashes.iter().copied().chain(doubled).collect())) == server
+  })
 }
 
 /// The SHA-1 a PBO ends with.
@@ -104,14 +128,14 @@ async fn differing_ids(dayz_dir: Option<String>, server_id: String, ids: Vec<u64
     ids
       .into_iter()
       .filter(|&id| install.is_mod_installed(id))
-      .filter_map(|id| Some((id, mod_hash(&install.mod_dir(id))?)))
-      .collect::<HashMap<u64, u32>>()
+      .filter_map(|id| Some((id, pbo_hashes(&install.mod_dir(id))?)))
+      .collect::<HashMap<u64, Vec<[u8; 20]>>>()
   });
   let (local, server) = tokio::join!(local, crate::query::a2s_mod_hashes(addr));
   let (Ok(local), Some(server)) = (local, server) else { return Vec::new() };
   let mut differing: Vec<u64> = local
     .into_iter()
-    .filter(|(id, hash)| server.get(id).is_some_and(|theirs| theirs != hash))
+    .filter(|(id, pbos)| server.get(id).is_some_and(|&theirs| !same_version(pbos, theirs)))
     .map(|(id, _)| id)
     .collect();
   differing.sort_unstable();
@@ -122,10 +146,35 @@ async fn differing_ids(dayz_dir: Option<String>, server_id: String, ids: Vec<u64
 mod tests {
   use super::*;
 
+  /// The hash of the mod in `mod_dir`, as a server reports it.
+  fn mod_hash(mod_dir: &Path) -> Option<u32> {
+    Some(short_hash(&full_hash(pbo_hashes(mod_dir)?)))
+  }
+
   #[test]
   fn hashes_a_mod_without_pbos_as_servers_do() {
     // What servers report for a mod folder with nothing in it.
     assert_eq!(short_hash(&full_hash(Vec::new())), 0x11FD_D19C);
+  }
+
+  #[test]
+  fn counts_pbos_the_server_has_twice_as_the_same_version() {
+    let pbos = [[1; 20], [2; 20], [3; 20]];
+    assert!(same_version(&pbos, short_hash(&full_hash(pbos.to_vec()))));
+    // As on a Linux server holding both `gui.pbo` and `GUI.pbo`.
+    assert!(same_version(&pbos, short_hash(&full_hash(vec![[1; 20], [2; 20], [2; 20], [3; 20]]))));
+    assert!(same_version(&pbos, short_hash(&full_hash([pbos, pbos].concat()))));
+    // A missing PBO or another one is a different version.
+    assert!(!same_version(&pbos, short_hash(&full_hash(vec![[1; 20], [2; 20]]))));
+    assert!(!same_version(&pbos, short_hash(&full_hash(vec![[1; 20], [2; 20], [3; 20], [4; 20]]))));
+  }
+
+  #[test]
+  fn only_matches_exactly_for_mods_with_many_pbos() {
+    let pbos: Vec<[u8; 20]> = (0..=MAX_DOUBLED_SEARCH as u8).map(|i| [i; 20]).collect();
+    let doubled = [pbos.clone(), vec![[0; 20]]].concat();
+    assert!(same_version(&pbos, short_hash(&full_hash(pbos.clone()))));
+    assert!(!same_version(&pbos, short_hash(&full_hash(doubled))));
   }
 
   #[test]
