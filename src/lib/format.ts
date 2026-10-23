@@ -1,6 +1,11 @@
 import { i18n } from "@lingui/core";
 import { t } from "@lingui/core/macro";
-import type { ModProgress } from "./types";
+import type { ModProgress, ServerRow } from "./types";
+
+/** The address players join a server on, its game port rather than the query port in its id: `1.2.3.4:2302`. */
+export function joinAddress(server: Pick<ServerRow, "ip" | "gamePort">): string {
+  return `${server.ip}:${server.gamePort}`;
+}
 
 const UNITS = ["B", "KB", "MB", "GB", "TB"];
 

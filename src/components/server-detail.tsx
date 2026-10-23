@@ -36,7 +36,7 @@ import { useLowMapCount } from "@/hooks/use-low-map-count";
 import type { PingResult } from "@/hooks/use-pings";
 import { backend, errorMessage } from "@/lib/backend";
 import { countryName } from "@/lib/countries";
-import { downloadFraction, formatBytes, formatMinutes } from "@/lib/format";
+import { downloadFraction, formatBytes, formatMinutes, joinAddress } from "@/lib/format";
 import { mapName } from "@/lib/maps";
 import type { Install, Mod, ModProgress, PlayJob, ServerRow } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -233,7 +233,7 @@ export function ServerDetail({
   const differs = (id: number) => differing.has(id) && installed?.has(id) === true;
   const differingCount = mods ? mods.filter((mod) => differs(mod.steamWorkshopId)).length : 0;
   const checking = canCheckMods && !checkFailed && (mods === null || (mods.length > 0 && installed === null));
-  const address = `${server.ip}:${server.gamePort}`;
+  const address = joinAddress(server);
   const players = ping?.players ?? server.players;
   const maxPlayers = ping?.maxPlayers ?? server.maxPlayers;
   const canPlay = canCheckMods && !checking && !busy;

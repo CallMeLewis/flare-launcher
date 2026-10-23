@@ -610,6 +610,7 @@ export function App() {
                     selectedId={selectedId}
                     onSelect={setSelectedId}
                     onPlay={play}
+                    onLoadMods={(server) => void play(server, "", false)}
                     favourites={favourites}
                     unlisted={unlisted}
                     onToggleFavourite={toggleFavourite}

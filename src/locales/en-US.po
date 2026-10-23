@@ -210,6 +210,7 @@ msgid "Add to app menu"
 msgstr ""
 
 #: src/components/server-detail.tsx
+#: src/components/server-table.tsx
 msgid "Add to favourites"
 msgstr "Add to favorites"
 
@@ -222,6 +223,7 @@ msgid "Added to the command line"
 msgstr ""
 
 #: src/components/server-detail.tsx
+#: src/components/server-table.tsx
 msgid "Address copied"
 msgstr ""
 
@@ -382,6 +384,7 @@ msgid "Copy"
 msgstr ""
 
 #: src/components/server-detail.tsx
+#: src/components/server-table.tsx
 msgid "Copy address"
 msgstr ""
 
@@ -398,6 +401,7 @@ msgid "Couldn't check your mods"
 msgstr ""
 
 #: src/components/server-detail.tsx
+#: src/components/server-table.tsx
 msgid "Couldn't copy the address"
 msgstr ""
 
@@ -910,6 +914,7 @@ msgid "Light or dark, or System to match this computer."
 msgstr ""
 
 #: src/components/server-detail.tsx
+#: src/components/server-table.tsx
 msgid "Load mods"
 msgstr ""
 
@@ -1190,6 +1195,7 @@ msgid "Ping"
 msgstr ""
 
 #: src/components/server-detail.tsx
+#: src/components/server-table.tsx
 msgid "Play"
 msgstr ""
 
@@ -1244,6 +1250,7 @@ msgid "Remove filter: {prefix} {label}"
 msgstr ""
 
 #: src/components/server-detail.tsx
+#: src/components/server-table.tsx
 msgid "Remove from favourites"
 msgstr "Remove from favorites"
 

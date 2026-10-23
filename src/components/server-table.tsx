@@ -1,13 +1,35 @@
-import { memo, useEffect, useRef, type KeyboardEvent, type ReactNode } from "react";
+import { memo, useEffect, useRef, useState, type KeyboardEvent, type MouseEvent, type ReactNode } from "react";
 import type { MessageDescriptor } from "@lingui/core";
 import { msg } from "@lingui/core/macro";
 import { Trans, useLingui } from "@lingui/react/macro";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { ArrowDown, ArrowUp, Lock, Moon, Puzzle, Star, Sun, TriangleAlert } from "lucide-react";
+import {
+  ArrowDown,
+  ArrowUp,
+  Copy,
+  Download,
+  Lock,
+  Moon,
+  Play,
+  Puzzle,
+  Star,
+  StarOff,
+  Sun,
+  TriangleAlert,
+} from "lucide-react";
+import { toast } from "sonner";
 import { Skeleton } from "@flare/ui/ui/skeleton";
 import type { PingResult, Pings } from "@/hooks/use-pings";
 import { compareGameVersions, isNight, matchedMod, type Sort, type SortKey } from "@/lib/filter";
 import { CountryFlag } from "@/components/country-flag";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
+import { joinAddress } from "@/lib/format";
 import { mapName } from "@/lib/maps";
 import type { ServerRow } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -52,6 +74,8 @@ type Props = {
   selectedId: string | null;
   onSelect: (id: string) => void;
   onPlay: (row: ServerRow) => void;
+  /** Downloads a server's mods without starting DayZ. */
+  onLoadMods: (row: ServerRow) => void;
   favourites: ReadonlySet<string>;
   /** Saved servers missing from the server list, shown from what was last known about them. */
   unlisted: ReadonlySet<string>;
@@ -73,6 +97,7 @@ export function ServerTable({
   selectedId,
   onSelect,
   onPlay,
+  onLoadMods,
   favourites,
   unlisted,
   onToggleFavourite,
@@ -84,6 +109,8 @@ export function ServerTable({
 }: Props) {
   const { t, i18n } = useLingui();
   const scroller = useRef<HTMLDivElement>(null);
+  // The server the right-click menu is for.
+  const [menuRow, setMenuRow] = useState<ServerRow | null>(null);
   const virtualizer = useVirtualizer({
     count: rows.length,
     getScrollElement: () => scroller.current,
@@ -128,6 +155,12 @@ export function ServerTable({
       case "Enter":
         if (current >= 0) onPlay(rows[current]);
         return;
+      case "ContextMenu":
+      case "F10":
+        if (event.key === "F10" && !event.shiftKey) return;
+        event.preventDefault();
+        if (current >= 0) openMenuAt(rows[current].id);
+        return;
       default:
         return;
     }
@@ -136,97 +169,160 @@ export function ServerTable({
     virtualizer.scrollToIndex(next);
   }
 
-  return (
-    // A grid, so the selected row is announced. It takes focus as a whole and arrow keys move the selection.
-    <div
-      role="grid"
-      aria-label={t`Servers`}
-      aria-readonly
-      aria-rowcount={rows.length + 1}
-      tabIndex={0}
-      aria-activedescendant={selectedId ? `server-${selectedId}` : undefined}
-      onKeyDown={onKeyDown}
-      className="flex min-h-0 flex-1 flex-col focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-inset"
-    >
-      <div role="rowgroup" className="overflow-y-hidden border-b bg-card/60 [scrollbar-gutter:stable]">
-        <div role="row" className={cn(COLUMNS, "h-8 text-xs font-medium text-muted-foreground")}>
-          <div role="columnheader" aria-label={t`Favourite`} />
-          {HEADERS.map((header) => {
-            const active = sort.key === header.key;
-            const Arrow = sort.descending ? ArrowDown : ArrowUp;
-            return (
-              <div
-                key={header.key}
-                role="columnheader"
-                aria-sort={active ? (sort.descending ? "descending" : "ascending") : "none"}
-                className={cn("flex", header.numeric && "justify-end pr-3", header.key === "time" && TIME_COLUMN)}
-              >
-                <button
-                  type="button"
-                  title={header.hint && i18n._(header.hint)}
-                  onClick={() =>
-                    onSort({
-                      key: header.key,
-                      descending: active ? !sort.descending : Boolean(header.descendingFirst),
-                    })
-                  }
-                  className={cn(
-                    "flex h-8 items-center gap-1 rounded-sm px-1 -mx-1 transition-colors duration-150 hover:text-foreground focus-visible:outline-2",
-                    active && "text-foreground",
-                  )}
-                >
-                  {i18n._(header.label)}
-                  {active && <Arrow className="size-3" aria-hidden />}
-                </button>
-              </div>
-            );
-          })}
-        </div>
-      </div>
+  /** From the keyboard, opens the menu under the selected row as if it had been right-clicked. */
+  function openMenuAt(id: string) {
+    const element = document.getElementById(`server-${id}`);
+    if (!element) return;
+    const box = element.getBoundingClientRect();
+    element.dispatchEvent(
+      new window.MouseEvent("contextmenu", {
+        bubbles: true,
+        cancelable: true,
+        clientX: box.left + 48,
+        clientY: box.bottom,
+      }),
+    );
+  }
 
-      <div ref={scroller} role="rowgroup" className="min-h-0 flex-1 overflow-y-auto [scrollbar-gutter:stable]">
-        {loading ? (
-          <div aria-busy="true" aria-label={t`Loading servers`}>
-            {Array.from({ length: 18 }, (_, i) => (
-              <div key={i} className={cn(COLUMNS, "h-9 border-b border-border/50")}>
-                <span />
-                <Skeleton className="h-3.5" style={{ width: `${35 + ((i * 37) % 45)}%` }} />
-                <Skeleton className="h-3.5 w-16" />
-                <Skeleton className="h-3.5 w-6" />
-                <Skeleton className="h-3.5 w-20" />
-                <Skeleton className={cn("h-3.5 w-12", TIME_COLUMN)} />
-                <span />
+  /** Right-clicking a row selects it and opens the menu for it. Anywhere else, such as the headers, opens nothing. */
+  function onContextMenu(event: MouseEvent<HTMLDivElement>) {
+    const element = event.target instanceof Element ? event.target.closest<HTMLElement>("[data-server-id]") : null;
+    const row = element && rows.find((r) => r.id === element.dataset.serverId);
+    if (!row) {
+      event.preventDefault();
+      return;
+    }
+    setMenuRow(row);
+    onSelect(row.id);
+  }
+
+  async function copyAddress(row: ServerRow) {
+    try {
+      await navigator.clipboard.writeText(joinAddress(row));
+      toast.success(t`Address copied`);
+    } catch {
+      toast.error(t`Couldn't copy the address`);
+    }
+  }
+
+  const menuFavourite = menuRow ? favourites.has(menuRow.id) : false;
+
+  return (
+    <ContextMenu onOpenChange={(open) => !open && setMenuRow(null)}>
+      {/* A grid, so the selected row is announced. It takes focus as a whole and arrow keys move the selection. */}
+      <ContextMenuTrigger asChild onContextMenu={onContextMenu}>
+        <div
+          role="grid"
+          aria-label={t`Servers`}
+          aria-readonly
+          aria-rowcount={rows.length + 1}
+          tabIndex={0}
+          aria-activedescendant={selectedId ? `server-${selectedId}` : undefined}
+          onKeyDown={onKeyDown}
+          className="flex min-h-0 flex-1 flex-col focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-inset"
+        >
+          <div role="rowgroup" className="overflow-y-hidden border-b bg-card/60 [scrollbar-gutter:stable]">
+            <div role="row" className={cn(COLUMNS, "h-8 text-xs font-medium text-muted-foreground")}>
+              <div role="columnheader" aria-label={t`Favourite`} />
+              {HEADERS.map((header) => {
+                const active = sort.key === header.key;
+                const Arrow = sort.descending ? ArrowDown : ArrowUp;
+                return (
+                  <div
+                    key={header.key}
+                    role="columnheader"
+                    aria-sort={active ? (sort.descending ? "descending" : "ascending") : "none"}
+                    className={cn("flex", header.numeric && "justify-end pr-3", header.key === "time" && TIME_COLUMN)}
+                  >
+                    <button
+                      type="button"
+                      title={header.hint && i18n._(header.hint)}
+                      onClick={() =>
+                        onSort({
+                          key: header.key,
+                          descending: active ? !sort.descending : Boolean(header.descendingFirst),
+                        })
+                      }
+                      className={cn(
+                        "flex h-8 items-center gap-1 rounded-sm px-1 -mx-1 transition-colors duration-150 hover:text-foreground focus-visible:outline-2",
+                        active && "text-foreground",
+                      )}
+                    >
+                      {i18n._(header.label)}
+                      {active && <Arrow className="size-3" aria-hidden />}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div ref={scroller} role="rowgroup" className="min-h-0 flex-1 overflow-y-auto [scrollbar-gutter:stable]">
+            {loading ? (
+              <div aria-busy="true" aria-label={t`Loading servers`}>
+                {Array.from({ length: 18 }, (_, i) => (
+                  <div key={i} className={cn(COLUMNS, "h-9 border-b border-border/50")}>
+                    <span />
+                    <Skeleton className="h-3.5" style={{ width: `${35 + ((i * 37) % 45)}%` }} />
+                    <Skeleton className="h-3.5 w-16" />
+                    <Skeleton className="h-3.5 w-6" />
+                    <Skeleton className="h-3.5 w-20" />
+                    <Skeleton className={cn("h-3.5 w-12", TIME_COLUMN)} />
+                    <span />
+                  </div>
+                ))}
               </div>
-            ))}
+            ) : rows.length === 0 ? (
+              empty
+            ) : (
+              <div className="relative w-full" style={{ height: virtualizer.getTotalSize() }}>
+                {items.map((item) => {
+                  const row = rows[item.index];
+                  return (
+                    <Row
+                      key={row.id}
+                      row={row}
+                      index={item.index}
+                      top={item.start}
+                      selected={row.id === selectedId}
+                      favourite={favourites.has(row.id)}
+                      unlisted={unlisted.has(row.id)}
+                      ping={pings.get(row.id)}
+                      modMatch={search ? matchedMod(row, search, modNames) : null}
+                      gameVersion={gameVersion}
+                      onSelect={onSelect}
+                      onPlay={onPlay}
+                      onToggleFavourite={onToggleFavourite}
+                    />
+                  );
+                })}
+              </div>
+            )}
           </div>
-        ) : rows.length === 0 ? (
-          empty
-        ) : (
-          <div className="relative w-full" style={{ height: virtualizer.getTotalSize() }}>
-            {items.map((item) => {
-              const row = rows[item.index];
-              return (
-                <Row
-                  key={row.id}
-                  row={row}
-                  index={item.index}
-                  top={item.start}
-                  selected={row.id === selectedId}
-                  favourite={favourites.has(row.id)}
-                  unlisted={unlisted.has(row.id)}
-                  ping={pings.get(row.id)}
-                  modMatch={search ? matchedMod(row, search, modNames) : null}
-                  gameVersion={gameVersion}
-                  onSelect={onSelect}
-                  onPlay={onPlay}
-                  onToggleFavourite={onToggleFavourite}
-                />
-              );
-            })}
-          </div>
-        )}
-      </div>
-    </div>
+        </div>
+      </ContextMenuTrigger>
+      {menuRow && (
+        <ContextMenuContent aria-label={menuRow.name} className="min-w-48">
+          <ContextMenuItem onSelect={() => onPlay(menuRow)}>
+            <Play aria-hidden />
+            <Trans>Play</Trans>
+          </ContextMenuItem>
+          <ContextMenuItem disabled={menuRow.modCount === 0} onSelect={() => onLoadMods(menuRow)}>
+            <Download aria-hidden />
+            <Trans>Load mods</Trans>
+          </ContextMenuItem>
+          <ContextMenuSeparator />
+          <ContextMenuItem onSelect={() => onToggleFavourite(menuRow.id)}>
+            {menuFavourite ? <StarOff aria-hidden /> : <Star aria-hidden />}
+            {menuFavourite ? <Trans>Remove from favourites</Trans> : <Trans>Add to favourites</Trans>}
+          </ContextMenuItem>
+          <ContextMenuItem onSelect={() => void copyAddress(menuRow)}>
+            <Copy aria-hidden />
+            <Trans>Copy address</Trans>
+          </ContextMenuItem>
+        </ContextMenuContent>
+      )}
+    </ContextMenu>
   );
 }
 
@@ -278,6 +374,7 @@ const Row = memo(function Row({
   return (
     <div
       id={`server-${row.id}`}
+      data-server-id={row.id}
       role="row"
       aria-rowindex={index + 2}
       aria-selected={selected}
