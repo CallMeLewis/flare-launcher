@@ -24,7 +24,7 @@ export function useServers(onRefreshFailed: (message: string) => void): ServersS
   const loaded = useRef(false);
 
   const refresh = useCallback(() => {
-    // Coalesce overlapping calls: the list is a ~17 MB download.
+    // Coalesce overlapping calls: each one downloads the list, or at least its player counts.
     inFlight.current ??= (async () => {
       setRefreshing(true);
       try {

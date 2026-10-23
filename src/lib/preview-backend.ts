@@ -3,7 +3,16 @@
 
 import type { BackendText, Mod, Problem, Report, ServerList, ServerRow, SubscribedMod } from "./types";
 
+const OWN_LIST_URL = "https://servers.darkzone.dev/v1/servers";
+const OWN_LIVE_URL = "https://servers.darkzone.dev/v1/live";
 const LIST_URL = "https://dayzsalauncher.com/api/v1/launcher/servers/dayz";
+
+type OwnList = {
+  format: number;
+  servers: Omit<ServerRow, "id" | "country" | "modCount">[];
+  modNames: string[];
+  modIds: number[];
+};
 
 type ApiServer = {
   endpoint: { ip: string; port: number };
@@ -25,6 +34,55 @@ type ApiServer = {
 const mods = new Map<string, Mod[]>();
 
 export async function fetchServers(): Promise<ServerList> {
+  try {
+    return await fetchOwnServers();
+  } catch (e) {
+    console.warn("Using the fallback list:", e);
+    return fetchFallbackServers();
+  }
+}
+
+async function fetchOwnServers(): Promise<ServerList> {
+  const [list, live] = await Promise.all([
+    fetch(OWN_LIST_URL).then((r) => (r.ok ? (r.json() as Promise<OwnList>) : Promise.reject(new Error(`${r.status}`)))),
+    fetch(OWN_LIVE_URL)
+      .then((r) => (r.ok ? (r.json() as Promise<{ players: Record<string, number> }>) : null))
+      .catch(() => null),
+  ]);
+  if (list.format !== 1) throw new Error(`format ${list.format}`);
+  mods.clear();
+  const rows = list.servers.map((server): ServerRow => {
+    const id = `${server.ip}:${server.queryPort}`;
+    mods.set(
+      id,
+      server.mods.map((i) => ({ name: list.modNames[i], steamWorkshopId: list.modIds[i] })),
+    );
+    return {
+      id,
+      ip: server.ip,
+      queryPort: server.queryPort,
+      gamePort: server.gamePort,
+      name: server.name.trim(),
+      map: server.map.trim().toLowerCase(),
+      players: live?.players[id] ?? server.players,
+      maxPlayers: server.maxPlayers,
+      password: server.password,
+      firstPersonOnly: server.firstPersonOnly,
+      official: server.official,
+      battlEye: server.battlEye,
+      version: server.version,
+      time: server.time,
+      timeAcceleration: server.timeAcceleration,
+      // Only the backend has the table of countries.
+      country: null,
+      modCount: server.mods.length,
+      mods: server.mods,
+    };
+  });
+  return { servers: rows, modNames: list.modNames, modIds: list.modIds };
+}
+
+async function fetchFallbackServers(): Promise<ServerList> {
   const response = await fetch(LIST_URL);
   if (!response.ok) throw new Error(`Could not reach the server list (${response.status}).`);
   const body = (await response.json()) as { result: ApiServer[] };

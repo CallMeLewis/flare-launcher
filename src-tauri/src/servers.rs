@@ -1,7 +1,10 @@
 use std::collections::HashMap;
 use std::net::{IpAddr, SocketAddr};
 use std::sync::RwLock;
+use std::time::{Duration, SystemTime};
 
+use reqwest::StatusCode;
+use reqwest::header::{ETAG, IF_NONE_MATCH};
 use serde::{Deserialize, Serialize};
 use tauri::State;
 
@@ -10,6 +13,15 @@ use crate::error::Result;
 use crate::query::Info;
 use crate::text;
 
+/// The server list, with each server's settings and mods.
+const OWN_LIST_URL: &str = "https://servers.darkzone.dev/v1/servers";
+/// Just the player counts, replaced every minute, so a refresh downloads a small file when the list hasn't changed.
+const OWN_LIVE_URL: &str = "https://servers.darkzone.dev/v1/live";
+/// The list's format. A list in a newer one is left for the fallback rather than misread.
+const OWN_FORMAT: u32 = 1;
+/// Older than this, the list has stopped being updated, and the fallback is fresher.
+const OWN_STALE: Duration = Duration::from_secs(15 * 60);
+/// The list the launcher used before, kept as a fallback.
 const LIST_URL: &str = "https://dayzsalauncher.com/api/v1/launcher/servers/dayz";
 
 #[derive(Deserialize)]
@@ -100,6 +112,7 @@ pub struct ServerList {
   pub mod_ids: Vec<u64>,
 }
 
+#[derive(Clone)]
 pub struct StoredServer {
   pub row: ServerRow,
   pub mods: Vec<Mod>,
@@ -209,9 +222,153 @@ fn parse_list(body: &[u8]) -> Result<HashMap<String, StoredServer>> {
   Ok(servers)
 }
 
+/// Downloads the fallback list.
 pub async fn download_list(http: &reqwest::Client) -> Result<HashMap<String, StoredServer>> {
   let body = http.get(LIST_URL).send().await?.error_for_status()?.bytes().await?;
   parse_list(&body)
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct OwnList {
+  format: u32,
+  generated_at: String,
+  servers: Vec<serde_json::Value>,
+  mod_names: Vec<String>,
+  mod_ids: Vec<u64>,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct OwnServer {
+  ip: String,
+  query_port: u16,
+  game_port: u16,
+  name: String,
+  map: String,
+  players: u32,
+  max_players: u32,
+  password: bool,
+  first_person_only: bool,
+  official: bool,
+  battl_eye: bool,
+  version: String,
+  time: String,
+  time_acceleration: Option<f32>,
+  /// Positions in `mod_names` and `mod_ids`.
+  mods: Vec<u32>,
+}
+
+#[derive(Deserialize)]
+struct OwnLive {
+  format: u32,
+  /// Players on each server, by `ip:queryPort`.
+  players: HashMap<String, u32>,
+}
+
+/// The list as last downloaded, kept so a refresh can ask whether it changed rather than download it again.
+pub struct OwnListCache {
+  etag: String,
+  servers: HashMap<String, StoredServer>,
+}
+
+#[derive(Default)]
+pub struct OwnCache(pub tokio::sync::Mutex<Option<OwnListCache>>);
+
+/// Parses the list, skipping entries that don't match the expected shape as [`parse_list`] does, and turning it down
+/// when it's in a newer format or has stopped being updated. Errors here aren't shown: the fallback is used instead.
+fn parse_own_list(body: &[u8], now: SystemTime) -> std::result::Result<HashMap<String, StoredServer>, String> {
+  let list: OwnList = serde_json::from_slice(body).map_err(|e| e.to_string())?;
+  if list.format != OWN_FORMAT {
+    return Err(format!("format {} isn't one this version reads", list.format));
+  }
+  let generated = humantime::parse_rfc3339(&list.generated_at).map_err(|e| e.to_string())?;
+  if now.duration_since(generated).unwrap_or_default() > OWN_STALE {
+    return Err(format!("it was last updated at {}", list.generated_at));
+  }
+  let mut servers = HashMap::with_capacity(list.servers.len());
+  for value in list.servers {
+    let Ok(own) = serde_json::from_value::<OwnServer>(value) else { continue };
+    let Ok(ip) = own.ip.parse::<IpAddr>() else { continue };
+    let mods: Vec<Mod> = own
+      .mods
+      .iter()
+      .filter_map(|&i| {
+        let i = i as usize;
+        Some(Mod { name: list.mod_names.get(i)?.clone(), steam_workshop_id: *list.mod_ids.get(i)? })
+      })
+      .collect();
+    let row = ServerRow {
+      id: format!("{}:{}", own.ip, own.query_port),
+      ip: own.ip,
+      query_port: own.query_port,
+      game_port: own.game_port,
+      name: own.name.trim().to_string(),
+      map: own.map.trim().to_lowercase(),
+      players: own.players,
+      max_players: own.max_players,
+      password: own.password,
+      first_person_only: own.first_person_only,
+      official: own.official,
+      battl_eye: own.battl_eye,
+      version: own.version,
+      time: own.time,
+      time_acceleration: own.time_acceleration,
+      country: country_of(ip),
+      mod_count: mods.len(),
+      mods: Vec::new(),
+    };
+    servers.entry(row.id.clone()).or_insert(StoredServer { row, mods, listed: true });
+  }
+  Ok(servers)
+}
+
+/// Updates the player counts from the live file. Servers it doesn't mention keep the count the list gave.
+fn apply_live(servers: &mut HashMap<String, StoredServer>, body: &[u8]) -> std::result::Result<(), String> {
+  let live: OwnLive = serde_json::from_slice(body).map_err(|e| e.to_string())?;
+  if live.format != OWN_FORMAT {
+    return Err(format!("format {} isn't one this version reads", live.format));
+  }
+  for (id, players) in live.players {
+    if let Some(server) = servers.get_mut(&id) {
+      server.row.players = players;
+    }
+  }
+  Ok(())
+}
+
+/// Downloads the list, or reuses the last one when it hasn't changed, and brings its player counts up to date.
+pub async fn own_list(
+  http: &reqwest::Client,
+  cache: &OwnCache,
+) -> std::result::Result<HashMap<String, StoredServer>, String> {
+  let mut cache = cache.0.lock().await;
+  let mut request = http.get(OWN_LIST_URL);
+  if let Some(cached) = cache.as_ref() {
+    request = request.header(IF_NONE_MATCH, &cached.etag);
+  }
+  let response = request.send().await.and_then(|r| r.error_for_status()).map_err(|e| e.to_string())?;
+  let mut servers = match (response.status(), cache.as_ref()) {
+    (StatusCode::NOT_MODIFIED, Some(cached)) => cached.servers.clone(),
+    _ => {
+      let etag = response.headers().get(ETAG).and_then(|v| v.to_str().ok()).unwrap_or_default().to_string();
+      let body = response.bytes().await.map_err(|e| e.to_string())?;
+      let servers = parse_own_list(&body, SystemTime::now())?;
+      *cache = Some(OwnListCache { etag, servers: servers.clone() });
+      servers
+    }
+  };
+  // The list itself is up to five minutes old; without the live counts it's still worth showing.
+  let live = async { http.get(OWN_LIVE_URL).send().await?.error_for_status()?.bytes().await };
+  match live.await {
+    Ok(body) => {
+      if let Err(e) = apply_live(&mut servers, &body) {
+        log::warn!("server list: couldn't read the player counts: {e}");
+      }
+    }
+    Err(e) => log::warn!("server list: couldn't download the player counts: {e}"),
+  }
+  Ok(servers)
 }
 
 /// Builds the browser list, giving each distinct mod one entry in a shared
@@ -242,8 +399,18 @@ fn build_list(servers: &HashMap<String, StoredServer>) -> ServerList {
 }
 
 #[tauri::command]
-pub async fn fetch_servers(http: State<'_, reqwest::Client>, cache: State<'_, ServerCache>) -> Result<ServerList> {
-  let servers = download_list(&http).await?;
+pub async fn fetch_servers(
+  http: State<'_, reqwest::Client>,
+  own: State<'_, OwnCache>,
+  cache: State<'_, ServerCache>,
+) -> Result<ServerList> {
+  let servers = match own_list(&http, &own).await {
+    Ok(servers) => servers,
+    Err(e) => {
+      log::warn!("server list: using the fallback: {e}");
+      download_list(&http).await?
+    }
+  };
   let list = build_list(&servers);
   let mut cache = cache.0.write().unwrap();
   // Servers asked directly stay, unless the list now has them too.
@@ -293,6 +460,51 @@ mod tests {
     assert!(bare.row.official);
     assert_eq!(bare.row.time_acceleration, None);
     assert_eq!(alpha.row.country.as_deref(), Some("AU"));
+  }
+
+  fn own_list(generated_at: &str) -> String {
+    format!(
+      r#"{{"format":1,"generatedAt":"{generated_at}","modNames":["CF","Dabs Framework"],"modIds":[1559212036,2545327648],
+      "servers":[
+        {{"ip":"1.2.3.4","queryPort":2303,"gamePort":2302,"name":" Alpha ","map":"ChernarusPlus","players":10,
+         "maxPlayers":60,"password":false,"firstPersonOnly":true,"official":false,"battlEye":true,"environment":"w",
+         "version":"1.30.164200","time":"12:30","timeAcceleration":6.0,"mods":[1,0]}},
+        {{"ip":"not an ip","queryPort":2303,"gamePort":2302,"name":"Bad","map":"enoch","players":0,"maxPlayers":10,
+         "password":false,"firstPersonOnly":false,"official":false,"battlEye":true,"version":"1","time":"",
+         "timeAcceleration":null,"mods":[]}},
+        {{"ip":"5.6.7.8","name":"Missing fields"}}
+      ]}}"#
+    )
+  }
+
+  #[test]
+  fn reads_the_list() {
+    let now = humantime::parse_rfc3339("2026-10-24T00:05:00Z").unwrap();
+    let servers = parse_own_list(own_list("2026-10-24T00:00:00Z").as_bytes(), now).unwrap();
+    assert_eq!(servers.len(), 1);
+    let alpha = &servers["1.2.3.4:2303"];
+    assert_eq!((alpha.row.name.as_str(), alpha.row.map.as_str()), ("Alpha", "chernarusplus"));
+    assert_eq!((alpha.row.game_port, alpha.row.mod_count, alpha.row.time_acceleration), (2302, 2, Some(6.0)));
+    assert_eq!(alpha.row.country.as_deref(), Some("AU"));
+    assert_eq!(alpha.mods[0], Mod { name: "Dabs Framework".into(), steam_workshop_id: 2545327648 });
+    assert!(alpha.listed);
+  }
+
+  #[test]
+  fn turns_down_the_list_when_stale_or_in_a_newer_format() {
+    let now = humantime::parse_rfc3339("2026-10-24T01:00:00Z").unwrap();
+    assert!(parse_own_list(own_list("2026-10-24T00:00:00Z").as_bytes(), now).is_err(), "an hour old");
+    let newer = own_list("2026-10-24T01:00:00Z").replacen(r#""format":1"#, r#""format":2"#, 1);
+    assert!(parse_own_list(newer.as_bytes(), now).is_err());
+  }
+
+  #[test]
+  fn brings_player_counts_up_to_date_from_the_live_file() {
+    let now = humantime::parse_rfc3339("2026-10-24T00:00:00Z").unwrap();
+    let mut servers = parse_own_list(own_list("2026-10-24T00:00:00Z").as_bytes(), now).unwrap();
+    apply_live(&mut servers, br#"{"format":1,"generatedAt":"x","players":{"1.2.3.4:2303":42,"9.9.9.9:1":3}}"#).unwrap();
+    assert_eq!(servers["1.2.3.4:2303"].row.players, 42);
+    assert!(apply_live(&mut servers, br#"{"format":2,"players":{}}"#).is_err());
   }
 
   #[test]

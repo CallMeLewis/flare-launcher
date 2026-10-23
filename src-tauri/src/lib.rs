@@ -94,6 +94,7 @@ pub fn run() {
     )
     .manage(http)
     .manage(servers::ServerCache::default())
+    .manage(servers::OwnCache::default())
     .manage(Arc::new(workshop::Downloads::default()))
     .manage(links::PendingLink::default())
     .invoke_handler(tauri::generate_handler![
@@ -170,6 +171,17 @@ mod live_tests {
   //! Checks against the real server list and Workshop. Run with `cargo test -- --ignored`.
 
   use super::*;
+
+  #[tokio::test]
+  #[ignore = "needs network access"]
+  async fn downloads_the_list_then_asks_whether_it_changed() {
+    let http = reqwest::Client::builder().user_agent("FlareLauncher/test").build().unwrap();
+    let cache = servers::OwnCache::default();
+    let first = servers::own_list(&http, &cache).await.unwrap();
+    assert!(first.len() > 1000, "only {} servers", first.len());
+    let again = servers::own_list(&http, &cache).await.unwrap();
+    assert!(again.len() >= first.len() / 2, "the second fetch lost servers");
+  }
 
   #[tokio::test]
   #[ignore = "needs network access"]
