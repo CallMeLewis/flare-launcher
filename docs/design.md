@@ -14,15 +14,15 @@ Light is the `:root` set and dark the `.dark` set; the class goes on `<html>`. L
 
 | Role | Dark | Light | Use |
 |---|---|---|---|
-| background | `#0B1120` | `#FFFFFF` | App background, table |
-| card | `#0F1829` | `#F5F7FA` | Sidebar, detail panel |
-| popover | `#131C30` | `#FFFFFF` | Menus, dialogs, toasts |
-| muted / accent | `#18223A` | `#EEF2F6` | Hover surfaces |
-| border | `#1F2A40` | `#DFE5EC` | Dividers |
-| input | `#56677F` | `#8794A8` | Field edges: inputs, selects, checkboxes, outline buttons |
-| control | `#334155` | `#CBD5E1` | Control fills: a switch that is off, the chosen segment |
-| foreground | `#F1F5F9` | `#0F172A` | Primary text |
-| muted-foreground | `#9AA8BD` | `#475569` | Secondary text |
+| background | `#0A1B2E` | `#FFFFFF` | App background, table |
+| card | `#0E2238` | `#F2F6FB` | Sidebar, detail panel |
+| popover | `#112A46` | `#FFFFFF` | Menus, dialogs, toasts |
+| muted / accent | `#16334F` | `#E1E8F0` | Hover surfaces |
+| border | `#162F49` | `#D3DDE9` | Dividers |
+| input | `#557392` | `#7A8CA6` | Field edges: inputs, selects, checkboxes, outline buttons |
+| control | `#1B3B5A` | `#C4D2E1` | Control fills: a switch that is off, the chosen segment |
+| foreground | `#E1E8F0` | `#0A1B2E` | Primary text |
+| muted-foreground | `#A1B2C4` | `#34506D` | Secondary text |
 | primary | `#22C55E` | `#15803D` | Play button, selection, focus ring |
 | success | `#4ADE80` | `#166534` | Installed, good ping |
 | warning | `#FBBF24` | `#92400E` | Full server, missing mod, favourite, fair ping |
@@ -32,8 +32,8 @@ Green means "good to go" and is reserved for that. Colour never carries meaning 
 
 ## Typography
 
-- Fira Sans 400/500/600 for interface text. Base size 13px in the table, 14px elsewhere, 11–12px for labels.
-- Fira Code for data: player counts, ping, time, addresses, versions. Apply the `data` utility, which also sets tabular figures and turns ligatures off.
+- IBM Plex Sans 400/500/600 for interface text. Base size 13px in the table, 14px elsewhere, 11–12px for labels.
+- JetBrains Mono for data: player counts, ping, time, addresses, versions. Apply the `data` utility, which also sets tabular figures and turns ligatures off.
 - Fonts are bundled through `@fontsource`. The app makes no font requests.
 
 ## Density

@@ -2,28 +2,4 @@
 @import "@flare/ui/theme.css";
 
 /* The colours, fonts and base styles are the Flare apps' shared ones (@flare/ui, in the flare-common repo beside this
-   one), light by default and dark under .dark. See docs/design.md. These are the launcher's own: the server table's
-   rows. */
-
-:root {
-  --row-stripe: #f8fafc;
-  --row-hover: #eff3f7;
-  --row-selected: #dcf7e6;
-}
-
-.dark {
-  --row-stripe: #0d1425;
-  --row-hover: #141d33;
-  --row-selected: #0f2a20;
-}
-
-@theme inline {
-  --color-row-stripe: var(--row-stripe);
-  --color-row-hover: var(--row-hover);
-  --color-row-selected: var(--row-selected);
-}
-
-/* Toasts set their own font; keep them on the interface font. */
-[data-sonner-toaster] {
-  font-family: var(--font-sans);
-}
+   one), light by default and dark under .dark, including the server table's row colours. See docs/design.md. */
