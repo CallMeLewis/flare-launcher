@@ -473,7 +473,10 @@ export function App() {
       const count = ids.length;
       setModJob({ kind, progress: ids.map((id) => ({ id, status: "queued" as const, downloaded: 0, total: 0 })) });
       try {
-        const finished = await backend.downloadMods(ids, (progress) => setModJob({ kind, progress }));
+        // Progress arriving after the job ended is dropped, so it can't bring the finished job back.
+        const finished = await backend.downloadMods(ids, (progress) =>
+          setModJob((current) => current && { kind, progress }),
+        );
         if (kind === "verify") {
           if (finished) {
             toast.success(t`Mods verified`, {
