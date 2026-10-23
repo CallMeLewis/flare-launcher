@@ -691,7 +691,7 @@ function ModRow({
   return (
     <li className="group flex h-8 items-center gap-2 rounded-md px-2 text-[13px] hover:bg-accent/50">
       {status === "installed" ? (
-        <CircleCheck className="size-3.5 shrink-0 text-success" aria-label={t`Installed`} />
+        <CircleCheck className="size-3.5 shrink-0 text-muted-foreground" aria-label={t`Installed`} />
       ) : status === "differs" ? (
         <span
           className="shrink-0"

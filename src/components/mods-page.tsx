@@ -755,7 +755,7 @@ function ModStatus({ mod, progress }: { mod: SubscribedMod; progress: ModProgres
       case "failed":
         return line(<CircleX className="size-3.5 shrink-0" aria-hidden />, t`Download failed`, "text-danger");
       case "installed":
-        return line(<CircleCheck className="size-3.5 shrink-0" aria-hidden />, t`Up to date`, "text-success");
+        return line(<CircleCheck className="size-3.5 shrink-0" aria-hidden />, t`Up to date`, "text-muted-foreground");
     }
   }
 
@@ -776,8 +776,9 @@ function ModStatus({ mod, progress }: { mod: SubscribedMod; progress: ModProgres
         "text-muted-foreground",
         t`It was removed from the Workshop or made private. Your copy still works, but it won't get updates.`,
       );
+    // The usual state stays quiet, so colour marks only the mods that need something doing.
     case "current":
-      return line(<CircleCheck className="size-3.5 shrink-0" aria-hidden />, t`Up to date`, "text-success");
+      return line(<CircleCheck className="size-3.5 shrink-0" aria-hidden />, t`Up to date`, "text-muted-foreground");
   }
 }
 
