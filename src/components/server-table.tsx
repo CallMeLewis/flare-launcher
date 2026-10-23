@@ -421,7 +421,7 @@ const Row = memo(function Row({
       </div>
 
       <div role="gridcell" className="flex min-w-0 items-center gap-2 pr-4">
-        <span className="truncate font-medium" title={row.name}>
+        <span className="truncate" title={row.name}>
           {row.name}
         </span>
         {versionNote && (

@@ -659,7 +659,7 @@ const ModRow = memo(function ModRow({
       </div>
 
       <div role="gridcell" className="flex min-w-0 items-center gap-2 pr-4">
-        <span className={cn("truncate font-medium", mod.name === null && "text-muted-foreground")} title={name}>
+        <span className={cn("truncate", mod.name === null && "text-muted-foreground")} title={name}>
           {name}
         </span>
       </div>
