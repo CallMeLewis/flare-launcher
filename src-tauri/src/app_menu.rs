@@ -27,7 +27,8 @@ pub fn app_menu_status() -> AppMenu {
 /// Adds the launcher to the app menu, and returns whether it is reopening. If the file had to move, the launcher
 /// reopens from its new place and this copy closes: its update check would otherwise keep writing updates to where the
 /// file used to be.
-#[tauri::command]
+// Async as it can copy the whole AppImage to another disk.
+#[tauri::command(async)]
 pub fn add_to_app_menu(app: AppHandle) -> Result<bool> {
   imp::add(&app)
 }

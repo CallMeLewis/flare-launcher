@@ -362,13 +362,15 @@ pub fn locate(custom_dayz_dir: Option<&str>) -> Option<Install> {
   steam_roots().iter().find_map(|root| find_dayz(root))
 }
 
-#[tauri::command]
+// Commands marked async run off the window's thread: finding DayZ reads the registry and Steam's files, which can
+// take a moment on a disk that is spinning up.
+#[tauri::command(async)]
 pub fn detect_install(dayz_dir: Option<String>) -> Option<Install> {
   locate(dayz_dir.as_deref())
 }
 
 /// How many Workshop mods for DayZ are downloaded on this computer.
-#[tauri::command]
+#[tauri::command(async)]
 pub fn downloaded_mod_count(dayz_dir: Option<String>) -> Option<usize> {
   let install = locate(dayz_dir.as_deref())?;
   let entries = std::fs::read_dir(&install.workshop_dir).ok()?;
@@ -383,7 +385,7 @@ pub enum Folder {
 }
 
 /// Opens the DayZ or Workshop folder in the file manager.
-#[tauri::command]
+#[tauri::command(async)]
 pub fn open_folder(app: tauri::AppHandle, dayz_dir: Option<String>, folder: Folder) -> crate::error::Result<()> {
   let install =
     locate(dayz_dir.as_deref()).ok_or_else(|| crate::text!("DayZ wasn't found. Set the DayZ folder in Settings."))?;

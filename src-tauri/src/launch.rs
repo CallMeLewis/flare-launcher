@@ -129,7 +129,8 @@ fn game_command(install: &Install, args: &[String]) -> Command {
   command
 }
 
-#[tauri::command]
+// Async so linking the mods and starting the game happen off the window's thread.
+#[tauri::command(async)]
 pub fn launch(cache: State<'_, ServerCache>, request: LaunchRequest) -> Result<()> {
   let (ip, game_port, mod_ids) = {
     let servers = cache.0.read().unwrap();
@@ -191,15 +192,19 @@ pub(crate) fn game_running(system: &mut System) -> bool {
 /// Waits for the game to start, up to `timeout_secs`. Returns whether it did.
 #[tauri::command]
 pub async fn wait_for_game(timeout_secs: u64) -> bool {
-  let deadline = Instant::now() + Duration::from_secs(timeout_secs);
-  let mut system = System::new();
-  while Instant::now() < deadline {
-    if game_running(&mut system) {
-      return true;
+  // Listing every process with its command line takes a while, so it's done on a thread of its own.
+  let waited = tauri::async_runtime::spawn_blocking(move || {
+    let deadline = Instant::now() + Duration::from_secs(timeout_secs);
+    let mut system = System::new();
+    while Instant::now() < deadline {
+      if game_running(&mut system) {
+        return true;
+      }
+      std::thread::sleep(GAME_POLL_INTERVAL);
     }
-    tokio::time::sleep(GAME_POLL_INTERVAL).await;
-  }
-  false
+    false
+  });
+  waited.await.unwrap_or(false)
 }
 
 /// The `vm.max_map_count` DayZ needs on Linux. Below it, the game can freeze in the main menu or soon after joining.
