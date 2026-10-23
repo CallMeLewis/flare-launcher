@@ -1280,8 +1280,25 @@ msgid "Run these commands in a terminal. The first keeps the new limit after a r
 msgstr "Ejecuta estos comandos en un terminal. El primero mantiene el nuevo límite tras reiniciar y el segundo lo aplica al instante."
 
 #: src/components/server-table.tsx
+msgid "Runs a newer version of DayZ ({version}) than this computer ({gameVersion})"
+msgstr "Ejecuta una versión de DayZ ({version}) más reciente que la de este equipo ({gameVersion})"
+
+#: src/components/server-table.tsx
+msgid "Runs an older version of DayZ ({version}) than this computer ({gameVersion})"
+msgstr "Ejecuta una versión de DayZ ({version}) más antigua que la de este equipo ({gameVersion})"
+
+#: src/components/server-table.tsx
 msgid "Runs the mod {modMatch}"
 msgstr "Usa el mod {modMatch}"
+
+#: src/components/filter-menu.tsx
+#: src/lib/filter.ts
+msgid "Same as mine"
+msgstr "Igual que la mía"
+
+#: src/components/filter-menu.tsx
+msgid "Same as mine <0>({gameVersion})</0>"
+msgstr "Igual que la mía <0>({gameVersion})</0>"
 
 #: src/App.tsx
 msgid "Search again"
@@ -1764,6 +1781,14 @@ msgstr "Este servidor no está ahora mismo en la lista de servidores, así que p
 #: src/App.tsx
 msgid "This server needs a password"
 msgstr "Este servidor necesita contraseña"
+
+#: src/components/server-detail.tsx
+msgid "This server runs a newer version of DayZ ({serverVersion}) than this computer ({gameVersion}). Update DayZ in Steam, then join."
+msgstr "Este servidor usa una versión de DayZ ({serverVersion}) más reciente que la de este ordenador ({gameVersion}). Actualiza DayZ en Steam, luego únete."
+
+#: src/components/server-detail.tsx
+msgid "This server runs an older version of DayZ ({serverVersion}) than this computer ({gameVersion}), usually because it hasn't updated yet. It's likely to turn you away until it does."
+msgstr "Este servidor usa una versión de DayZ ({serverVersion}) más antigua que la de este ordenador ({gameVersion}), normalmente porque aún no se ha actualizado. Es probable que rechace tu conexión hasta que lo haga."
 
 #: src/components/server-table.tsx
 #: src/lib/filter.ts

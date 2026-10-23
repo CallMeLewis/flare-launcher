@@ -20,6 +20,8 @@ type Props = {
   filtersEnabled: boolean;
   maps: Option[];
   versions: Option[];
+  /** The DayZ version on this computer, when known. */
+  gameVersion: string | null;
   /** Countries in the list by code, A to Z by name. */
   countries: Option[];
   /** Mods in the list, busiest first. */
@@ -42,6 +44,7 @@ export function ServerToolbar({
   filtersEnabled,
   maps,
   versions,
+  gameVersion,
   countries,
   mods,
   shown,
@@ -119,6 +122,7 @@ export function ServerToolbar({
                   onChange={set}
                   maps={maps}
                   versions={versions}
+                  gameVersion={gameVersion}
                   countries={countries}
                   mods={mods}
                   shown={shown}

@@ -24,7 +24,7 @@ import { toast } from "sonner";
 import { CountryFlag } from "@/components/country-flag";
 import { MapCountDialog } from "@/components/map-count-dialog";
 import { PingValue } from "@/components/server-table";
-import { isNight, untilDayChange } from "@/lib/filter";
+import { compareGameVersions, isNight, untilDayChange } from "@/lib/filter";
 import { Button } from "@flare/ui/ui/button";
 import { Checkbox } from "@flare/ui/ui/checkbox";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@flare/ui/ui/dropdown-menu";
@@ -103,6 +103,9 @@ export function ServerDetail({
   const [receivedAt, setReceivedAt] = useState(Date.now);
   const [now, setNow] = useState(Date.now);
   const lowMapCount = useLowMapCount();
+  const serverVersion = server.version;
+  const gameVersion = install?.gameVersion ?? null;
+  const versionDiffers = compareGameVersions(serverVersion, gameVersion);
   const [mapCountOpen, setMapCountOpen] = useState(false);
   // Shows on the address for a moment after copying it.
   const [copied, setCopied] = useState(false);
@@ -438,6 +441,16 @@ export function ServerDetail({
             {unlisted
               ? t`This server isn't in the server list right now, so it's probably offline. It comes back once the server is up again.`
               : t`This server isn't answering, so it's probably offline or restarting. You can still try to join.`}
+          </Notice>
+        )}
+        {versionDiffers === -1 && (
+          <Notice>
+            {t`This server runs an older version of DayZ (${serverVersion}) than this computer (${gameVersion}), usually because it hasn't updated yet. It's likely to turn you away until it does.`}
+          </Notice>
+        )}
+        {versionDiffers === 1 && (
+          <Notice>
+            {t`This server runs a newer version of DayZ (${serverVersion}) than this computer (${gameVersion}). Update DayZ in Steam, then join.`}
           </Notice>
         )}
         {differingCount > 0 && !downloading && (

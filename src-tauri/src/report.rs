@@ -60,6 +60,9 @@ pub struct Report {
   /// How Steam was found, or `None` when it wasn't.
   steam: Option<String>,
   dayz_found: bool,
+  /// The DayZ version on this computer, such as `1.30.164200`.
+  #[serde(default)]
+  game_version: Option<String>,
   /// On Linux, `vm.max_map_count` when it's too low for DayZ.
   low_map_count: Option<u64>,
   log: Vec<String>,
@@ -152,7 +155,7 @@ pub async fn prepare_report(
   error: Option<Value>,
   dayz_dir: Option<String>,
 ) -> Report {
-  let install = crate::steam::detect_install(dayz_dir);
+  let install = crate::steam::locate(dayz_dir.as_deref());
   let home = std::env::home_dir();
   let scrub = |text: &str| scrub_text(text, home.as_deref());
   Report {
@@ -165,6 +168,7 @@ pub async fn prepare_report(
     system: system_name(),
     steam: crate::steam::steam_kind(install.as_ref()).map(String::from),
     dayz_found: install.is_some(),
+    game_version: install.as_ref().and_then(|install| crate::steam::game_version(&install.dayz_dir)),
     low_map_count: crate::launch::low_map_count(),
     log: recent_lines().iter().map(|line| scrub(line)).collect(),
   }

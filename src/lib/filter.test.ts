@@ -2,7 +2,9 @@ import { i18n } from "@lingui/core";
 import { describe, expect, it } from "vitest";
 import {
   DEFAULT_FILTERS,
+  MY_VERSION,
   activeFilterCount,
+  compareGameVersions,
   countryCounts,
   filterServers,
   mapCounts,
@@ -66,6 +68,27 @@ const rows = [
 const filtered = (filters: Partial<Filters>) =>
   filterServers(rows, { ...DEFAULT_FILTERS, hasPlayers: false, ...filters }).map((r) => r.name);
 
+describe("compareGameVersions", () => {
+  it("compares versions by their numbers", () => {
+    expect(compareGameVersions("1.30.164200", "1.30.164200")).toBe(0);
+    expect(compareGameVersions("1.29.163709", "1.30.164200")).toBe(-1);
+    expect(compareGameVersions("1.30.164078", "1.30.164200")).toBe(-1);
+    expect(compareGameVersions("1.31.165000", "1.30.164200")).toBe(1);
+    expect(compareGameVersions("1.100.1", "1.9.1")).toBe(1);
+  });
+
+  it("compares only the parts both versions have", () => {
+    expect(compareGameVersions("1.30", "1.30.164200")).toBe(0);
+    expect(compareGameVersions("1.29", "1.30.164200")).toBe(-1);
+  });
+
+  it("can't compare an unknown version", () => {
+    expect(compareGameVersions("", "1.30.164200")).toBeNull();
+    expect(compareGameVersions("1.30.164200", null)).toBeNull();
+    expect(compareGameVersions("1.30.beta", "1.30.164200")).toBeNull();
+  });
+});
+
 describe("filterServers", () => {
   it("hides empty servers by default", () => {
     expect(filterServers(rows, DEFAULT_FILTERS).map((r) => r.name)).not.toContain("Vanilla Livonia");
@@ -107,6 +130,12 @@ describe("filterServers", () => {
     expect(filtered({ perspective: "third" })).not.toContain("Hardcore 1PP");
     expect(filtered({ map: "Livonia" })).toEqual(["Vanilla Livonia"]);
     expect(filtered({ version: "1.28.160123" })).toEqual(["alpha namalsk"]);
+    // Same as mine knows `1.29` and `1.29.163709` as the same version, and does nothing until the version is known.
+    const mine = (gameVersion: string | null) =>
+      filterServers(rows, { ...DEFAULT_FILTERS, hasPlayers: false, version: MY_VERSION }, [], undefined, gameVersion);
+    expect(mine("1.29.163709").map((r) => r.name)).not.toContain("alpha namalsk");
+    expect(mine("1.29.163709")).toHaveLength(3);
+    expect(mine(null)).toHaveLength(4);
     expect(filtered({ mods: "vanilla" })).toEqual(["Vanilla Livonia", "Hardcore 1PP"]);
     expect(filtered({ mods: "modded" })).toEqual(["Rearmed EU4", "alpha namalsk"]);
     expect(filtered({ timeOfDay: "night" })).toEqual(["Hardcore 1PP"]);

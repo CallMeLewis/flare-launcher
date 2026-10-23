@@ -2,6 +2,8 @@
 
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
+use std::sync::Mutex;
+use std::time::SystemTime;
 
 use serde::Serialize;
 
@@ -362,11 +364,65 @@ pub fn locate(custom_dayz_dir: Option<&str>) -> Option<Install> {
   steam_roots().iter().find_map(|root| find_dayz(root))
 }
 
+/// DayZ as found on this computer, with its version.
+#[derive(Serialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct DetectedInstall {
+  #[serde(flatten)]
+  install: Install,
+  /// Such as `1.30.164200`, the form servers report theirs in. `None` when it can't be read.
+  game_version: Option<String>,
+}
+
 // Commands marked async run off the window's thread: finding DayZ reads the registry and Steam's files, which can
 // take a moment on a disk that is spinning up.
 #[tauri::command(async)]
-pub fn detect_install(dayz_dir: Option<String>) -> Option<Install> {
-  locate(dayz_dir.as_deref())
+pub fn detect_install(dayz_dir: Option<String>) -> Option<DetectedInstall> {
+  let install = locate(dayz_dir.as_deref())?;
+  let game_version = game_version(&install.dayz_dir);
+  Some(DetectedInstall { install, game_version })
+}
+
+/// The version of DayZ in a folder, such as `1.30.164200`. Read from the game's own file, as Steam only knows its build
+/// number. Kept until the file changes, so asking again after every DayZ update stays cheap.
+pub fn game_version(dayz_dir: &Path) -> Option<String> {
+  /// The file last read, its size and when it was changed, and the version in it.
+  type Read = (PathBuf, u64, Option<SystemTime>, Option<String>);
+  static LAST: Mutex<Option<Read>> = Mutex::new(None);
+  let exe = dayz_dir.join(GAME_EXE);
+  let metadata = std::fs::metadata(&exe).ok()?;
+  let (size, modified) = (metadata.len(), metadata.modified().ok());
+  let mut last = LAST.lock().unwrap_or_else(|poisoned| poisoned.into_inner());
+  if let Some((path, last_size, last_modified, version)) = last.as_ref()
+    && *path == exe
+    && *last_size == size
+    && *last_modified == modified
+  {
+    return version.clone();
+  }
+  // Read whole rather than mapped, so Steam is never kept from updating the file.
+  let version = std::fs::read(&exe).ok().and_then(|bytes| product_version(&bytes)).and_then(|v| short_version(&v));
+  if version.is_none() {
+    log::warn!("could not read the DayZ version from {}", exe.display());
+  }
+  *last = Some((exe, size, modified, version.clone()));
+  version
+}
+
+/// The ProductVersion in a program's version information, such as `1.30.164200.56`.
+fn product_version(bytes: &[u8]) -> Option<String> {
+  use pelite::pe64::{Pe, PeFile};
+  let info = PeFile::from_bytes(bytes).ok()?.resources().ok()?.version_info().ok()?;
+  let language = *info.translation().first()?;
+  info.value(language, "ProductVersion")
+}
+
+/// The first three parts of a DayZ ProductVersion, which is how servers report their version: `1.30.164200.56` gives
+/// `1.30.164200`.
+fn short_version(product_version: &str) -> Option<String> {
+  let parts: Vec<&str> = product_version.trim().split('.').take(3).collect();
+  let numbers = parts.iter().all(|part| !part.is_empty() && part.bytes().all(|b| b.is_ascii_digit()));
+  (parts.len() == 3 && numbers).then(|| parts.join("."))
 }
 
 /// How many Workshop mods for DayZ are downloaded on this computer.
@@ -508,6 +564,29 @@ fn up_to_date(installed: Option<&u64>, latest: Option<&u64>) -> bool {
 #[cfg(test)]
 mod tests {
   use super::*;
+
+  #[test]
+  fn shortens_the_game_version_to_the_servers_form() {
+    assert_eq!(short_version("1.30.164200.56").as_deref(), Some("1.30.164200"));
+    assert_eq!(short_version(" 1.29.163709 ").as_deref(), Some("1.29.163709"));
+    assert_eq!(short_version("1.30"), None);
+    assert_eq!(short_version("1.30.beta.1"), None);
+    assert_eq!(short_version(""), None);
+  }
+
+  #[test]
+  fn reads_no_version_from_a_file_that_isnt_a_program() {
+    assert_eq!(product_version(b"not a program"), None);
+  }
+
+  #[test]
+  #[ignore = "needs DayZ installed"]
+  fn reads_the_installed_game_version() {
+    let install = locate(None).expect("DayZ wasn't found");
+    let version = game_version(&install.dayz_dir).expect("no version");
+    println!("DayZ {version}");
+    assert!(short_version(&version).is_some());
+  }
 
   #[test]
   fn reads_library_paths_from_vdf() {

@@ -89,6 +89,8 @@ export type PlayJob = {
 export type Install = {
   dayzDir: string;
   workshopDir: string;
+  /** The DayZ version on this computer, such as `1.30.164200`, or `null` when it couldn't be read. */
+  gameVersion: string | null;
 };
 
 export type LaunchRequest = {
@@ -147,6 +149,7 @@ export type Report = {
   system: string;
   steam: string | null;
   dayzFound: boolean;
+  gameVersion: string | null;
   lowMapCount: number | null;
   log: string[];
 };

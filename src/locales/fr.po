@@ -1280,8 +1280,25 @@ msgid "Run these commands in a terminal. The first keeps the new limit after a r
 msgstr "Exécutez ces commandes dans un terminal. La première conserve la nouvelle limite après un redémarrage, la seconde l’applique tout de suite."
 
 #: src/components/server-table.tsx
+msgid "Runs a newer version of DayZ ({version}) than this computer ({gameVersion})"
+msgstr "Utilise une version de DayZ ({version}) plus récente que celle de cet ordinateur ({gameVersion})"
+
+#: src/components/server-table.tsx
+msgid "Runs an older version of DayZ ({version}) than this computer ({gameVersion})"
+msgstr "Utilise une version de DayZ ({version}) plus ancienne que celle de cet ordinateur ({gameVersion})"
+
+#: src/components/server-table.tsx
 msgid "Runs the mod {modMatch}"
 msgstr "Utilise le mod {modMatch}"
+
+#: src/components/filter-menu.tsx
+#: src/lib/filter.ts
+msgid "Same as mine"
+msgstr "Identique à la mienne"
+
+#: src/components/filter-menu.tsx
+msgid "Same as mine <0>({gameVersion})</0>"
+msgstr "Identique à la mienne <0>({gameVersion})</0>"
 
 #: src/App.tsx
 msgid "Search again"
@@ -1764,6 +1781,14 @@ msgstr "Ce serveur n’est pas dans la liste des serveurs pour le moment, il est
 #: src/App.tsx
 msgid "This server needs a password"
 msgstr "Ce serveur nécessite un mot de passe"
+
+#: src/components/server-detail.tsx
+msgid "This server runs a newer version of DayZ ({serverVersion}) than this computer ({gameVersion}). Update DayZ in Steam, then join."
+msgstr "Ce serveur utilise une version de DayZ ({serverVersion}) plus récente que celle de cet ordinateur ({gameVersion}). Mettez DayZ à jour dans Steam, puis rejoignez le serveur."
+
+#: src/components/server-detail.tsx
+msgid "This server runs an older version of DayZ ({serverVersion}) than this computer ({gameVersion}), usually because it hasn't updated yet. It's likely to turn you away until it does."
+msgstr "Ce serveur utilise une version de DayZ ({serverVersion}) plus ancienne que celle de cet ordinateur ({gameVersion}), généralement parce qu’il n’a pas encore été mis à jour. Il refusera probablement votre connexion tant que la mise à jour ne sera pas faite."
 
 #: src/components/server-table.tsx
 #: src/lib/filter.ts

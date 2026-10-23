@@ -37,6 +37,7 @@ if-addrs = "0.15.0"
 sysinfo = { version = "0.38.4", default-features = false, features = ["system"] }
 keyring-core = "1.0.0"
 sha1 = "0.11"
+pelite = { version = "0.10.0", default-features = false, features = ["mmap"] }
 
 [target.'cfg(target_os = "linux")'.dependencies]
 gtk = "0.18.2"

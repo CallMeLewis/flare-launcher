@@ -3,10 +3,10 @@ import type { MessageDescriptor } from "@lingui/core";
 import { msg } from "@lingui/core/macro";
 import { Trans, useLingui } from "@lingui/react/macro";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { ArrowDown, ArrowUp, Lock, Moon, Puzzle, Star, Sun } from "lucide-react";
+import { ArrowDown, ArrowUp, Lock, Moon, Puzzle, Star, Sun, TriangleAlert } from "lucide-react";
 import { Skeleton } from "@flare/ui/ui/skeleton";
 import type { PingResult, Pings } from "@/hooks/use-pings";
-import { isNight, matchedMod, type Sort, type SortKey } from "@/lib/filter";
+import { compareGameVersions, isNight, matchedMod, type Sort, type SortKey } from "@/lib/filter";
 import { CountryFlag } from "@/components/country-flag";
 import { mapName } from "@/lib/maps";
 import type { ServerRow } from "@/lib/types";
@@ -60,6 +60,8 @@ type Props = {
   /** The current search, to show which mod a server was found through. */
   search: string;
   modNames: readonly string[];
+  /** The DayZ version on this computer, to mark servers running another. */
+  gameVersion: string | null;
   empty: ReactNode;
 };
 
@@ -77,6 +79,7 @@ export function ServerTable({
   pings,
   search,
   modNames,
+  gameVersion,
   empty,
 }: Props) {
   const { t, i18n } = useLingui();
@@ -213,6 +216,7 @@ export function ServerTable({
                   unlisted={unlisted.has(row.id)}
                   ping={pings.get(row.id)}
                   modMatch={search ? matchedMod(row, search, modNames) : null}
+                  gameVersion={gameVersion}
                   onSelect={onSelect}
                   onPlay={onPlay}
                   onToggleFavourite={onToggleFavourite}
@@ -235,6 +239,7 @@ type RowProps = {
   unlisted: boolean;
   ping: PingResult | undefined;
   modMatch: string | null;
+  gameVersion: string | null;
   onSelect: (id: string) => void;
   onPlay: (row: ServerRow) => void;
   onToggleFavourite: (id: string) => void;
@@ -249,6 +254,7 @@ const Row = memo(function Row({
   unlisted,
   ping,
   modMatch,
+  gameVersion,
   onSelect,
   onPlay,
   onToggleFavourite,
@@ -260,6 +266,14 @@ const Row = memo(function Row({
   const full = row.maxPlayers > 0 && row.players >= row.maxPlayers;
   const fill = row.maxPlayers > 0 ? Math.min(row.players / row.maxPlayers, 1) : 0;
   const TimeIcon = isNight(row.time) ? Moon : Sun;
+  const version = row.version;
+  const versionDiffers = compareGameVersions(version, gameVersion);
+  const versionNote =
+    versionDiffers === -1
+      ? t`Runs an older version of DayZ (${version}) than this computer (${gameVersion})`
+      : versionDiffers === 1
+        ? t`Runs a newer version of DayZ (${version}) than this computer (${gameVersion})`
+        : null;
 
   return (
     <div
@@ -307,6 +321,11 @@ const Row = memo(function Row({
         <span className="truncate font-medium" title={row.name}>
           {row.name}
         </span>
+        {versionNote && (
+          <span className="shrink-0 text-warning" title={versionNote}>
+            <TriangleAlert className="size-3" aria-label={versionNote} />
+          </span>
+        )}
         {row.password && (
           <span className="shrink-0 text-warning" title={t`Password protected`}>
             <Lock className="size-3" aria-label={t`Password protected`} />

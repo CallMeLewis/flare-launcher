@@ -125,17 +125,24 @@ export function App() {
 
   useEffect(() => {
     let cancelled = false;
-    const timer = setTimeout(() => {
+    // Kept as it was when nothing changed, so what depends on it isn't checked again.
+    const update = (found: Install | null) =>
+      !cancelled && setInstall((current) => (JSON.stringify(current) === JSON.stringify(found) ? current : found));
+    const detect = () =>
       backend
         .detectInstall(settings.dayzDir)
-        .then((found) => !cancelled && setInstall(found))
-        .catch(() => !cancelled && setInstall(null));
-    }, 300);
+        .then(update)
+        .catch(() => update(null));
+    const timer = setTimeout(detect, 300);
+    // DayZ can update while the launcher is open, changing its version.
+    window.addEventListener("focus", detect);
     return () => {
       cancelled = true;
       clearTimeout(timer);
+      window.removeEventListener("focus", detect);
     };
   }, [settings.dayzDir]);
+  const gameVersion = install?.gameVersion ?? null;
 
   useEffect(() => {
     backend.setInterfaceScale(settings.uiScale).catch(() => {});
@@ -303,11 +310,12 @@ export function App() {
         applied,
         servers.modNames,
         getPing,
+        gameVersion,
       ),
     ];
     // filterPingVersion is a dependency so ping filters update as results arrive.
     // oxlint-disable-next-line react-hooks/exhaustive-deps
-  }, [view, inView, applied, search, favourites, servers.modNames, getPing, filterPingVersion]);
+  }, [view, inView, applied, search, favourites, servers.modNames, getPing, filterPingVersion, gameVersion]);
 
   const sortingByPing = sort.key === "ping";
   const pingVersion = sortingByPing ? pings.version : 0;
@@ -583,6 +591,7 @@ export function App() {
                     filtersEnabled={view === "all"}
                     maps={maps}
                     versions={versions}
+                    gameVersion={gameVersion}
                     countries={countries}
                     mods={mods}
                     shown={listed.length}
@@ -607,6 +616,7 @@ export function App() {
                     pings={pings}
                     search={search}
                     modNames={servers.modNames}
+                    gameVersion={gameVersion}
                     empty={
                       inView.length === 0 && view === "lan" ? (
                         <Message

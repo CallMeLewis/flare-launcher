@@ -12,7 +12,7 @@ export type Filters = {
   search: string;
   /** Map name as shown to the player, or an empty string for any map. */
   map: string;
-  /** Game version, or an empty string for any version. */
+  /** Game version, MY_VERSION for the one on this computer, or an empty string for any version. */
   version: string;
   /** Two-letter country code, or an empty string for any country. */
   country: string;
@@ -157,26 +157,51 @@ function positionsNamed(modNames: readonly string[], name: string): Set<number> 
   return found;
 }
 
+/** The Game version filter's choice for the DayZ version on this computer, whichever that is. */
+export const MY_VERSION = "mine";
+
+/**
+ * How a server's DayZ version compares with this computer's: -1 when the server's is older, 1 when it's newer, 0 when
+ * they match and null when either is unknown. Only the parts both have are compared, as some servers report just
+ * `1.29`.
+ */
+export function compareGameVersions(server: string, mine: string | null | undefined): -1 | 0 | 1 | null {
+  if (!server || !mine) return null;
+  const theirs = server.split(".");
+  const ours = mine.split(".");
+  for (let i = 0; i < Math.min(theirs.length, ours.length); i++) {
+    const a = Number(theirs[i]);
+    const b = Number(ours[i]);
+    if (!Number.isInteger(a) || !Number.isInteger(b)) return null;
+    if (a !== b) return a < b ? -1 : 1;
+  }
+  return 0;
+}
+
 /** What is known about a server's connection, for the ping filters. */
 export type Reachability = { pingMs: number | null; offline: boolean };
 
 /**
  * Every search term has to match the server's name, address or map, or the
  * name of one of its mods. A server that hasn't been pinged yet passes the
- * ping filters until it has.
+ * ping filters until it has, and one whose version is unknown passes Same as
+ * mine. `gameVersion` is the DayZ version on this computer.
  */
 export function filterServers(
   rows: ServerRow[],
   filters: Filters,
   modNames: readonly string[] = [],
   reachability: (id: string) => Reachability | undefined = () => undefined,
+  gameVersion: string | null = null,
 ): ServerRow[] {
   const terms = searchTerms(filters.search);
   const modsByTerm = terms.map((term) => modsMatching(modNames, term));
   const required = filters.requiredMods.map((name) => positionsNamed(modNames, name));
   return rows.filter((row) => {
     if (filters.map && mapName(row.map) !== filters.map) return false;
-    if (filters.version && row.version !== filters.version) return false;
+    if (filters.version === MY_VERSION) {
+      if (compareGameVersions(row.version, gameVersion) ?? 0) return false;
+    } else if (filters.version && row.version !== filters.version) return false;
     if (filters.country && row.country !== filters.country) return false;
     if (filters.serverType === "official" && !row.official) return false;
     if (filters.serverType === "community" && row.official) return false;
@@ -318,7 +343,12 @@ export function filterChips(filters: Filters, countryName: (code: string) => str
   const chips: FilterChip[] = [];
   if (filters.map) chips.push({ key: "map", prefix: msg`Map`, label: filters.map, clear: { map: "" } });
   if (filters.version)
-    chips.push({ key: "version", prefix: msg`Version`, label: filters.version, clear: { version: "" } });
+    chips.push({
+      key: "version",
+      prefix: msg`Version`,
+      label: filters.version === MY_VERSION ? msg`Same as mine` : filters.version,
+      clear: { version: "" },
+    });
   if (filters.country)
     chips.push({ key: "country", prefix: msg`Country`, label: countryName(filters.country), clear: { country: "" } });
   if (filters.serverType !== "any")

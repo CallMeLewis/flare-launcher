@@ -133,6 +133,7 @@ export async function prepareReport(problem: Problem, error: unknown): Promise<R
     system: "Linux (Ubuntu 24.04), kernel 6.8.0",
     steam: "native",
     dayzFound: true,
+    gameVersion: "1.30.164200",
     lowMapCount: null,
     log: ["WARN could not connect to Steam: Steam is not running (NoSteamClient)"],
   };

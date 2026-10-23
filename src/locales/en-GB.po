@@ -1280,8 +1280,25 @@ msgid "Run these commands in a terminal. The first keeps the new limit after a r
 msgstr "Run these commands in a terminal. The first keeps the new limit after a restart, the second applies it straight away."
 
 #: src/components/server-table.tsx
+msgid "Runs a newer version of DayZ ({version}) than this computer ({gameVersion})"
+msgstr "Runs a newer version of DayZ ({version}) than this computer ({gameVersion})"
+
+#: src/components/server-table.tsx
+msgid "Runs an older version of DayZ ({version}) than this computer ({gameVersion})"
+msgstr "Runs an older version of DayZ ({version}) than this computer ({gameVersion})"
+
+#: src/components/server-table.tsx
 msgid "Runs the mod {modMatch}"
 msgstr "Runs the mod {modMatch}"
+
+#: src/components/filter-menu.tsx
+#: src/lib/filter.ts
+msgid "Same as mine"
+msgstr "Same as mine"
+
+#: src/components/filter-menu.tsx
+msgid "Same as mine <0>({gameVersion})</0>"
+msgstr "Same as mine <0>({gameVersion})</0>"
 
 #: src/App.tsx
 msgid "Search again"
@@ -1764,6 +1781,14 @@ msgstr "This server isn't in the server list right now, so it's probably offline
 #: src/App.tsx
 msgid "This server needs a password"
 msgstr "This server needs a password"
+
+#: src/components/server-detail.tsx
+msgid "This server runs a newer version of DayZ ({serverVersion}) than this computer ({gameVersion}). Update DayZ in Steam, then join."
+msgstr "This server runs a newer version of DayZ ({serverVersion}) than this computer ({gameVersion}). Update DayZ in Steam, then join."
+
+#: src/components/server-detail.tsx
+msgid "This server runs an older version of DayZ ({serverVersion}) than this computer ({gameVersion}), usually because it hasn't updated yet. It's likely to turn you away until it does."
+msgstr "This server runs an older version of DayZ ({serverVersion}) than this computer ({gameVersion}), usually because it hasn't updated yet. It's likely to turn you away until it does."
 
 #: src/components/server-table.tsx
 #: src/lib/filter.ts

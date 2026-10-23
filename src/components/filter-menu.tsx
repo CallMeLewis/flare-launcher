@@ -9,7 +9,16 @@ import { Label } from "@flare/ui/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@flare/ui/ui/select";
 import { ToggleGroup, ToggleGroupItem } from "@flare/ui/ui/toggle-group";
 import { useActiveOption } from "@/hooks/use-active-option";
-import type { Filters, ModsFilter, Option, Perspective, ServerType, TimeOfDay } from "@/lib/filter";
+import {
+  MY_VERSION,
+  compareGameVersions,
+  type Filters,
+  type ModsFilter,
+  type Option,
+  type Perspective,
+  type ServerType,
+  type TimeOfDay,
+} from "@/lib/filter";
 import { countryName } from "@/lib/countries";
 import { cn } from "@/lib/utils";
 
@@ -21,6 +30,8 @@ type Props = {
   onChange: (patch: Partial<Filters>) => void;
   maps: Option[];
   versions: Option[];
+  /** The DayZ version on this computer, for Same as mine. */
+  gameVersion: string | null;
   /** Countries by code. */
   countries: Option[];
   mods: Option[];
@@ -31,8 +42,23 @@ type Props = {
 };
 
 /** Every filter, in groups, inside the Filters popover. */
-export function FilterMenu({ filters, onChange, maps, versions, countries, mods, shown, canReset, onReset }: Props) {
+export function FilterMenu({
+  filters,
+  onChange,
+  maps,
+  versions,
+  gameVersion,
+  countries,
+  mods,
+  shown,
+  canReset,
+  onReset,
+}: Props) {
   const { t, i18n } = useLingui();
+  const sameAsMine = versions.reduce(
+    (servers, { value, count }) => servers + (compareGameVersions(value, gameVersion) === 0 ? count : 0),
+    0,
+  );
   return (
     <div className="flex max-h-[min(640px,var(--radix-popover-content-available-height))] flex-col">
       <div className="grid min-h-0 grid-cols-2 overflow-y-auto">
@@ -63,13 +89,27 @@ export function FilterMenu({ filters, onChange, maps, versions, countries, mods,
               >
                 <SelectTrigger size="sm" aria-label={t`Game version`} className="w-full text-[13px]">
                   <SelectValue>
-                    {filters.version ? <span className="data text-xs">{filters.version}</span> : t`All versions`}
+                    {filters.version === MY_VERSION ? (
+                      t`Same as mine`
+                    ) : filters.version ? (
+                      <span className="data text-xs">{filters.version}</span>
+                    ) : (
+                      t`All versions`
+                    )}
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent className="max-h-80">
                   <SelectItem value={ANY}>
                     <Trans>All versions</Trans>
                   </SelectItem>
+                  {gameVersion && (
+                    <SelectItem value={MY_VERSION}>
+                      <Trans>
+                        Same as mine <span className="data text-xs">({gameVersion})</span>
+                      </Trans>
+                      <span className="data ml-1 text-xs text-muted-foreground">{i18n.number(sameAsMine)}</span>
+                    </SelectItem>
+                  )}
                   {versions.map(({ value, count: servers }) => (
                     <SelectItem key={value} value={value}>
                       <span className="data text-xs">{value}</span>
