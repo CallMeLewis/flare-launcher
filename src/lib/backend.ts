@@ -8,6 +8,7 @@ import { backendText } from "./backend-messages";
 import type {
   AppMenu,
   BackendText,
+  DifferingMod,
   Install,
   LaunchRequest,
   Mod,
@@ -64,7 +65,7 @@ export const backend = {
     isPreview ? Promise.resolve([]) : invoke("installed_mods", { dayzDir: dayzDir || null, ids }),
 
   /** Of the given installed mods, those the server runs a different version of. Empty when it can't be checked. */
-  modsDifferingFromServer: (dayzDir: string, serverId: string, ids: number[]): Promise<number[]> =>
+  modsDifferingFromServer: (dayzDir: string, serverId: string, ids: number[]): Promise<DifferingMod[]> =>
     isPreview ? Promise.resolve([]) : invoke("mods_differing_from_server", { dayzDir: dayzDir || null, serverId, ids }),
 
   /** The mods the player is subscribed to. Resolves to `null` when DayZ isn't found. */

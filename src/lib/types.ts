@@ -162,3 +162,10 @@ export interface AppMenu {
   /** The entry is the launcher's own, so it can remove it. */
   ours: boolean;
 }
+
+/** A mod the server runs a different version of than this computer. */
+export type DifferingMod = {
+  id: number;
+  /** When the Workshop's copy was published, in seconds since 1970, or `null` when the Workshop couldn't be reached. */
+  updatedAt: number | null;
+};

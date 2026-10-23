@@ -37,7 +37,7 @@ import { useLowMapCount } from "@/hooks/use-low-map-count";
 import type { PingResult } from "@/hooks/use-pings";
 import { backend, errorMessage } from "@/lib/backend";
 import { countryName } from "@/lib/countries";
-import { downloadFraction, formatBytes, formatMinutes, joinAddress } from "@/lib/format";
+import { downloadFraction, formatAgo, formatBytes, formatMinutes, joinAddress } from "@/lib/format";
 import { copyJoinLink } from "@/lib/share";
 import { mapName } from "@/lib/maps";
 import type { Install, Mod, ModProgress, PlayJob, ServerRow } from "@/lib/types";
@@ -69,6 +69,9 @@ type Props = {
   onOpenSettings: () => void;
 };
 
+/** How often to ask a server again while it runs a different version of a mod. */
+const DIFFERING_RECHECK_MS = 60_000;
+
 export function ServerDetail({
   server,
   ping,
@@ -88,8 +91,9 @@ export function ServerDetail({
   const { t, i18n } = useLingui();
   const [mods, setMods] = useState<Mod[] | null>(null);
   const [installed, setInstalled] = useState<ReadonlySet<number> | null>(null);
-  // Installed mods the server runs a different version of, usually because it hasn't restarted since they updated.
-  const [differing, setDiffering] = useState<ReadonlySet<number>>(new Set());
+  // Up-to-date mods the server runs a different version of, with when each was updated on the Workshop. The server
+  // hasn't downloaded the update, or hasn't restarted since.
+  const [differing, setDiffering] = useState<ReadonlyMap<number, number | null>>(new Map());
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [remember, setRemember] = useState(false);
@@ -125,7 +129,7 @@ export function ServerDetail({
     latestCheck.current += 1;
     setMods(null);
     setInstalled(null);
-    setDiffering(new Set());
+    setDiffering(new Map());
     setModsFailed(false);
     setCheckFailed(false);
     // Only the server list knows a server's mods.
@@ -210,7 +214,7 @@ export function ServerDetail({
     // Asks the server, so it can be slow: Play doesn't wait for it.
     backend
       .modsDifferingFromServer(dayzDir, server.id, modIds)
-      .then((ids) => check === latestCheck.current && setDiffering(new Set(ids)))
+      .then((found) => check === latestCheck.current && setDiffering(new Map(found.map((m) => [m.id, m.updatedAt]))))
       .catch(() => {});
     const ids = await backend.installedMods(dayzDir, modIds).catch(() => null);
     if (check !== latestCheck.current) return;
@@ -226,6 +230,24 @@ export function ServerDetail({
     window.addEventListener("focus", checkMods);
     return () => window.removeEventListener("focus", checkMods);
   }, [checkMods]);
+
+  // While the server runs a different version, ask again every minute, so the warning goes once it updates and restarts.
+  const anyDiffering = differing.size > 0;
+  useEffect(() => {
+    if (!anyDiffering || !mods || !canCheckMods) return;
+    const timer = setInterval(() => {
+      const check = latestCheck.current;
+      backend
+        .modsDifferingFromServer(
+          dayzDir,
+          server.id,
+          mods.map((mod) => mod.steamWorkshopId),
+        )
+        .then((found) => check === latestCheck.current && setDiffering(new Map(found.map((m) => [m.id, m.updatedAt]))))
+        .catch(() => {});
+    }, DIFFERING_RECHECK_MS);
+    return () => clearInterval(timer);
+  }, [anyDiffering, mods, canCheckMods, dayzDir, server.id]);
 
   const downloading = job?.phase === "downloading" ? job.progress : null;
   const progressById = useMemo(() => new Map(downloading?.map((p) => [p.id, p])), [downloading]);
@@ -440,6 +462,7 @@ export function ServerDetail({
                   mod={mod}
                   installed={installed ? installed.has(mod.steamWorkshopId) : null}
                   differs={differs(mod.steamWorkshopId)}
+                  updatedAt={differing.get(mod.steamWorkshopId) ?? null}
                   progress={progressById.get(mod.steamWorkshopId)}
                 />
               ))}
@@ -469,9 +492,9 @@ export function ServerDetail({
         {differingCount > 0 && !downloading && (
           <Notice>
             {t`${plural(differingCount, {
-              one: "The server has a different version of # mod than this computer, usually because it hasn't restarted since the mod was updated. It may turn you away until it does.",
+              one: "The server doesn't have the latest version of # mod from the Workshop. You can usually still join, but the mod may not work as it should until the server downloads the update and restarts. If it's your server, update its mods and restart it.",
               other:
-                "The server has a different version of # mods than this computer, usually because it hasn't restarted since they were updated. It may turn you away until it does.",
+                "The server doesn't have the latest version of # mods from the Workshop. You can usually still join, but the mods may not work as they should until the server downloads the updates and restarts. If it's your server, update its mods and restart it.",
             })}`}
           </Notice>
         )}
@@ -646,6 +669,7 @@ function ModRow({
   mod,
   installed,
   differs,
+  updatedAt,
   progress,
 }: {
   mod: Mod;
@@ -653,6 +677,8 @@ function ModRow({
   installed: boolean | null;
   /** Installed, but the server runs a different version. */
   differs: boolean;
+  /** When a differing mod was updated on the Workshop, if known. */
+  updatedAt: number | null;
   progress: ModProgress | undefined;
 }) {
   const { t } = useLingui();
@@ -660,13 +686,23 @@ function ModRow({
   const status =
     progress?.status ?? (installed === null ? null : !installed ? "missing" : differs ? "differs" : "installed");
   const percent = progress && progress.total > 0 ? Math.floor((progress.downloaded / progress.total) * 100) : null;
+  const updated = updatedAt === null ? null : formatAgo(updatedAt);
 
   return (
     <li className="group flex h-8 items-center gap-2 rounded-md px-2 text-[13px] hover:bg-accent/50">
       {status === "installed" ? (
         <CircleCheck className="size-3.5 shrink-0 text-success" aria-label={t`Installed`} />
       ) : status === "differs" ? (
-        <TriangleAlert className="size-3.5 shrink-0 text-warning" aria-label={t`Different version from the server`} />
+        <span
+          className="shrink-0"
+          title={
+            updated === null
+              ? t`The server doesn't have the latest version from the Workshop`
+              : t`The server doesn't have the latest version from the Workshop, updated ${updated}`
+          }
+        >
+          <TriangleAlert className="size-3.5 text-warning" aria-label={t`Different version from the server`} />
+        </span>
       ) : status === "missing" ? (
         <CircleAlert className="size-3.5 shrink-0 text-warning" aria-label={t`Missing or out of date`} />
       ) : status === "downloading" ? (

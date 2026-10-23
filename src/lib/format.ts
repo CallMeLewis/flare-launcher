@@ -48,6 +48,15 @@ export function downloadFraction(progress: ModProgress[]): number {
 }
 
 /** A wait in whole minutes, as `40 min` or `1 h 20 min`. */
+/** How long ago a time was, such as "3 hours ago", in the interface language. `seconds` is since 1970. */
+export function formatAgo(seconds: number, now = Date.now()): string {
+  const elapsed = Math.max(0, now / 1000 - seconds);
+  const format = new Intl.RelativeTimeFormat(i18n.locale, { numeric: "auto" });
+  if (elapsed < 3600) return format.format(-Math.max(1, Math.round(elapsed / 60)), "minute");
+  if (elapsed < 86400) return format.format(-Math.round(elapsed / 3600), "hour");
+  return format.format(-Math.round(elapsed / 86400), "day");
+}
+
 export function formatMinutes(minutes: number): string {
   if (minutes < 1) return t`under 1 min`;
   const hours = Math.floor(minutes / 60);

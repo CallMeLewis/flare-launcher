@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { downloadFraction, formatBytes, joinAddress, joinLink } from "./format";
+import { downloadFraction, formatAgo, formatBytes, joinAddress, joinLink } from "./format";
 import type { ModProgress } from "./types";
 
 describe("formatBytes", () => {
@@ -39,5 +39,18 @@ describe("joinLink", () => {
     const server = { ip: "1.2.3.4", gamePort: 2302 };
     expect(joinAddress(server)).toBe("1.2.3.4:2302");
     expect(joinLink(server)).toBe("https://flarelauncher.app/join/1.2.3.4:2302");
+  });
+});
+
+describe("formatAgo", () => {
+  const now = 1_800_000_000_000;
+  const ago = (seconds: number) => formatAgo(now / 1000 - seconds, now);
+
+  it("picks minutes, hours or days", () => {
+    expect(ago(10)).toBe("1 minute ago");
+    expect(ago(25 * 60)).toBe("25 minutes ago");
+    expect(ago(3 * 3600)).toBe("3 hours ago");
+    expect(ago(86400)).toBe("yesterday");
+    expect(ago(9 * 86400)).toBe("9 days ago");
   });
 });

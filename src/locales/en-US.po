@@ -28,7 +28,7 @@ msgid "{differingCount, plural, one {# differs from the server} other {# differ 
 msgstr ""
 
 #: src/components/server-detail.tsx
-msgid "{differingCount, plural, one {The server has a different version of # mod than this computer, usually because it hasn't restarted since the mod was updated. It may turn you away until it does.} other {The server has a different version of # mods than this computer, usually because it hasn't restarted since they were updated. It may turn you away until it does.}}"
+msgid "{differingCount, plural, one {The server doesn't have the latest version of # mod from the Workshop. You can usually still join, but the mod may not work as it should until the server downloads the update and restarts. If it's your server, update its mods and restart it.} other {The server doesn't have the latest version of # mods from the Workshop. You can usually still join, but the mods may not work as they should until the server downloads the updates and restarts. If it's your server, update its mods and restart it.}}"
 msgstr ""
 
 #: src/components/mods-page.tsx
@@ -1727,6 +1727,14 @@ msgstr ""
 
 #: src/lib/backend-messages.ts
 msgid "The server answered but didn't send its details. Try again in a moment."
+msgstr ""
+
+#: src/components/server-detail.tsx
+msgid "The server doesn't have the latest version from the Workshop"
+msgstr ""
+
+#: src/components/server-detail.tsx
+msgid "The server doesn't have the latest version from the Workshop, updated {updated}"
 msgstr ""
 
 #: src/App.tsx

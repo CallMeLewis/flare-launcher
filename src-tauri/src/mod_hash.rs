@@ -69,10 +69,34 @@ fn short_hash(full: &[u8; 20]) -> u32 {
   hash
 }
 
+/// A mod the server runs a different version of than this computer.
+#[derive(serde::Serialize, Debug, PartialEq)]
+#[serde(rename_all = "camelCase")]
+pub struct DifferingMod {
+  pub id: u64,
+  /// When the Workshop's copy was published, to tell how long the server has gone without it. `None` when the
+  /// Workshop can't be reached.
+  pub updated_at: Option<u64>,
+}
+
 /// Of the given mods installed on this computer, those the server runs a different version of. Empty when DayZ isn't
 /// found or the server doesn't answer, so nothing is flagged that can't be checked.
 #[tauri::command]
-pub async fn mods_differing_from_server(dayz_dir: Option<String>, server_id: String, ids: Vec<u64>) -> Vec<u64> {
+pub async fn mods_differing_from_server(
+  http: tauri::State<'_, reqwest::Client>,
+  dayz_dir: Option<String>,
+  server_id: String,
+  ids: Vec<u64>,
+) -> Result<Vec<DifferingMod>, ()> {
+  let differing = differing_ids(dayz_dir, server_id, ids).await;
+  if differing.is_empty() {
+    return Ok(Vec::new());
+  }
+  let updated = crate::workshop::latest_update_times(&http, &differing).await.unwrap_or_default();
+  Ok(differing.into_iter().map(|id| DifferingMod { id, updated_at: updated.get(&id).copied() }).collect())
+}
+
+async fn differing_ids(dayz_dir: Option<String>, server_id: String, ids: Vec<u64>) -> Vec<u64> {
   let Some(install) = crate::steam::locate(dayz_dir.as_deref()) else { return Vec::new() };
   // A server's id is its query address.
   let Ok(addr) = server_id.parse::<SocketAddr>() else { return Vec::new() };
@@ -108,6 +132,47 @@ mod tests {
   fn hashes_the_pbos_in_any_order() {
     assert_eq!(short_hash(&full_hash(vec![[1; 20], [0; 20]])), 0x33E4_37AE);
     assert_eq!(full_hash(vec![[0; 20], [1; 20]]), full_hash(vec![[1; 20], [0; 20]]));
+  }
+
+  /// For each mod installed here that busy servers run, how many servers report the same hash. A mod no server
+  /// matches is most likely hashed differently from DayZ.
+  #[tokio::test]
+  #[ignore = "needs DayZ, Workshop mods and network access"]
+  async fn installed_mods_hash_as_busy_servers_report() {
+    let install = crate::steam::locate(None).expect("DayZ wasn't found");
+    let installed: std::collections::HashSet<u64> = std::fs::read_dir(&install.workshop_dir)
+      .unwrap()
+      .flatten()
+      .filter_map(|entry| entry.file_name().to_str()?.parse().ok())
+      .collect();
+    let local: HashMap<u64, u32> =
+      installed.iter().filter_map(|&id| Some((id, mod_hash(&install.mod_dir(id))?))).collect();
+    let http = reqwest::Client::builder().user_agent("FlareLauncher/test").build().unwrap();
+    let servers = crate::servers::download_list(&http).await.unwrap();
+    let mut busy: Vec<_> = servers
+      .values()
+      .filter(|s| s.row.players > 0 && s.mods.iter().any(|m| local.contains_key(&m.steam_workshop_id)))
+      .collect();
+    busy.sort_by_key(|s| std::cmp::Reverse(s.row.players));
+    let mut tally: HashMap<u64, (u32, u32)> = HashMap::new();
+    let queries = futures::future::join_all(busy.iter().take(80).map(|s| {
+      let addr: SocketAddr = format!("{}:{}", s.row.ip, s.row.query_port).parse().unwrap();
+      crate::query::a2s_mod_hashes(addr)
+    }))
+    .await;
+    for hashes in queries.into_iter().flatten() {
+      for (id, theirs) in hashes {
+        if let Some(ours) = local.get(&id) {
+          let entry = tally.entry(id).or_default();
+          if *ours == theirs { entry.0 += 1 } else { entry.1 += 1 }
+        }
+      }
+    }
+    let mut rows: Vec<_> = tally.into_iter().collect();
+    rows.sort_by_key(|(_, (same, differ))| (*same, std::cmp::Reverse(*differ)));
+    for (id, (same, differ)) in &rows {
+      println!("{id:>12}  same {same:>3}  differ {differ:>3}");
+    }
   }
 
   #[test]

@@ -28,8 +28,8 @@ msgid "{differingCount, plural, one {# differs from the server} other {# differ 
 msgstr "{differingCount, plural, one {# diffère de la version du serveur} other {# diffèrent des versions du serveur}}"
 
 #: src/components/server-detail.tsx
-msgid "{differingCount, plural, one {The server has a different version of # mod than this computer, usually because it hasn't restarted since the mod was updated. It may turn you away until it does.} other {The server has a different version of # mods than this computer, usually because it hasn't restarted since they were updated. It may turn you away until it does.}}"
-msgstr ""
+msgid "{differingCount, plural, one {The server doesn't have the latest version of # mod from the Workshop. You can usually still join, but the mod may not work as it should until the server downloads the update and restarts. If it's your server, update its mods and restart it.} other {The server doesn't have the latest version of # mods from the Workshop. You can usually still join, but the mods may not work as they should until the server downloads the updates and restarts. If it's your server, update its mods and restart it.}}"
+msgstr "{differingCount, plural, one {Le serveur ne dispose pas de la dernière version de # mod du Workshop. Vous pouvez généralement quand même rejoindre le serveur, mais le mod risque de ne pas fonctionner correctement tant que le serveur n’aura pas téléchargé la mise à jour et redémarré. Si c’est votre serveur, mettez ses mods à jour et redémarrez-le.} other {Le serveur ne dispose pas de la dernière version de # mods du Workshop. Vous pouvez généralement quand même rejoindre le serveur, mais les mods risquent de ne pas fonctionner correctement tant que le serveur n’aura pas téléchargé les mises à jour et redémarré. Si c’est votre serveur, mettez ses mods à jour et redémarrez-le.}}"
 
 #: src/components/mods-page.tsx
 #: src/components/server-detail.tsx
@@ -1728,6 +1728,14 @@ msgstr "L’adresse du serveur, ses mods et le nom de votre personnage sont ajou
 #: src/lib/backend-messages.ts
 msgid "The server answered but didn't send its details. Try again in a moment."
 msgstr "Le serveur a répondu, mais sans envoyer ses informations. Réessayez dans un instant."
+
+#: src/components/server-detail.tsx
+msgid "The server doesn't have the latest version from the Workshop"
+msgstr "Le serveur ne dispose pas de la dernière version du Workshop"
+
+#: src/components/server-detail.tsx
+msgid "The server doesn't have the latest version from the Workshop, updated {updated}"
+msgstr "Le serveur ne dispose pas de la dernière version du Workshop, mise à jour {updated}"
 
 #: src/App.tsx
 msgid "The server list couldn't be loaded"
