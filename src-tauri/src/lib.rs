@@ -121,6 +121,7 @@ pub fn run() {
       discord::set_discord_presence,
       report::prepare_report,
       report::send_report,
+      report::log_interface_error,
     ])
     .setup(|app| {
       // The window is built here rather than from the config alone so Linux can keep the system title bar: Linux

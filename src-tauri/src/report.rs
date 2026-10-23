@@ -120,6 +120,16 @@ pub fn log_panics() {
   }));
 }
 
+/// The longest interface error kept, in characters: enough for the error and the first few components it passed through.
+const MAX_INTERFACE_ERROR: usize = 600;
+
+/// Logs an error the interface couldn't recover from, so the next report shows it.
+#[tauri::command]
+pub fn log_interface_error(message: String) {
+  let message: String = message.chars().take(MAX_INTERFACE_ERROR).collect();
+  log::error!("Interface error: {message}");
+}
+
 /// Adds a line to those kept, such as one the download helper passed back.
 pub fn record_line(line: String) {
   let mut lines = RECORDER.lines.lock().unwrap();

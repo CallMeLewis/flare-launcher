@@ -1207,6 +1207,10 @@ msgstr ""
 msgid "Refresh server list"
 msgstr ""
 
+#: src/components/crash-screen.tsx
+msgid "Reload"
+msgstr ""
+
 #: src/components/server-detail.tsx
 msgid "Remember password"
 msgstr ""
@@ -1417,6 +1421,10 @@ msgstr ""
 msgid "Skip the splash screens"
 msgstr ""
 
+#: src/components/crash-screen.tsx
+msgid "Something went wrong"
+msgstr ""
+
 #: src/lib/backend.ts
 msgid "Something went wrong."
 msgstr ""
@@ -1622,6 +1630,10 @@ msgstr ""
 #: src/components/settings-dialog.tsx
 msgid "The language the launcher is shown in."
 msgstr ""
+
+#: src/components/crash-screen.tsx
+msgid "The launcher ran into a problem it couldn't recover from. Reload to carry on: your settings and favourites are kept."
+msgstr "The launcher ran into a problem it couldn't recover from. Reload to carry on: your settings and favorites are kept."
 
 #: src/components/settings-dialog.tsx
 msgid "The launcher stays in your Applications folder."

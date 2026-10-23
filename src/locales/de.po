@@ -1207,6 +1207,10 @@ msgstr "Zuletzt gespielt"
 msgid "Refresh server list"
 msgstr "Serverliste aktualisieren"
 
+#: src/components/crash-screen.tsx
+msgid "Reload"
+msgstr "Neu laden"
+
 #: src/components/server-detail.tsx
 msgid "Remember password"
 msgstr "Passwort speichern"
@@ -1417,6 +1421,10 @@ msgstr "Intro und Startbildschirme überspringen"
 msgid "Skip the splash screens"
 msgstr "Startbildschirme überspringen"
 
+#: src/components/crash-screen.tsx
+msgid "Something went wrong"
+msgstr "Etwas ist schiefgelaufen"
+
 #: src/lib/backend.ts
 msgid "Something went wrong."
 msgstr "Etwas ist schiefgelaufen."
@@ -1622,6 +1630,10 @@ msgstr "Das Installationsprogramm hat Flare Launcher bereits zum Startmenü hinz
 #: src/components/settings-dialog.tsx
 msgid "The language the launcher is shown in."
 msgstr "Die Sprache, in der der Launcher angezeigt wird."
+
+#: src/components/crash-screen.tsx
+msgid "The launcher ran into a problem it couldn't recover from. Reload to carry on: your settings and favourites are kept."
+msgstr "Im Launcher ist ein nicht behebbarer Fehler aufgetreten. Lade ihn neu, um fortzufahren: Deine Einstellungen und Favoriten bleiben erhalten."
 
 #: src/components/settings-dialog.tsx
 msgid "The launcher stays in your Applications folder."

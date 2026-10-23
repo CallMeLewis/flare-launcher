@@ -178,6 +178,13 @@ export const backend = {
   sendReport: (report: Report, note: string): Promise<void> =>
     isPreview ? preview().then((p) => p.sendReport()) : invoke("send_report", { report, note }),
 
+  /** Logs an error the interface couldn't recover from, so the next problem report shows it. */
+  logInterfaceError: (message: string): Promise<void> => {
+    if (!isPreview) return invoke<void>("log_interface_error", { message }).catch(() => {});
+    console.error(message);
+    return Promise.resolve();
+  },
+
   /** Opens the launcher's GitHub page in the browser. */
   openProjectPage: (): Promise<void> => {
     if (!isPreview) return invoke("open_project_page");
