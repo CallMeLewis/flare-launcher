@@ -2,6 +2,12 @@
 
 What changed in each version of Flare Launcher, newest first.
 
+## 1.6.0-beta.2 - 2026-10-23
+
+- Improved the look: a deeper navy in dark mode with matching light colours, clearer fonts for text and numbers, server and mod names in regular weight so long lists are easier to scan, and the current page marked with a green bar in the sidebar.
+- Mods that are up to date on the Mods page, and installed mods in the server panel, are now shown quietly, so colour only marks mods that need an update or didn't download.
+- Keyboard focus is now shown the same way on every button, field and control.
+
 ## 1.6.0-beta.1 - 2026-10-23
 
 - New warning when a server runs a different version of DayZ than yours: a mark next to its name in the server list, a note above Play saying which is newer, and a Same as mine choice under Game version in the Filters menu.
