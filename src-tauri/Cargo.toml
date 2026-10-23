@@ -28,7 +28,8 @@ futures = "0.3.34"
 tokio = { version = "1.53.1", features = ["net", "io-util", "time", "sync", "macros", "rt-multi-thread"] }
 reqwest = { version = "0.13.5", default-features = false, features = ["json", "form", "gzip", "brotli", "native-tls"] }
 ping-async = "1.0.2"
-steamworks = "0.13.1"
+# raw-bindings for SteamAPI_IsSteamRunning, which the safe API leaves out.
+steamworks = { version = "0.13.1", features = ["raw-bindings"] }
 tauri-plugin-window-state = "2.5.0"
 tauri-plugin-dialog = "2.8.1"
 tauri-plugin-flare-updater = { path = "../../flare-common/crates/tauri-plugin-flare-updater" }

@@ -37,10 +37,14 @@ export const BACKEND_MESSAGES = [
   }),
   msg({
     message:
-      "Steam couldn't download {failures, plural, one {# mod} other {# mods}}. Check your connection and disk space, then try again.",
+      "Steam couldn't download {failures, plural, one {# mod} other {# mods}}. A mod removed from the Workshop or made private can't be downloaded, and the disk may be full.",
   }),
   msg({ message: "Steam couldn't unsubscribe you from {failures, plural, one {# mod} other {# mods}}. Try again." }),
+  msg({ message: "Steam closed while downloading the mods. Open Steam, then try again." }),
   msg({ message: "Steam didn't answer in time. Make sure Steam is running and you're signed in, then try again." }),
+  msg({
+    message: "Steam hasn't moved on with the mods for {minutes} minutes. Check Steam's Downloads page, then try again.",
+  }),
   msg({ message: "Steam is out of date. Restart Steam so it can update, then try again." }),
   msg({ message: "Steam wasn't found on this computer. Install Steam, then try again." }),
   msg({ message: "That server is no longer in the list. Refresh and try again." }),

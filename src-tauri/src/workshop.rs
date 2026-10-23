@@ -9,7 +9,7 @@
 use std::collections::{HashMap, HashSet};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 use serde::{Deserialize, Serialize};
 use steamworks::{Client, DownloadItemResult, ItemState, PublishedFileId, SteamAPIInitError};
@@ -24,6 +24,11 @@ const POLL_INTERVAL: Duration = Duration::from_millis(250);
 /// How long a mod already on disk can stay looking installed before it counts as up to date. Steam flags one that needs
 /// an update within moments of being asked to download it, but may never report a download it didn't need.
 const UPDATE_NOTICE_TIMEOUT: Duration = Duration::from_secs(20);
+/// How long a download can go without any mod moving on before it's given up. Steam may hold mods back behind another
+/// download for a while, so this is generous.
+const STALL_TIMEOUT: Duration = Duration::from_secs(5 * 60);
+/// How often a download checks Steam is still running. Without Steam, mods never move on.
+const STEAM_CHECK_INTERVAL: Duration = Duration::from_secs(2);
 /// Public, and needs no key.
 const DETAILS_URL: &str = "https://api.steampowered.com/ISteamRemoteStorage/GetPublishedFileDetails/v1/";
 
@@ -146,6 +151,13 @@ fn connect() -> Result<Client> {
   })
 }
 
+/// Whether the Steam client is still running.
+fn steam_running() -> bool {
+  // SAFETY: takes no arguments and only asks Steam's library whether the client is up, which is safe at any time once
+  // it has loaded.
+  unsafe { steamworks::sys::SteamAPI_IsSteamRunning() }
+}
+
 /// Subscribes to the mods and waits for Steam to finish installing them.
 /// Returns `false` if the wait was cancelled.
 ///
@@ -176,21 +188,25 @@ fn download(ids: &[u64], cancelled: &AtomicBool, mut report: impl FnMut(&[ModPro
 
   for &id in ids {
     let item = PublishedFileId(id);
-    let failed = failed.clone();
+    let subscribe_failed = failed.clone();
     // Subscribing makes Steam keep the mod up to date from now on.
     ugc.subscribe_item(item, move |result| {
       if result.is_err() {
-        failed.lock().unwrap().insert(id);
+        subscribe_failed.lock().unwrap().insert(id);
       }
     });
     // High priority puts it ahead of anything else Steam is downloading.
     if !ugc.download_item(item, true) {
+      // Otherwise it would wait in the queue for ever.
       log::warn!("Steam did not accept a download request for mod {id}");
+      failed.lock().unwrap().insert(id);
     }
   }
 
-  let started = std::time::Instant::now();
+  let started = Instant::now();
   let mut last = Vec::new();
+  let mut moved = Instant::now();
+  let mut steam_checked = Instant::now();
   loop {
     client.run_callbacks();
     let noticing = started.elapsed() < UPDATE_NOTICE_TIMEOUT;
@@ -219,23 +235,42 @@ fn download(ids: &[u64], cancelled: &AtomicBool, mut report: impl FnMut(&[ModPro
     if progress != last {
       report(&progress);
       last = progress;
+      moved = Instant::now();
     }
 
+    if last.iter().all(|p| p.status == ModStatus::Installed) {
+      return Ok(true);
+    }
+    // A failed mod doesn't stop the others, so trying again only has that one left to download.
     let failures = last.iter().filter(|p| p.status == ModStatus::Failed).count();
-    if failures > 0 {
+    if failures > 0 && last.iter().all(|p| matches!(p.status, ModStatus::Installed | ModStatus::Failed)) {
       return Err(
         text!(
-          "Steam couldn't download {failures, plural, one {# mod} other {# mods}}. Check your connection and disk space, then try again.",
+          "Steam couldn't download {failures, plural, one {# mod} other {# mods}}. A mod removed from the Workshop or made private can't be downloaded, and the disk may be full.",
           failures = failures
         )
         .into(),
       );
     }
-    if last.iter().all(|p| p.status == ModStatus::Installed) {
-      return Ok(true);
-    }
     if cancelled.load(Ordering::Relaxed) {
       return Ok(false);
+    }
+    if moved.elapsed() >= STALL_TIMEOUT {
+      log::warn!("no mod moved on for {} s", STALL_TIMEOUT.as_secs());
+      return Err(
+        text!(
+          "Steam hasn't moved on with the mods for {minutes} minutes. Check Steam's Downloads page, then try again.",
+          minutes = STALL_TIMEOUT.as_secs() / 60
+        )
+        .into(),
+      );
+    }
+    if steam_checked.elapsed() >= STEAM_CHECK_INTERVAL {
+      steam_checked = Instant::now();
+      if !steam_running() {
+        log::warn!("Steam closed during a download");
+        return Err(text!("Steam closed while downloading the mods. Open Steam, then try again.").into());
+      }
     }
     std::thread::sleep(POLL_INTERVAL);
   }

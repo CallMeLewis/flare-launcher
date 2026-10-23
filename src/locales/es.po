@@ -1471,6 +1471,10 @@ msgid "Steam checked {count, plural, one {# mod} other {# mods}} and downloaded 
 msgstr "Steam comprobó {count, plural, one {# mod} other {# mods}} y volvió a descargar los archivos que faltaban o estaban incompletos."
 
 #: src/lib/backend-messages.ts
+msgid "Steam closed while downloading the mods. Open Steam, then try again."
+msgstr "Steam se ha cerrado mientras se descargaban los mods. Abre Steam, luego inténtalo de nuevo."
+
+#: src/lib/backend-messages.ts
 msgid "Steam couldn't be asked: {error}"
 msgstr "No se pudo consultar a Steam: {error}"
 
@@ -1487,8 +1491,8 @@ msgid "Steam couldn't be reached. With the Flatpak version of Steam, the launche
 msgstr "No se pudo conectar con Steam. Con la versión Flatpak de Steam, puede que el launcher no consiga descargar mods: suscríbete a ellos en el Workshop de Steam y vuelve a intentarlo."
 
 #: src/lib/backend-messages.ts
-msgid "Steam couldn't download {failures, plural, one {# mod} other {# mods}}. Check your connection and disk space, then try again."
-msgstr ""
+msgid "Steam couldn't download {failures, plural, one {# mod} other {# mods}}. A mod removed from the Workshop or made private can't be downloaded, and the disk may be full."
+msgstr "Steam no ha podido descargar {failures, plural, one {# mod} other {# mods}}. No se puede descargar un mod eliminado de Workshop o marcado como privado, y puede que el disco esté lleno."
 
 #: src/lib/backend-messages.ts
 msgid "Steam couldn't unsubscribe you from {failures, plural, one {# mod} other {# mods}}. Try again."
@@ -1501,6 +1505,10 @@ msgstr "Steam no respondió a tiempo. Asegúrate de que Steam esté abierto y de
 #: src/components/mods-page.tsx
 msgid "Steam hasn't downloaded this mod to this computer yet."
 msgstr "Steam aún no ha descargado este mod en este equipo."
+
+#: src/lib/backend-messages.ts
+msgid "Steam hasn't moved on with the mods for {minutes} minutes. Check Steam's Downloads page, then try again."
+msgstr "Steam lleva {minutes} minutos sin avanzar con los mods. Consulta la página de Descargas de Steam, luego inténtalo de nuevo."
 
 #: src/lib/backend-messages.ts
 msgid "Steam is out of date. Restart Steam so it can update, then try again."
