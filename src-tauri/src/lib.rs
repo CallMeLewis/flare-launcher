@@ -7,6 +7,7 @@ mod discord;
 mod error;
 mod lan;
 mod launch;
+mod links;
 mod mod_hash;
 mod query;
 mod report;
@@ -61,6 +62,7 @@ pub fn run() {
   if let Some(code) = workshop::helper::run_helper() {
     std::process::exit(code);
   }
+  app_menu::wait_for_previous_copy();
   #[cfg(target_os = "linux")]
   desktop::unpin_theme_variant();
   let http = reqwest::Client::builder()
@@ -70,6 +72,10 @@ pub fn run() {
     .expect("error while building http client");
 
   tauri::Builder::default()
+    // First, so a second copy hands over to this one before setting anything else up. A join link it was opened with
+    // comes along too.
+    .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| links::show_window(app)))
+    .plugin(tauri_plugin_deep_link::init())
     .plugin(tauri_plugin_opener::init())
     .plugin(tauri_plugin_dialog::init())
     .plugin(tauri_plugin_flare_updater::updater())
@@ -89,6 +95,7 @@ pub fn run() {
     .manage(http)
     .manage(servers::ServerCache::default())
     .manage(Arc::new(workshop::Downloads::default()))
+    .manage(links::PendingLink::default())
     .invoke_handler(tauri::generate_handler![
       servers::fetch_servers,
       servers::server_mods,
@@ -122,6 +129,7 @@ pub fn run() {
       report::prepare_report,
       report::send_report,
       report::log_interface_error,
+      links::take_join_link,
     ])
     .setup(|app| {
       // The window is built here rather than from the config alone so Linux can keep the system title bar: Linux
@@ -139,6 +147,18 @@ pub fn run() {
         .initialization_script(format!("window.__systemTitleBar = {};", cfg!(target_os = "linux")))
         .build()?;
       app.manage(discord::Presence::start());
+
+      use tauri_plugin_deep_link::DeepLinkExt;
+      let handle = app.handle().clone();
+      app.deep_link().on_open_url(move |event| {
+        let links: Vec<String> = event.urls().iter().map(|url| url.to_string()).collect();
+        links::receive(&handle, &links);
+      });
+      if let Ok(Some(urls)) = app.deep_link().get_current() {
+        let links: Vec<String> = urls.iter().map(|url| url.to_string()).collect();
+        links::receive(app.handle(), &links);
+      }
+      app_menu::refresh_entry();
       Ok(())
     })
     .run(tauri::generate_context!())

@@ -388,6 +388,11 @@ msgstr ""
 msgid "Copy address"
 msgstr ""
 
+#: src/components/server-detail.tsx
+#: src/components/server-table.tsx
+msgid "Copy join link"
+msgstr ""
+
 #: src/components/map-count-dialog.tsx
 msgid "Copy the commands"
 msgstr ""
@@ -407,6 +412,10 @@ msgstr ""
 
 #: src/components/map-count-dialog.tsx
 msgid "Couldn't copy the commands"
+msgstr ""
+
+#: src/lib/share.ts
+msgid "Couldn't copy the join link"
 msgstr ""
 
 #: src/App.tsx
@@ -435,6 +444,10 @@ msgstr ""
 
 #: src/components/settings-dialog.tsx
 msgid "Couldn't open the folder picker"
+msgstr ""
+
+#: src/App.tsx
+msgid "Couldn't open the join link"
 msgstr ""
 
 #: src/components/mods-page.tsx
@@ -679,6 +692,10 @@ msgstr ""
 msgid "Find server"
 msgstr ""
 
+#: src/App.tsx
+msgid "Finding the server at {address}…"
+msgstr ""
+
 #: src/components/join-address-dialog.tsx
 msgid "Finding…"
 msgstr ""
@@ -861,8 +878,16 @@ msgstr ""
 msgid "It may still be loading. If it doesn't open, check Steam for a message."
 msgstr ""
 
+#: src/lib/share.ts
+msgid "It opens this server in Flare Launcher, or offers the launcher to download."
+msgstr ""
+
 #: src/components/mods-page.tsx
 msgid "It was removed from the Workshop or made private. Your copy still works, but it won't get updates."
+msgstr ""
+
+#: src/lib/share.ts
+msgid "Join link copied"
 msgstr ""
 
 #: src/components/mods-page.tsx

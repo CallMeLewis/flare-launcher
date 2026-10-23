@@ -7,6 +7,14 @@ export function joinAddress(server: Pick<ServerRow, "ip" | "gamePort">): string 
   return `${server.ip}:${server.gamePort}`;
 }
 
+/**
+ * A link to share a server by. It opens a page that opens the launcher on the server, or offers the launcher to
+ * download, as links to the launcher's own scheme can't be clicked in most chat apps.
+ */
+export function joinLink(server: Pick<ServerRow, "ip" | "gamePort">): string {
+  return `https://flarelauncher.app/join/${joinAddress(server)}`;
+}
+
 const UNITS = ["B", "KB", "MB", "GB", "TB"];
 
 /** Formats a byte count the way Steam does, e.g. `1.4 GB`, with the interface language's decimal mark. */

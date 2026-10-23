@@ -14,6 +14,7 @@ import {
   Eye,
   EyeOff,
   Globe,
+  Link2,
   Loader2,
   Lock,
   Play,
@@ -37,6 +38,7 @@ import type { PingResult } from "@/hooks/use-pings";
 import { backend, errorMessage } from "@/lib/backend";
 import { countryName } from "@/lib/countries";
 import { downloadFraction, formatBytes, formatMinutes, joinAddress } from "@/lib/format";
+import { copyJoinLink } from "@/lib/share";
 import { mapName } from "@/lib/maps";
 import type { Install, Mod, ModProgress, PlayJob, ServerRow } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -286,29 +288,40 @@ export function ServerDetail({
             <Star className="size-4" fill={favourite ? "currentColor" : "none"} aria-hidden />
           </Button>
         </div>
-        <button
-          type="button"
-          title={t`Copy address`}
-          onClick={copyAddress}
-          className="group flex h-8 w-full items-stretch overflow-hidden rounded-md border border-input bg-background text-left transition-colors duration-150 outline-none hover:bg-muted focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
-        >
-          <span className="flex min-w-0 flex-1 items-center gap-2 px-2.5">
-            <Globe className="size-3.5 shrink-0 text-muted-foreground" aria-hidden />
-            <span className="data flex min-w-0 text-xs">
-              <span className="truncate">{server.ip}</span>
-              <span className="text-muted-foreground">:{server.gamePort}</span>
-            </span>
-          </span>
-          <span
-            className={cn(
-              "flex shrink-0 items-center gap-1.5 border-l px-2.5 text-xs font-medium text-muted-foreground transition-colors duration-150 group-hover:text-foreground",
-              copied && "text-success group-hover:text-success",
-            )}
+        <div className="flex gap-2">
+          <button
+            type="button"
+            title={t`Copy address`}
+            onClick={copyAddress}
+            className="group flex h-8 min-w-0 flex-1 items-stretch overflow-hidden rounded-md border border-input bg-background text-left transition-colors duration-150 outline-none hover:bg-muted focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
           >
-            {copied ? <Check className="size-3.5" aria-hidden /> : <Copy className="size-3.5" aria-hidden />}
-            {copied ? t`Copied` : t`Copy`}
-          </span>
-        </button>
+            <span className="flex min-w-0 flex-1 items-center gap-2 px-2.5">
+              <Globe className="size-3.5 shrink-0 text-muted-foreground" aria-hidden />
+              <span className="data flex min-w-0 text-xs">
+                <span className="truncate">{server.ip}</span>
+                <span className="text-muted-foreground">:{server.gamePort}</span>
+              </span>
+            </span>
+            <span
+              className={cn(
+                "flex shrink-0 items-center gap-1.5 border-l px-2.5 text-xs font-medium text-muted-foreground transition-colors duration-150 group-hover:text-foreground",
+                copied && "text-success group-hover:text-success",
+              )}
+            >
+              {copied ? <Check className="size-3.5" aria-hidden /> : <Copy className="size-3.5" aria-hidden />}
+              {copied ? t`Copied` : t`Copy`}
+            </span>
+          </button>
+          <Button
+            variant="outline"
+            size="icon-sm"
+            title={t`Copy join link`}
+            aria-label={t`Copy join link`}
+            onClick={() => void copyJoinLink(server)}
+          >
+            <Link2 aria-hidden />
+          </Button>
+        </div>
         <span className="sr-only" aria-live="polite">
           {copied ? t`Address copied` : ""}
         </span>

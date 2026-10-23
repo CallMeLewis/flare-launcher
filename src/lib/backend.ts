@@ -1,5 +1,6 @@
 import { t } from "@lingui/core/macro";
 import { Channel, invoke, isTauri } from "@tauri-apps/api/core";
+import { listen } from "@tauri-apps/api/event";
 import { getCurrentWebview } from "@tauri-apps/api/webview";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { open } from "@tauri-apps/plugin-dialog";
@@ -177,6 +178,13 @@ export const backend = {
   /** Sends a report the player has looked over, with their note. */
   sendReport: (report: Report, note: string): Promise<void> =>
     isPreview ? preview().then((p) => p.sendReport()) : invoke("send_report", { report, note }),
+
+  /** The server address from the last join link the launcher was opened with, once. */
+  takeJoinLink: (): Promise<string | null> => (isPreview ? Promise.resolve(null) : invoke("take_join_link")),
+
+  /** Calls `onLink` whenever a join link arrives, to collect with `takeJoinLink`. Resolves to a stop function. */
+  onJoinLink: (onLink: () => void): Promise<() => void> =>
+    isPreview ? Promise.resolve(() => {}) : listen("join-link", onLink),
 
   /** Logs an error the interface couldn't recover from, so the next problem report shows it. */
   logInterfaceError: (message: string): Promise<void> => {

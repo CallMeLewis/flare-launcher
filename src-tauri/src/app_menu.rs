@@ -3,10 +3,15 @@
 //! `~/Applications` and writes a menu entry and icon, as AppImage tools such as Gear Lever do. The Windows installer
 //! already adds Start menu shortcuts, so there is nothing to do there.
 
+use std::time::{Duration, Instant};
+
 use serde::Serialize;
 use tauri::AppHandle;
 
 use crate::error::Result;
+
+/// Set on the copy that reopens the launcher from its new place, to the process ID of the copy it replaces.
+const REOPENED_FROM: &str = "FLARE_REOPENED_FROM";
 
 #[derive(Serialize, Debug, PartialEq)]
 #[serde(rename_all = "camelCase")]
@@ -31,6 +36,30 @@ pub fn app_menu_status() -> AppMenu {
 #[tauri::command(async)]
 pub fn add_to_app_menu(app: AppHandle) -> Result<bool> {
   imp::add(&app)
+}
+
+/// In a copy reopened from the AppImage's new place, waits for the one it replaces to close. Otherwise the single-instance
+/// check would hand this copy's start over to the closing one, and nothing would reopen. Called first thing, before any
+/// other thread starts.
+pub fn wait_for_previous_copy() {
+  let Some(pid) = std::env::var(REOPENED_FROM).ok().and_then(|pid| pid.parse::<u32>().ok()) else { return };
+  // SAFETY: no other thread is running yet to read the environment at the same time.
+  unsafe { std::env::remove_var(REOPENED_FROM) };
+  let pid = sysinfo::Pid::from_u32(pid);
+  let mut system = sysinfo::System::new();
+  let deadline = Instant::now() + Duration::from_secs(10);
+  while Instant::now() < deadline {
+    system.refresh_processes(sysinfo::ProcessesToUpdate::Some(&[pid]), true);
+    if system.process(pid).is_none() {
+      return;
+    }
+    std::thread::sleep(Duration::from_millis(100));
+  }
+}
+
+/// Brings the launcher's own menu entry up to date, for one written by an older version without join links.
+pub fn refresh_entry() {
+  imp::refresh_entry();
 }
 
 /// Takes the launcher's own entry out of the app menu. The AppImage stays in `~/Applications`.
@@ -98,6 +127,7 @@ mod imp {
     refresh_menu(&apps);
     if moved {
       without_appimage_env(&mut Command::new(&target))
+        .env(super::REOPENED_FROM, std::process::id().to_string())
         .spawn()
         .map_err(|e| text!("Flare Launcher is in your app menu, but couldn't reopen: {error}", error = e))?;
       app.exit(0);
@@ -135,9 +165,31 @@ mod imp {
     }
   }
 
-  /// Lets the desktop see the new entry straight away. Most desktops notice by themselves, so failing is fine.
+  /// Lets the desktop see the new entry straight away, and makes it the one that opens join links. Most desktops notice
+  /// the entry by themselves, so failing is fine.
   fn refresh_menu(apps: &Path) {
     let _ = without_appimage_env(Command::new("update-desktop-database").arg(apps)).output();
+    let handler = format!("x-scheme-handler/{}", crate::links::SCHEME);
+    let _ = without_appimage_env(Command::new("xdg-mime").args(["default", DESKTOP_FILE, &handler])).output();
+  }
+
+  /// Rewrites the launcher's own entry when it opens this AppImage but lacks join links, as one written by an older
+  /// version does.
+  pub fn refresh_entry() {
+    let (Some(appimage), Some(data)) = (appimage(), data_home()) else { return };
+    let apps = data.join("applications");
+    let entry = apps.join(DESKTOP_FILE);
+    if !opens(&entry, &appimage) {
+      return;
+    }
+    let Ok(text) = std::fs::read_to_string(&entry) else { return };
+    if text.contains("x-scheme-handler/") {
+      return;
+    }
+    let icon = data.join("icons/hicolor/256x256/apps").join(ICON_FILE);
+    if std::fs::write(&entry, desktop_entry(&appimage, &icon)).is_ok() {
+      refresh_menu(&apps);
+    }
   }
 
   pub(super) fn desktop_entry(appimage: &Path, icon: &Path) -> String {
@@ -146,15 +198,17 @@ mod imp {
        Type=Application\n\
        Name=Flare Launcher\n\
        Comment=Server browser and mod launcher for DayZ\n\
-       Exec={}\n\
+       Exec={} %u\n\
        TryExec={}\n\
        Icon={}\n\
        Terminal=false\n\
        Categories=Game;\n\
+       MimeType=x-scheme-handler/{};\n\
        StartupWMClass=flare-launcher\n",
       exec_quote(appimage),
       appimage.display(),
       icon.display(),
+      crate::links::SCHEME,
     )
   }
 
@@ -240,6 +294,8 @@ mod imp {
   pub fn remove() -> Result<()> {
     Err(text!("Use Add or remove programs to take Flare Launcher off this computer.").into())
   }
+
+  pub fn refresh_entry() {}
 }
 
 #[cfg(all(test, target_os = "linux"))]
@@ -252,7 +308,8 @@ mod tests {
   fn writes_a_desktop_entry_that_runs_the_appimage() {
     let entry = desktop_entry(Path::new("/home/a b/Applications/Flare-Launcher.AppImage"), Path::new("/i/f.png"));
     assert!(entry.starts_with("[Desktop Entry]\n"));
-    assert!(entry.contains("\nExec=\"/home/a b/Applications/Flare-Launcher.AppImage\"\n"));
+    assert!(entry.contains("\nExec=\"/home/a b/Applications/Flare-Launcher.AppImage\" %u\n"));
+    assert!(entry.contains("\nMimeType=x-scheme-handler/flare-launcher;\n"));
     assert!(entry.contains("\nTryExec=/home/a b/Applications/Flare-Launcher.AppImage\n"));
     assert!(entry.contains("\nIcon=/i/f.png\n"));
     assert!(entry.contains("\nStartupWMClass=flare-launcher\n"));
@@ -262,7 +319,7 @@ mod tests {
   #[test]
   fn quotes_characters_the_exec_line_reserves() {
     let entry = desktop_entry(Path::new("/home/x$\"y/F.AppImage"), Path::new("/i.png"));
-    assert!(entry.contains("\nExec=\"/home/x\\$\\\"y/F.AppImage\"\n"));
+    assert!(entry.contains("\nExec=\"/home/x\\$\\\"y/F.AppImage\" %u\n"));
   }
 
   #[test]

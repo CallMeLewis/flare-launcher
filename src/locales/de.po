@@ -388,6 +388,11 @@ msgstr "Kopieren"
 msgid "Copy address"
 msgstr "Adresse kopieren"
 
+#: src/components/server-detail.tsx
+#: src/components/server-table.tsx
+msgid "Copy join link"
+msgstr "Beitrittslink kopieren"
+
 #: src/components/map-count-dialog.tsx
 msgid "Copy the commands"
 msgstr "Befehle kopieren"
@@ -408,6 +413,10 @@ msgstr "Adresse konnte nicht kopiert werden"
 #: src/components/map-count-dialog.tsx
 msgid "Couldn't copy the commands"
 msgstr "Die Befehle konnten nicht kopiert werden"
+
+#: src/lib/share.ts
+msgid "Couldn't copy the join link"
+msgstr "Beitrittslink konnte nicht kopiert werden"
 
 #: src/App.tsx
 msgid "Couldn't download the mods"
@@ -436,6 +445,10 @@ msgstr "Ordner konnte nicht geöffnet werden"
 #: src/components/settings-dialog.tsx
 msgid "Couldn't open the folder picker"
 msgstr "Ordnerauswahl konnte nicht geöffnet werden"
+
+#: src/App.tsx
+msgid "Couldn't open the join link"
+msgstr "Beitrittslink konnte nicht geöffnet werden"
 
 #: src/components/mods-page.tsx
 #: src/components/server-detail.tsx
@@ -679,6 +692,10 @@ msgstr "Stattdessen über Steam finden"
 msgid "Find server"
 msgstr "Server finden"
 
+#: src/App.tsx
+msgid "Finding the server at {address}…"
+msgstr "Server unter {address} wird gesucht…"
+
 #: src/components/join-address-dialog.tsx
 msgid "Finding…"
 msgstr "Wird gesucht…"
@@ -861,9 +878,17 @@ msgstr "DayZ verbindet sich mit dem Server, sobald es geladen ist."
 msgid "It may still be loading. If it doesn't open, check Steam for a message."
 msgstr "Vielleicht lädt es noch. Falls es sich nicht öffnet, schau in Steam nach einer Meldung."
 
+#: src/lib/share.ts
+msgid "It opens this server in Flare Launcher, or offers the launcher to download."
+msgstr "Er öffnet diesen Server in Flare Launcher oder bietet den Launcher zum Herunterladen an."
+
 #: src/components/mods-page.tsx
 msgid "It was removed from the Workshop or made private. Your copy still works, but it won't get updates."
 msgstr "Sie wurde aus dem Workshop entfernt oder auf privat gestellt. Deine Kopie funktioniert weiter, bekommt aber keine Updates mehr."
+
+#: src/lib/share.ts
+msgid "Join link copied"
+msgstr "Beitrittslink kopiert"
 
 #: src/components/mods-page.tsx
 msgid "Keep it"

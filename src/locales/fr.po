@@ -388,6 +388,11 @@ msgstr "Copier"
 msgid "Copy address"
 msgstr "Copier l’adresse"
 
+#: src/components/server-detail.tsx
+#: src/components/server-table.tsx
+msgid "Copy join link"
+msgstr "Copier le lien de connexion"
+
 #: src/components/map-count-dialog.tsx
 msgid "Copy the commands"
 msgstr "Copier les commandes"
@@ -408,6 +413,10 @@ msgstr "Impossible de copier l’adresse"
 #: src/components/map-count-dialog.tsx
 msgid "Couldn't copy the commands"
 msgstr "Impossible de copier les commandes"
+
+#: src/lib/share.ts
+msgid "Couldn't copy the join link"
+msgstr "Impossible de copier le lien de connexion"
 
 #: src/App.tsx
 msgid "Couldn't download the mods"
@@ -436,6 +445,10 @@ msgstr "Impossible d’ouvrir le dossier"
 #: src/components/settings-dialog.tsx
 msgid "Couldn't open the folder picker"
 msgstr "Impossible d’ouvrir le sélecteur de dossier"
+
+#: src/App.tsx
+msgid "Couldn't open the join link"
+msgstr "Impossible d’ouvrir le lien de connexion"
 
 #: src/components/mods-page.tsx
 #: src/components/server-detail.tsx
@@ -679,6 +692,10 @@ msgstr "Le trouver plutôt via Steam"
 msgid "Find server"
 msgstr "Trouver le serveur"
 
+#: src/App.tsx
+msgid "Finding the server at {address}…"
+msgstr "Recherche du serveur à l’adresse {address}…"
+
 #: src/components/join-address-dialog.tsx
 msgid "Finding…"
 msgstr "Recherche…"
@@ -861,9 +878,17 @@ msgstr "Il rejoindra le serveur dès qu’il sera chargé."
 msgid "It may still be loading. If it doesn't open, check Steam for a message."
 msgstr "Il est peut-être encore en chargement. S’il ne s’ouvre pas, regardez si Steam affiche un message."
 
+#: src/lib/share.ts
+msgid "It opens this server in Flare Launcher, or offers the launcher to download."
+msgstr "Il ouvre ce serveur dans Flare Launcher, ou vous propose de télécharger le lanceur."
+
 #: src/components/mods-page.tsx
 msgid "It was removed from the Workshop or made private. Your copy still works, but it won't get updates."
 msgstr "Il a été retiré du Workshop ou rendu privé. Votre copie fonctionne toujours, mais ne recevra plus de mises à jour."
+
+#: src/lib/share.ts
+msgid "Join link copied"
+msgstr "Lien de connexion copié"
 
 #: src/components/mods-page.tsx
 msgid "Keep it"

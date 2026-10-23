@@ -8,6 +8,7 @@ import {
   ArrowUp,
   Copy,
   Download,
+  Link2,
   Lock,
   Moon,
   Play,
@@ -30,6 +31,7 @@ import {
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 import { joinAddress } from "@/lib/format";
+import { copyJoinLink } from "@/lib/share";
 import { mapName } from "@/lib/maps";
 import type { ServerRow } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -319,6 +321,10 @@ export function ServerTable({
           <ContextMenuItem onSelect={() => void copyAddress(menuRow)}>
             <Copy aria-hidden />
             <Trans>Copy address</Trans>
+          </ContextMenuItem>
+          <ContextMenuItem onSelect={() => void copyJoinLink(menuRow)}>
+            <Link2 aria-hidden />
+            <Trans>Copy join link</Trans>
           </ContextMenuItem>
         </ContextMenuContent>
       )}

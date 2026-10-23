@@ -86,6 +86,9 @@ The launcher ships for both, and a feature, fix or release that only works on on
   `src-tauri/libsteam_api.so` through `tauri.linux.conf.json`. Both are Valve's redistributable Steamworks library,
   copied from the `steamworks-sys` crate.
 - DayZ is a Windows program on both, so anything passed to the game (such as `-mod=` paths) stays Windows-style.
+- Join links (`flare-launcher://join/<address>`) are registered by the Windows installer and by the `.deb` and `.rpm`
+  packages, both from `plugins.deep-link` in `tauri.conf.json`. The AppImage registers them when it adds itself to the
+  app menu. A link opened while the launcher is running goes to the open window rather than starting a second copy.
 
 When writing code:
 
@@ -110,7 +113,7 @@ ping path and mod downloads compile for Windows but haven't been run on a Window
 download screens have only been exercised against a simulated Steam. On Linux, the AppImage starts, loads the server
 list and pings servers, but joining, mod downloads and launching through Proton haven't been tried with Steam and DayZ
 installed. The Discord status has been tried against Discord on Windows, but not on Linux, including its Flatpak and
-Snap packages.
+Snap packages. Join links haven't been opened from a browser on either platform.
 
 ## Languages
 
@@ -160,6 +163,8 @@ own and loaded when chosen in Settings > Launcher. System, the default, uses the
   (stats.darkzone.dev), kept separately, where they're read and worked through on its Reports page; a debug build
   sends them to `DZSL_REPORT_URL` instead when it's set.
 - `src-tauri/src/app_menu.rs`: on Linux, moves the AppImage to `~/Applications` and adds it to the app menu.
+- `src-tauri/src/links.rs`: reads join links, which select a server for the player to join. They're shared as
+  `https://flarelauncher.app/join/<address>`, a page on the download site that opens the launcher.
 - `src-tauri/windows/installer-hooks.nsh`: removes an install made under the launcher's old name.
 - `scripts/`: the release tooling, which gives the Flare apps' shared release script (`@flare/release`, in flare-common)
   the launcher's builds. `CHANGELOG.md` holds every version's notes, read through the same package.

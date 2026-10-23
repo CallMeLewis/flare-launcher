@@ -388,6 +388,11 @@ msgstr "Copy"
 msgid "Copy address"
 msgstr "Copy address"
 
+#: src/components/server-detail.tsx
+#: src/components/server-table.tsx
+msgid "Copy join link"
+msgstr "Copy join link"
+
 #: src/components/map-count-dialog.tsx
 msgid "Copy the commands"
 msgstr "Copy the commands"
@@ -408,6 +413,10 @@ msgstr "Couldn't copy the address"
 #: src/components/map-count-dialog.tsx
 msgid "Couldn't copy the commands"
 msgstr "Couldn't copy the commands"
+
+#: src/lib/share.ts
+msgid "Couldn't copy the join link"
+msgstr "Couldn't copy the join link"
 
 #: src/App.tsx
 msgid "Couldn't download the mods"
@@ -436,6 +445,10 @@ msgstr "Couldn't open the folder"
 #: src/components/settings-dialog.tsx
 msgid "Couldn't open the folder picker"
 msgstr "Couldn't open the folder picker"
+
+#: src/App.tsx
+msgid "Couldn't open the join link"
+msgstr "Couldn't open the join link"
 
 #: src/components/mods-page.tsx
 #: src/components/server-detail.tsx
@@ -679,6 +692,10 @@ msgstr "Find it through Steam instead"
 msgid "Find server"
 msgstr "Find server"
 
+#: src/App.tsx
+msgid "Finding the server at {address}…"
+msgstr "Finding the server at {address}…"
+
 #: src/components/join-address-dialog.tsx
 msgid "Finding…"
 msgstr "Finding…"
@@ -861,9 +878,17 @@ msgstr "It joins the server as soon as it has loaded."
 msgid "It may still be loading. If it doesn't open, check Steam for a message."
 msgstr "It may still be loading. If it doesn't open, check Steam for a message."
 
+#: src/lib/share.ts
+msgid "It opens this server in Flare Launcher, or offers the launcher to download."
+msgstr "It opens this server in Flare Launcher, or offers the launcher to download."
+
 #: src/components/mods-page.tsx
 msgid "It was removed from the Workshop or made private. Your copy still works, but it won't get updates."
 msgstr "It was removed from the Workshop or made private. Your copy still works, but it won't get updates."
+
+#: src/lib/share.ts
+msgid "Join link copied"
+msgstr "Join link copied"
 
 #: src/components/mods-page.tsx
 msgid "Keep it"

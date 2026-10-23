@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { downloadFraction, formatBytes } from "./format";
+import { downloadFraction, formatBytes, joinAddress, joinLink } from "./format";
 import type { ModProgress } from "./types";
 
 describe("formatBytes", () => {
@@ -31,5 +31,13 @@ describe("downloadFraction", () => {
 
   it("is complete once every mod is installed", () => {
     expect(downloadFraction([mod("installed"), mod("installed", 10, 10)])).toBe(1);
+  });
+});
+
+describe("joinLink", () => {
+  it("shares the address players join on, not the query port", () => {
+    const server = { ip: "1.2.3.4", gamePort: 2302 };
+    expect(joinAddress(server)).toBe("1.2.3.4:2302");
+    expect(joinLink(server)).toBe("https://flarelauncher.app/join/1.2.3.4:2302");
   });
 });

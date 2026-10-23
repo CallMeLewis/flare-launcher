@@ -144,6 +144,43 @@ export function App() {
   }, [settings.dayzDir]);
   const gameVersion = install?.gameVersion ?? null;
 
+  // A join link selects the server it names, for the player to look over and join.
+  useEffect(() => {
+    let cancelled = false;
+    let stop: (() => void) | undefined;
+    const open = async () => {
+      // Checked before collecting the link, so a link collected is always shown.
+      if (cancelled) return;
+      const address = await backend.takeJoinLink().catch(() => null);
+      if (!address) return;
+      setView((current) => (current === "mods" ? "all" : current));
+      const finding = toast.loading(t`Finding the server at ${address}…`);
+      try {
+        const server = await backend.findServer(address);
+        setAskedRows((rows) => withRows(rows, [server]));
+        setSelectedId(server.id);
+        const name = server.name;
+        toast.success(t`Server found`, {
+          id: finding,
+          description: t`${name}. Select Play in the panel on the right to join.`,
+        });
+      } catch (e) {
+        toast.error(t`Couldn't open the join link`, { id: finding, description: errorMessage(e) });
+      }
+    };
+    void open();
+    void backend
+      .onJoinLink(() => void open())
+      .then((unlisten) => {
+        if (cancelled) unlisten();
+        else stop = unlisten;
+      });
+    return () => {
+      cancelled = true;
+      stop?.();
+    };
+  }, [t]);
+
   useEffect(() => {
     backend.setInterfaceScale(settings.uiScale).catch(() => {});
   }, [settings.uiScale]);

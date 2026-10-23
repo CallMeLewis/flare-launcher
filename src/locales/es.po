@@ -388,6 +388,11 @@ msgstr "Copiar"
 msgid "Copy address"
 msgstr "Copiar dirección"
 
+#: src/components/server-detail.tsx
+#: src/components/server-table.tsx
+msgid "Copy join link"
+msgstr "Copiar enlace para unirse"
+
 #: src/components/map-count-dialog.tsx
 msgid "Copy the commands"
 msgstr "Copiar los comandos"
@@ -408,6 +413,10 @@ msgstr "No se pudo copiar la dirección"
 #: src/components/map-count-dialog.tsx
 msgid "Couldn't copy the commands"
 msgstr "No se pudieron copiar los comandos"
+
+#: src/lib/share.ts
+msgid "Couldn't copy the join link"
+msgstr "No se pudo copiar el enlace para unirse"
 
 #: src/App.tsx
 msgid "Couldn't download the mods"
@@ -436,6 +445,10 @@ msgstr "No se pudo abrir la carpeta"
 #: src/components/settings-dialog.tsx
 msgid "Couldn't open the folder picker"
 msgstr "No se pudo abrir el selector de carpetas"
+
+#: src/App.tsx
+msgid "Couldn't open the join link"
+msgstr "No se pudo abrir el enlace para unirse"
 
 #: src/components/mods-page.tsx
 #: src/components/server-detail.tsx
@@ -679,6 +692,10 @@ msgstr "Buscarla a través de Steam"
 msgid "Find server"
 msgstr "Buscar servidor"
 
+#: src/App.tsx
+msgid "Finding the server at {address}…"
+msgstr "Buscando el servidor en {address}…"
+
 #: src/components/join-address-dialog.tsx
 msgid "Finding…"
 msgstr "Buscando…"
@@ -861,9 +878,17 @@ msgstr "Se unirá al servidor en cuanto haya cargado."
 msgid "It may still be loading. If it doesn't open, check Steam for a message."
 msgstr "Puede que siga cargando. Si no se abre, mira si Steam muestra algún mensaje."
 
+#: src/lib/share.ts
+msgid "It opens this server in Flare Launcher, or offers the launcher to download."
+msgstr "Abre este servidor en Flare Launcher, u ofrece descargar el lanzador."
+
 #: src/components/mods-page.tsx
 msgid "It was removed from the Workshop or made private. Your copy still works, but it won't get updates."
 msgstr "Se retiró del Workshop o se hizo privado. Tu copia sigue funcionando, pero no recibirá actualizaciones."
+
+#: src/lib/share.ts
+msgid "Join link copied"
+msgstr "Enlace para unirse copiado"
 
 #: src/components/mods-page.tsx
 msgid "Keep it"
