@@ -101,6 +101,25 @@ pub fn keep_log() {
   }
 }
 
+/// Logs panics, which a release build otherwise loses: it has no console, and a panic in a command leaves the interface
+/// waiting for an answer that never comes. Logged, it shows in the next report.
+pub fn log_panics() {
+  let default = std::panic::take_hook();
+  std::panic::set_hook(Box::new(move |info| {
+    let message = info
+      .payload()
+      .downcast_ref::<&str>()
+      .copied()
+      .or_else(|| info.payload().downcast_ref::<String>().map(String::as_str))
+      .unwrap_or("unknown cause");
+    match info.location() {
+      Some(at) => log::error!("Panicked at {}:{}: {message}", at.file(), at.line()),
+      None => log::error!("Panicked: {message}"),
+    }
+    default(info);
+  }));
+}
+
 /// Adds a line to those kept, such as one the download helper passed back.
 pub fn record_line(line: String) {
   let mut lines = RECORDER.lines.lock().unwrap();

@@ -56,6 +56,7 @@ fn open_project_page(app: tauri::AppHandle) -> error::Result<()> {
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
   report::keep_log();
+  report::log_panics();
   #[cfg(target_os = "linux")]
   if let Some(code) = workshop::helper::run_helper() {
     std::process::exit(code);

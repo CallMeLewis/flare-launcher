@@ -29,7 +29,7 @@ msgstr "{differingCount, plural, one {# diffère de la version du serveur} other
 
 #: src/components/server-detail.tsx
 msgid "{differingCount, plural, one {The server has a different version of # mod than this computer, usually because it hasn't restarted since the mod was updated. It may turn you away until it does.} other {The server has a different version of # mods than this computer, usually because it hasn't restarted since they were updated. It may turn you away until it does.}}"
-msgstr "{differingCount, plural, one {Le serveur utilise une version de # mod différente de celle de cet ordinateur, généralement parce qu'il n'a pas redémarré depuis la mise à jour du mod. Il peut vous refuser l'accès tant qu'il n'a pas redémarré.} other {Le serveur utilise des versions de # mods différentes de celles de cet ordinateur, généralement parce qu'il n'a pas redémarré depuis leur mise à jour. Il peut vous refuser l'accès tant qu'il n'a pas redémarré.}}"
+msgstr ""
 
 #: src/components/mods-page.tsx
 #: src/components/server-detail.tsx
@@ -1488,7 +1488,7 @@ msgstr "Impossible de joindre Steam. Avec la version Flatpak de Steam, le lanceu
 
 #: src/lib/backend-messages.ts
 msgid "Steam couldn't download {failures, plural, one {# mod} other {# mods}}. Check your connection and disk space, then try again."
-msgstr "Steam n’a pas pu télécharger {failures, plural, one {# mod} other {# mods}}. Vérifiez votre connexion et l’espace disque, puis réessayez."
+msgstr ""
 
 #: src/lib/backend-messages.ts
 msgid "Steam couldn't unsubscribe you from {failures, plural, one {# mod} other {# mods}}. Try again."
