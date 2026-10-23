@@ -221,7 +221,7 @@ export function ServerTable({
           tabIndex={0}
           aria-activedescendant={selectedId ? `server-${selectedId}` : undefined}
           onKeyDown={onKeyDown}
-          className="flex min-h-0 flex-1 flex-col focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-inset"
+          className="flex min-h-0 flex-1 flex-col focus-visible:outline-2 focus-visible:-outline-offset-2"
         >
           <div role="rowgroup" className="overflow-y-hidden border-b bg-card/60 [scrollbar-gutter:stable]">
             <div role="row" className={cn(COLUMNS, "h-8 text-xs font-medium text-muted-foreground")}>

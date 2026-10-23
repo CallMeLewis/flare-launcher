@@ -315,7 +315,7 @@ export function ServerDetail({
             type="button"
             title={t`Copy address`}
             onClick={copyAddress}
-            className="group flex h-8 min-w-0 flex-1 items-stretch overflow-hidden rounded-md border border-input bg-background text-left transition-colors duration-150 outline-none hover:bg-muted focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+            className="group flex h-8 min-w-0 flex-1 items-stretch overflow-hidden rounded-md border border-input bg-background text-left transition-colors duration-150 hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2"
           >
             <span className="flex min-w-0 flex-1 items-center gap-2 px-2.5">
               <Globe className="size-3.5 shrink-0 text-muted-foreground" aria-hidden />
