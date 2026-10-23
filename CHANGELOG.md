@@ -2,6 +2,17 @@
 
 What changed in each version of Flare Launcher, newest first.
 
+## 1.6.0-beta.1 - 2026-10-23
+
+- New warning when a server runs a different version of DayZ than yours: a mark next to its name in the server list, a note above Play saying which is newer, and a Same as mine choice under Game version in the Filters menu.
+- New menu when you right-click a server in the list, with Play, Load mods, favourites, Copy address and Copy join link.
+- New join links: Copy join link, in a server's right-click menu or next to its address in the server panel, gives a link that opens the server in Flare Launcher, or offers the launcher to download when it isn't installed.
+- Improved the warning about a server running a different version of your mods: it says the server needs to update and restart, hovering a mod shows when it was updated on the Workshop, and the warning goes by itself within a minute of the server catching up.
+- Improved mod downloads: they now stop with a message saying what happened when Steam closes or stops making progress, and one mod failing no longer stops the others.
+- Improved the messages when mods can't be set up in the DayZ folder, such as when a folder of the same name is in the way.
+- If something goes wrong in the launcher's window, it now offers to reload instead of staying blank.
+- Fixed the mod version warning showing for some Linux servers that hold a mod's files twice, though they run the same version.
+
 ## 1.5.1 - 2026-10-18
 
 - Each Settings section's title now stays at the top while you scroll.
