@@ -2,6 +2,10 @@
 
 What changed in each version of Flare Launcher, newest first.
 
+## 1.6.0-beta.5 - 2026-10-24
+
+- New Verified tag beside a server's name in the server list, and Verified owner in the server panel, for servers whose owners have proved they run them. Server owners can verify theirs at flarelauncher.app/owners.
+
 ## 1.6.0-beta.4 - 2026-10-24
 
 - The server panel now sorts a server's mods into To download, Different from the server and Up to date when any need something, so the ones to deal with stand out.
