@@ -2,6 +2,11 @@
 
 What changed in each version of Flare Launcher, newest first.
 
+## 1.6.0-beta.4 - 2026-10-24
+
+- The server panel now sorts a server's mods into To download, Different from the server and Up to date when any need something, so the ones to deal with stand out.
+- Mods that are up to date, and installed mods in the server panel, are shown in green again.
+
 ## 1.6.0-beta.3 - 2026-10-24
 
 - Improved the server list: it now includes more servers, its player counts are more up to date, and Refresh is faster.
