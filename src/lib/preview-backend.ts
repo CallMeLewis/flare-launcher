@@ -9,7 +9,7 @@ const LIST_URL = "https://dayzsalauncher.com/api/v1/launcher/servers/dayz";
 
 type OwnList = {
   format: number;
-  servers: Omit<ServerRow, "id" | "country" | "modCount">[];
+  servers: (Omit<ServerRow, "id" | "country" | "modCount"> & { fullName?: string })[];
   modNames: string[];
   modIds: number[];
 };
@@ -32,6 +32,22 @@ type ApiServer = {
 };
 
 const mods = new Map<string, Mod[]>();
+
+/** The most characters in a full name, as the download site allows. */
+const MAX_FULL_NAME = 128;
+
+/** Mirrors `shown_name`: an owner's full name while it carries on from the server's own. */
+function shownName(name: string, fullName?: string): string {
+  const own = name.trim();
+  const carriesOn =
+    fullName !== undefined &&
+    own !== "" &&
+    fullName.length > own.length &&
+    fullName.startsWith(own) &&
+    [...fullName].length <= MAX_FULL_NAME &&
+    !/\p{Cc}/u.test(fullName);
+  return carriesOn ? fullName : own;
+}
 
 export async function fetchServers(): Promise<ServerList> {
   try {
@@ -62,7 +78,7 @@ async function fetchOwnServers(): Promise<ServerList> {
       ip: server.ip,
       queryPort: server.queryPort,
       gamePort: server.gamePort,
-      name: server.name.trim(),
+      name: shownName(server.name, server.fullName),
       map: server.map.trim().toLowerCase(),
       players: live?.players[id] ?? server.players,
       maxPlayers: server.maxPlayers,

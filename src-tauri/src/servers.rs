@@ -21,6 +21,8 @@ const OWN_LIVE_URL: &str = "https://servers.darkzone.dev/v1/live";
 const OWN_FORMAT: u32 = 1;
 /// Older than this, the list has stopped being updated, and the fallback is fresher.
 const OWN_STALE: Duration = Duration::from_secs(15 * 60);
+/// The most characters in a full name, as the download site allows.
+const MAX_FULL_NAME: usize = 128;
 /// The list the launcher used before, kept as a fallback.
 const LIST_URL: &str = "https://dayzsalauncher.com/api/v1/launcher/servers/dayz";
 
@@ -249,6 +251,10 @@ struct OwnServer {
   query_port: u16,
   game_port: u16,
   name: String,
+  /// The full name the server's owner gave on the download site, since DayZ cuts names at 63 bytes. Sent only for
+  /// servers whose owners have given one.
+  #[serde(default)]
+  full_name: Option<String>,
   map: String,
   players: u32,
   max_players: u32,
@@ -282,6 +288,25 @@ pub struct OwnListCache {
 #[derive(Default)]
 pub struct OwnCache(pub tokio::sync::Mutex<Option<OwnListCache>>);
 
+/// The name to show for a server: the full name its owner gave, while it carries on from the name the server sends,
+/// or else that name. The list only sends a full name that does, but this checks again, as the download site and the
+/// list's crawler do, so a full name can never stand in for an unrelated one.
+fn shown_name(name: &str, full_name: Option<&str>) -> String {
+  let name = name.trim();
+  match full_name {
+    Some(full)
+      if !name.is_empty()
+        && full.len() > name.len()
+        && full.starts_with(name)
+        && full.chars().count() <= MAX_FULL_NAME
+        && !full.chars().any(char::is_control) =>
+    {
+      full.to_string()
+    }
+    _ => name.to_string(),
+  }
+}
+
 /// Parses the list, skipping entries that don't match the expected shape as [`parse_list`] does, and turning it down
 /// when it's in a newer format or has stopped being updated. Errors here aren't shown: the fallback is used instead.
 fn parse_own_list(body: &[u8], now: SystemTime) -> std::result::Result<HashMap<String, StoredServer>, String> {
@@ -310,7 +335,7 @@ fn parse_own_list(body: &[u8], now: SystemTime) -> std::result::Result<HashMap<S
       ip: own.ip,
       query_port: own.query_port,
       game_port: own.game_port,
-      name: own.name.trim().to_string(),
+      name: shown_name(&own.name, own.full_name.as_deref()),
       map: own.map.trim().to_lowercase(),
       players: own.players,
       max_players: own.max_players,
@@ -504,6 +529,24 @@ mod tests {
     let list = own_list("2026-10-24T00:00:00Z").replacen(r#""verified":true,"#, "", 1);
     let servers = parse_own_list(list.as_bytes(), now).unwrap();
     assert!(!servers["1.2.3.4:2303"].row.verified);
+  }
+
+  #[test]
+  fn shows_an_owners_full_name_while_it_carries_on_from_the_servers_own() {
+    let now = humantime::parse_rfc3339("2026-10-24T00:05:00Z").unwrap();
+    let named = |full_name: &str| {
+      let list = own_list("2026-10-24T00:00:00Z").replacen(
+        r#""name":" Alpha ","#,
+        &format!(r#""name":" Alpha ","fullName":{},"#, serde_json::json!(full_name)),
+        1,
+      );
+      parse_own_list(list.as_bytes(), now).unwrap()["1.2.3.4:2303"].row.name.clone()
+    };
+    assert_eq!(named("Alpha | Vanilla+ | discord.gg/alpha"), "Alpha | Vanilla+ | discord.gg/alpha");
+    assert_eq!(named("Beta | Vanilla+"), "Alpha", "doesn't carry on from the server's name");
+    assert_eq!(named("Alpha"), "Alpha");
+    assert_eq!(named("Alpha\nmore"), "Alpha");
+    assert_eq!(named(&format!("Alpha{}", "x".repeat(MAX_FULL_NAME))), "Alpha", "too long");
   }
 
   #[test]
