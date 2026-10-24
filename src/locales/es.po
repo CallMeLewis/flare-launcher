@@ -1957,6 +1957,15 @@ msgstr "Se usa esta carpeta."
 msgid "Vanilla"
 msgstr "Vanilla"
 
+#: src/components/server-detail.tsx
+msgid "Verified owner"
+msgstr "Propietario verificado"
+
+#: src/components/server-detail.tsx
+#: src/components/server-table.tsx
+msgid "Verified owner: they've proved they run this server."
+msgstr "Propietario verificado: ha demostrado que administra este servidor."
+
 #: src/App.tsx
 msgid "Verify cancelled"
 msgstr "Verificación cancelada"

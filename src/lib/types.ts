@@ -14,6 +14,8 @@ export type ServerRow = {
   password: boolean;
   firstPersonOnly: boolean;
   official: boolean;
+  /** Whether its owner has proved on the download site that they run it. Only the launcher's own list says so. */
+  verified: boolean;
   battlEye: boolean;
   version: string;
   /** In-game time as `HH:MM`. */

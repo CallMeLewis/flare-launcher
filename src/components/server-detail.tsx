@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } fro
 import { plural } from "@lingui/core/macro";
 import { Trans, useLingui } from "@lingui/react/macro";
 import {
+  BadgeCheck,
   Check,
   ChevronDown,
   CircleAlert,
@@ -337,6 +338,15 @@ export function ServerDetail({
             <Star className="size-4" fill={favourite ? "currentColor" : "none"} aria-hidden />
           </Button>
         </div>
+        {server.verified && (
+          <p
+            className="-mt-1.5 flex items-center gap-1.5 text-xs text-muted-foreground"
+            title={t`Verified owner: they've proved they run this server.`}
+          >
+            <BadgeCheck className="size-3.5 text-foreground/80" aria-hidden />
+            <Trans>Verified owner</Trans>
+          </p>
+        )}
         <div className="flex gap-2">
           <button
             type="button"

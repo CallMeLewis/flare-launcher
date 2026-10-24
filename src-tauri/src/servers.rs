@@ -90,6 +90,8 @@ pub struct ServerRow {
   pub password: bool,
   pub first_person_only: bool,
   pub official: bool,
+  /// Whether its owner has proved on the download site that they run it. Only the launcher's own list says so.
+  pub verified: bool,
   pub battl_eye: bool,
   pub version: String,
   pub time: String,
@@ -157,6 +159,7 @@ pub fn from_query(addr: SocketAddr, info: Info, mods: Vec<Mod>) -> Option<Stored
     first_person_only: has("no3rd"),
     // Community servers say they run their own hive or an external one.
     official: !has("privHive") && !has("external"),
+    verified: false,
     battl_eye: has("battleye"),
     version: info.version,
     time: tags.iter().find(|tag| tag.contains(':')).copied().unwrap_or_default().to_string(),
@@ -189,6 +192,7 @@ fn into_stored(api: ApiServer) -> StoredServer {
     password: api.password,
     first_person_only: api.first_person_only,
     official: api.shard == "public",
+    verified: false,
     battl_eye: api.battl_eye,
     version: api.version,
     time: api.time,
@@ -251,6 +255,9 @@ struct OwnServer {
   password: bool,
   first_person_only: bool,
   official: bool,
+  /// Sent only for servers whose owners have proved they run them.
+  #[serde(default)]
+  verified: bool,
   battl_eye: bool,
   version: String,
   time: String,
@@ -310,6 +317,7 @@ fn parse_own_list(body: &[u8], now: SystemTime) -> std::result::Result<HashMap<S
       password: own.password,
       first_person_only: own.first_person_only,
       official: own.official,
+      verified: own.verified,
       battl_eye: own.battl_eye,
       version: own.version,
       time: own.time,
@@ -467,8 +475,8 @@ mod tests {
       r#"{{"format":1,"generatedAt":"{generated_at}","modNames":["CF","Dabs Framework"],"modIds":[1559212036,2545327648],
       "servers":[
         {{"ip":"1.2.3.4","queryPort":2303,"gamePort":2302,"name":" Alpha ","map":"ChernarusPlus","players":10,
-         "maxPlayers":60,"password":false,"firstPersonOnly":true,"official":false,"battlEye":true,"environment":"w",
-         "version":"1.30.164200","time":"12:30","timeAcceleration":6.0,"mods":[1,0]}},
+         "maxPlayers":60,"password":false,"firstPersonOnly":true,"official":false,"verified":true,"battlEye":true,
+         "environment":"w","version":"1.30.164200","time":"12:30","timeAcceleration":6.0,"mods":[1,0]}},
         {{"ip":"not an ip","queryPort":2303,"gamePort":2302,"name":"Bad","map":"enoch","players":0,"maxPlayers":10,
          "password":false,"firstPersonOnly":false,"official":false,"battlEye":true,"version":"1","time":"",
          "timeAcceleration":null,"mods":[]}},
@@ -487,7 +495,15 @@ mod tests {
     assert_eq!((alpha.row.game_port, alpha.row.mod_count, alpha.row.time_acceleration), (2302, 2, Some(6.0)));
     assert_eq!(alpha.row.country.as_deref(), Some("AU"));
     assert_eq!(alpha.mods[0], Mod { name: "Dabs Framework".into(), steam_workshop_id: 2545327648 });
-    assert!(alpha.listed);
+    assert!(alpha.listed && alpha.row.verified);
+  }
+
+  #[test]
+  fn counts_a_server_as_unverified_unless_the_list_says_so() {
+    let now = humantime::parse_rfc3339("2026-10-24T00:05:00Z").unwrap();
+    let list = own_list("2026-10-24T00:00:00Z").replacen(r#""verified":true,"#, "", 1);
+    let servers = parse_own_list(list.as_bytes(), now).unwrap();
+    assert!(!servers["1.2.3.4:2303"].row.verified);
   }
 
   #[test]

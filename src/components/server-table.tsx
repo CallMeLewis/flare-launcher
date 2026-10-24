@@ -6,6 +6,7 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import {
   ArrowDown,
   ArrowUp,
+  BadgeCheck,
   Copy,
   Download,
   Link2,
@@ -424,6 +425,11 @@ const Row = memo(function Row({
         <span className="truncate" title={row.name}>
           {row.name}
         </span>
+        {row.verified && (
+          <span className="shrink-0 text-foreground/80" title={t`Verified owner: they've proved they run this server.`}>
+            <BadgeCheck className="size-3.5" aria-label={t`Verified owner: they've proved they run this server.`} />
+          </span>
+        )}
         {versionNote && (
           <span className="shrink-0 text-warning" title={versionNote}>
             <TriangleAlert className="size-3" aria-label={versionNote} />

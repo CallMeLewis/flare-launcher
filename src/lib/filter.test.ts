@@ -32,6 +32,7 @@ function server(overrides: Partial<ServerRow> & { id: string }): ServerRow {
     password: false,
     firstPersonOnly: false,
     official: false,
+    verified: false,
     battlEye: true,
     version: "1.29",
     time: "12:00",
