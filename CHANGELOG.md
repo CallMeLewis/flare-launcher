@@ -2,6 +2,10 @@
 
 What changed in each version of Flare Launcher, newest first.
 
+## 1.6.0-beta.3 - 2026-10-24
+
+- Improved the server list: it now includes more servers, its player counts are more up to date, and Refresh is faster.
+
 ## 1.6.0-beta.2 - 2026-10-23
 
 - Improved the look: a deeper navy in dark mode with matching light colours, clearer fonts for text and numbers, server and mod names in regular weight so long lists are easier to scan, and the current page marked with a green bar in the sidebar.
