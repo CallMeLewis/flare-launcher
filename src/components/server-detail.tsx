@@ -343,7 +343,7 @@ export function ServerDetail({
             className="-mt-1.5 flex items-center gap-1.5 text-xs text-muted-foreground"
             title={t`Verified owner: they've proved they run this server.`}
           >
-            <BadgeCheck className="size-3.5 text-foreground/80" aria-hidden />
+            <BadgeCheck className="size-3.5 text-verified" aria-hidden />
             <Trans>Verified owner</Trans>
           </p>
         )}

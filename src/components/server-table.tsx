@@ -426,8 +426,12 @@ const Row = memo(function Row({
           {row.name}
         </span>
         {row.verified && (
-          <span className="shrink-0 text-foreground/80" title={t`Verified owner: they've proved they run this server.`}>
-            <BadgeCheck className="size-3.5" aria-label={t`Verified owner: they've proved they run this server.`} />
+          <span
+            title={t`Verified owner: they've proved they run this server.`}
+            className="flex shrink-0 items-center gap-1 rounded border border-verified/40 bg-verified/10 pr-1.5 pl-1 text-[11px] leading-4 font-semibold text-verified uppercase"
+          >
+            <BadgeCheck className="size-3" aria-hidden />
+            <Trans>Verified</Trans>
           </span>
         )}
         {versionNote && (

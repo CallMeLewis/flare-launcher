@@ -3,3 +3,17 @@
 
 /* The colours, fonts and base styles are the Flare apps' shared ones (@flare/ui, in the flare-common repo beside this
    one), light by default and dark under .dark, including the server table's row colours. See docs/design.md. */
+
+/* The launcher's own colour: the badge on servers whose owners have verified them, in the blue players know for that.
+   Both stops keep 4.5:1 on every surface. */
+:root {
+  --verified: #0369a1;
+}
+
+.dark {
+  --verified: #38bdf8;
+}
+
+@theme inline {
+  --color-verified: var(--verified);
+}

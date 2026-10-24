@@ -1957,6 +1957,10 @@ msgstr "Dieser Ordner wird verwendet."
 msgid "Vanilla"
 msgstr "Vanilla"
 
+#: src/components/server-table.tsx
+msgid "Verified"
+msgstr "Verifiziert"
+
 #: src/components/server-detail.tsx
 msgid "Verified owner"
 msgstr "Verifizierter Betreiber"

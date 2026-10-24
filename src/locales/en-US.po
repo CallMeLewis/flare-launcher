@@ -1957,6 +1957,10 @@ msgstr ""
 msgid "Vanilla"
 msgstr ""
 
+#: src/components/server-table.tsx
+msgid "Verified"
+msgstr ""
+
 #: src/components/server-detail.tsx
 msgid "Verified owner"
 msgstr ""

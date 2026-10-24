@@ -8,7 +8,7 @@ Dark Mode (OLED) with Data-Dense Dashboard layout, plus a matching light theme. 
 
 ## Colour
 
-The tokens are the Flare apps' shared ones, in `@flare/ui` (`packages/ui/src/theme.css` in the flare-common repo beside this one), so every Flare app looks alike; change them there. `src/globals.css` adds only the launcher's own, the table rows. Use the tokens, never raw hex in components.
+The tokens are the Flare apps' shared ones, in `@flare/ui` (`packages/ui/src/theme.css` in the flare-common repo beside this one), so every Flare app looks alike; change them there. `src/globals.css` adds only the launcher's own, the verified colour. Use the tokens, never raw hex in components.
 
 Light is the `:root` set and dark the `.dark` set; the class goes on `<html>`. Light values keep text at WCAG AA (4.5:1) on every surface, which is why primary and the status colours are a shade darker than in dark. Field edges (`input`) reach 3:1 against the background in both, so they're too strong to fill a control with: fills use `control`.
 
@@ -27,6 +27,7 @@ Light is the `:root` set and dark the `.dark` set; the class goes on `<html>`. L
 | success | `#4ADE80` | `#166534` | Installed, good ping |
 | warning | `#FBBF24` | `#92400E` | Full server, missing mod, favourite, fair ping |
 | danger | `#F87171` | `#C81E1E` | Poor ping, errors |
+| verified | `#38BDF8` | `#0369A1` | The badge on servers their owners have verified |
 
 Green means "good to go" and is reserved for that. Colour never carries meaning alone: pair it with a number, icon or label.
 
