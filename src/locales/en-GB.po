@@ -576,6 +576,10 @@ msgid "Details to send"
 msgstr "Details to send"
 
 #: src/components/server-detail.tsx
+msgid "Different from the server"
+msgstr "Different from the server"
+
+#: src/components/server-detail.tsx
 msgid "Different version from the server"
 msgstr "Different version from the server"
 
@@ -1839,6 +1843,10 @@ msgstr "Time"
 msgid "Time of day"
 msgstr "Time of day"
 
+#: src/components/server-detail.tsx
+msgid "To download"
+msgstr "To download"
+
 #: src/components/mods-page.tsx
 msgid "Try a different name or Workshop ID."
 msgstr "Try a different name or Workshop ID."
@@ -1899,6 +1907,7 @@ msgid "Unsubscribing…"
 msgstr "Unsubscribing…"
 
 #: src/components/mods-page.tsx
+#: src/components/server-detail.tsx
 #: src/lib/shared-messages.ts
 msgid "Up to date"
 msgstr "Up to date"

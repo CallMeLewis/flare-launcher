@@ -257,6 +257,33 @@ export function ServerDetail({
   const differs = (id: number) => differing.has(id) && installed?.has(id) === true;
   const differingCount = mods ? mods.filter((mod) => differs(mod.steamWorkshopId)).length : 0;
   const checking = canCheckMods && !checkFailed && (mods === null || (mods.length > 0 && installed === null));
+  // Once any mod needs something doing, the list splits by what it needs, so those aren't lost among the rest.
+  const modGroups =
+    mods && installed && (missing > 0 || differingCount > 0)
+      ? [
+          { key: "missing", label: t`To download`, mods: mods.filter((mod) => !installed.has(mod.steamWorkshopId)) },
+          {
+            key: "differs",
+            label: t`Different from the server`,
+            mods: mods.filter((mod) => differs(mod.steamWorkshopId)),
+          },
+          {
+            key: "current",
+            label: t`Up to date`,
+            mods: mods.filter((mod) => installed.has(mod.steamWorkshopId) && !differs(mod.steamWorkshopId)),
+          },
+        ].filter((group) => group.mods.length > 0)
+      : null;
+  const modRow = (mod: Mod) => (
+    <ModRow
+      key={mod.steamWorkshopId}
+      mod={mod}
+      installed={installed ? installed.has(mod.steamWorkshopId) : null}
+      differs={differs(mod.steamWorkshopId)}
+      updatedAt={differing.get(mod.steamWorkshopId) ?? null}
+      progress={progressById.get(mod.steamWorkshopId)}
+    />
+  );
   const address = joinAddress(server);
   const players = ping?.players ?? server.players;
   const maxPlayers = ping?.maxPlayers ?? server.maxPlayers;
@@ -454,19 +481,25 @@ export function ServerDetail({
             <p className="px-2 py-1 text-[13px] text-muted-foreground">
               <Trans>This is a vanilla server. No mods needed.</Trans>
             </p>
-          ) : (
-            <ul className="flex flex-col">
-              {mods.map((mod) => (
-                <ModRow
-                  key={mod.steamWorkshopId}
-                  mod={mod}
-                  installed={installed ? installed.has(mod.steamWorkshopId) : null}
-                  differs={differs(mod.steamWorkshopId)}
-                  updatedAt={differing.get(mod.steamWorkshopId) ?? null}
-                  progress={progressById.get(mod.steamWorkshopId)}
-                />
+          ) : modGroups ? (
+            <div className="flex flex-col gap-3">
+              {modGroups.map((group) => (
+                <div key={group.key}>
+                  <h4
+                    id={`mods-${group.key}`}
+                    className="flex items-baseline gap-1.5 px-2 pt-2 pb-1 text-xs font-medium text-muted-foreground"
+                  >
+                    {group.label}
+                    <span className="data">{group.mods.length}</span>
+                  </h4>
+                  <ul aria-labelledby={`mods-${group.key}`} className="flex flex-col">
+                    {group.mods.map(modRow)}
+                  </ul>
+                </div>
               ))}
-            </ul>
+            </div>
+          ) : (
+            <ul className="flex flex-col">{mods.map(modRow)}</ul>
           )}
         </div>
       </section>
