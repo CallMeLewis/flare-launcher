@@ -727,13 +727,13 @@ export function ServerDetail({
                   <Download className="mt-0.5" aria-hidden />
                   <span className="flex flex-col gap-0.5">
                     <span className="text-[13px] font-medium">
-                      <Trans>Load mods</Trans>
+                      <Trans>Download mods only</Trans>
                     </span>
                     <span className="text-xs text-muted-foreground">
                       {missing > 0
                         ? t`${plural(missing, {
-                            one: "Download the # missing or out-of-date mod without starting DayZ.",
-                            other: "Download the # missing or out-of-date mods without starting DayZ.",
+                            one: "Gets the # missing or out-of-date mod ready, without starting DayZ.",
+                            other: "Gets the # missing or out-of-date mods ready, without starting DayZ.",
                           })}`
                         : t`Every mod for this server is installed and up to date.`}
                     </span>

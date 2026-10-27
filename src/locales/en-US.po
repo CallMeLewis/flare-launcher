@@ -86,7 +86,7 @@ msgid "{missing, plural, one {Download # mod and play} other {Download # mods an
 msgstr ""
 
 #: src/components/server-detail.tsx
-msgid "{missing, plural, one {Download the # missing or out-of-date mod without starting DayZ.} other {Download the # missing or out-of-date mods without starting DayZ.}}"
+msgid "{missing, plural, one {Gets the # missing or out-of-date mod ready, without starting DayZ.} other {Gets the # missing or out-of-date mods ready, without starting DayZ.}}"
 msgstr ""
 
 #: src/components/game-start-dialog.tsx
@@ -613,6 +613,11 @@ msgstr "Download canceled"
 msgid "Download failed"
 msgstr ""
 
+#: src/components/server-detail.tsx
+#: src/components/server-table.tsx
+msgid "Download mods only"
+msgstr ""
+
 #: src/lib/shared-messages.ts
 msgid "Download version {version}"
 msgstr ""
@@ -955,11 +960,6 @@ msgstr ""
 #: src/components/first-run-dialog.tsx
 #: src/lib/shared-messages.ts
 msgid "Light or dark, or System to match this computer."
-msgstr ""
-
-#: src/components/server-detail.tsx
-#: src/components/server-table.tsx
-msgid "Load mods"
 msgstr ""
 
 #: src/components/server-table.tsx

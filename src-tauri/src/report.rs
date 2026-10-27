@@ -34,7 +34,7 @@ pub enum Problem {
   Join,
   /// DayZ didn't open in time after joining.
   SlowStart,
-  /// Load mods, which downloads a server's mods without starting DayZ.
+  /// Download mods only, which downloads a server's mods without starting DayZ.
   ModDownload,
   ModUpdate,
   ModVerify,

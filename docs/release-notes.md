@@ -75,8 +75,8 @@ where it helps ("New ...", "Fixed ...", "Removed ..."):
 1. **Action needed**: changes that need the player to do something. They go first, start with "Action needed:", and
    say what changed, who it affects and what to do, on one line. For example: "Action needed: the DayZ folder setting
    has been reset. If DayZ isn't found through Steam, choose its folder again in Settings > Folders."
-2. **Added**: new features, options or capabilities. "New Load mods option next to Play, to download a server's mods
-   without starting DayZ."
+2. **Added**: new features, options or capabilities. "New Download mods only option next to Play, to get a server's
+   mods without starting DayZ."
 3. **Improved**: existing features that work better, faster or more conveniently. "Ping now shows the real network
    delay instead of how long a server takes to answer."
 4. **Changed**: existing behaviour that intentionally works differently, not just better.
@@ -89,7 +89,7 @@ where it helps ("New ...", "Fixed ...", "Removed ..."):
 
 - Is every bullet something a player can notice, written without technical wording?
 - Does every new feature say where to find it?
-- Does any feature name (Play, Load mods, Settings...) appear in more than one bullet? Merge them.
+- Does any feature name (Play, Download mods only, Settings...) appear in more than one bullet? Merge them.
 - Is any other launcher or service named? Remove it.
 - Are the bullets in category order, with any "Action needed:" first?
 - Does every bullet start with `- `, sit on one line and contain no Markdown?

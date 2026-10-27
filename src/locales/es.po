@@ -86,8 +86,8 @@ msgid "{missing, plural, one {Download # mod and play} other {Download # mods an
 msgstr "{missing, plural, one {Descargar # mod y jugar} other {Descargar # mods y jugar}}"
 
 #: src/components/server-detail.tsx
-msgid "{missing, plural, one {Download the # missing or out-of-date mod without starting DayZ.} other {Download the # missing or out-of-date mods without starting DayZ.}}"
-msgstr "{missing, plural, one {Descarga el # mod que falta o está desactualizado sin iniciar DayZ.} other {Descarga los # mods que faltan o están desactualizados sin iniciar DayZ.}}"
+msgid "{missing, plural, one {Gets the # missing or out-of-date mod ready, without starting DayZ.} other {Gets the # missing or out-of-date mods ready, without starting DayZ.}}"
+msgstr "{missing, plural, one {Prepara el # mod que falta o está desactualizado, sin iniciar DayZ.} other {Prepara los # mods que faltan o están desactualizados, sin iniciar DayZ.}}"
 
 #: src/components/game-start-dialog.tsx
 msgid "{modCount, plural, one {# mod} other {# mods}}"
@@ -613,6 +613,11 @@ msgstr "Descarga cancelada"
 msgid "Download failed"
 msgstr "Error en la descarga"
 
+#: src/components/server-detail.tsx
+#: src/components/server-table.tsx
+msgid "Download mods only"
+msgstr "Descargar solo los mods"
+
 #: src/lib/shared-messages.ts
 msgid "Download version {version}"
 msgstr "Descargar la versión {version}"
@@ -956,11 +961,6 @@ msgstr "Claro"
 #: src/lib/shared-messages.ts
 msgid "Light or dark, or System to match this computer."
 msgstr "Claro u oscuro, o Sistema para usar el de este equipo."
-
-#: src/components/server-detail.tsx
-#: src/components/server-table.tsx
-msgid "Load mods"
-msgstr "Cargar mods"
 
 #: src/components/server-table.tsx
 msgid "Loading servers"

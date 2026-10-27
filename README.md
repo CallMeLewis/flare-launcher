@@ -35,7 +35,7 @@ You need Steam with DayZ installed.
   type and more.
 - Keeps your favourite and recently joined servers at hand.
 - Shows the mods a server needs. Play downloads any that are missing or out of date, then starts DayZ and joins.
-- Load mods downloads a server's mods without starting the game.
+- Download mods only gets a server's mods without starting the game.
 - Launch options for common DayZ startup settings, plus your own.
 - Light and dark themes, and stable and beta update channels.
 

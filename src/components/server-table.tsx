@@ -312,7 +312,7 @@ export function ServerTable({
           </ContextMenuItem>
           <ContextMenuItem disabled={menuRow.modCount === 0} onSelect={() => onLoadMods(menuRow)}>
             <Download aria-hidden />
-            <Trans>Load mods</Trans>
+            <Trans>Download mods only</Trans>
           </ContextMenuItem>
           <ContextMenuSeparator />
           <ContextMenuItem onSelect={() => onToggleFavourite(menuRow.id)}>
