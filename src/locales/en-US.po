@@ -41,6 +41,10 @@ msgstr ""
 msgid "{downloadedSize} of {totalSize}"
 msgstr ""
 
+#: src/components/server-detail.tsx
+msgid "{downloadedSize} of up to {totalSize}"
+msgstr ""
+
 #: src/lib/backend-messages.ts
 msgid "{error}"
 msgstr ""
@@ -1904,6 +1908,10 @@ msgstr ""
 
 #: src/components/mods-page.tsx
 msgid "Unsubscribing…"
+msgstr ""
+
+#: src/components/server-detail.tsx
+msgid "up to {downloadSize}"
 msgstr ""
 
 #: src/components/mods-page.tsx

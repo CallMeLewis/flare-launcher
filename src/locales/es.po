@@ -41,6 +41,10 @@ msgstr "{done} de {count}"
 msgid "{downloadedSize} of {totalSize}"
 msgstr "{downloadedSize} de {totalSize}"
 
+#: src/components/server-detail.tsx
+msgid "{downloadedSize} of up to {totalSize}"
+msgstr "{downloadedSize} de un máximo de {totalSize}"
+
 #: src/lib/backend-messages.ts
 msgid "{error}"
 msgstr "{error}"
@@ -1905,6 +1909,10 @@ msgstr "La cancelación de la suscripción se detuvo inesperadamente: {error}"
 #: src/components/mods-page.tsx
 msgid "Unsubscribing…"
 msgstr "Cancelando suscripción…"
+
+#: src/components/server-detail.tsx
+msgid "up to {downloadSize}"
+msgstr "hasta {downloadSize}"
 
 #: src/components/mods-page.tsx
 #: src/components/server-detail.tsx

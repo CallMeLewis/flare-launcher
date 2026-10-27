@@ -51,6 +51,27 @@ struct Details {
   result: u32,
   title: Option<String>,
   time_updated: Option<u64>,
+  #[serde(default)]
+  file_size: Option<Bytes>,
+}
+
+/// The Workshop sends sizes as strings; a number is taken too, in case that changes.
+#[derive(Deserialize)]
+#[serde(untagged)]
+enum Bytes {
+  Text(String),
+  Number(u64),
+}
+
+impl Bytes {
+  /// `None` for a size that isn't a number or is zero, which says nothing about how big the mod is.
+  fn value(&self) -> Option<u64> {
+    match self {
+      Bytes::Text(text) => text.parse().ok(),
+      Bytes::Number(number) => Some(*number),
+    }
+    .filter(|&bytes| bytes > 0)
+  }
 }
 
 /// What the Workshop says about a mod.
@@ -58,6 +79,8 @@ struct Details {
 pub struct WorkshopItem {
   pub title: Option<String>,
   pub time_updated: Option<u64>,
+  /// The size of the whole mod in bytes.
+  pub size: Option<u64>,
 }
 
 /// The Workshop takes this many mods per request.
@@ -79,12 +102,18 @@ pub async fn item_details(http: &reqwest::Client, ids: &[u64]) -> Result<HashMap
       .error_for_status()?
       .json()
       .await?;
-    items.extend(details.response.publishedfiledetails.into_iter().filter(|d| d.result == 1).filter_map(|d| {
-      let title = d.title.map(|title| title.trim().to_string()).filter(|title| !title.is_empty());
-      Some((d.publishedfileid.parse().ok()?, WorkshopItem { title, time_updated: d.time_updated }))
-    }));
+    items.extend(details_by_id(details));
   }
   Ok(items)
+}
+
+/// The mods in an answer from the Workshop that it still has.
+fn details_by_id(details: DetailsResponse) -> impl Iterator<Item = (u64, WorkshopItem)> {
+  details.response.publishedfiledetails.into_iter().filter(|d| d.result == 1).filter_map(|d| {
+    let title = d.title.map(|title| title.trim().to_string()).filter(|title| !title.is_empty());
+    let size = d.file_size.as_ref().and_then(Bytes::value);
+    Some((d.publishedfileid.parse().ok()?, WorkshopItem { title, time_updated: d.time_updated, size }))
+  })
 }
 
 /// When each mod was last updated on the Workshop. Mods the Workshop doesn't know, such as removed ones, are left out.
@@ -569,5 +598,26 @@ mod tests {
   #[test]
   fn a_failed_download_wins_over_any_state() {
     assert_eq!(status_of(ItemState::SUBSCRIBED | ItemState::INSTALLED, true), ModStatus::Failed);
+  }
+
+  #[test]
+  fn reads_mod_details_from_the_workshop() {
+    let details: DetailsResponse = serde_json::from_str(
+      r#"{"response": {"publishedfiledetails": [
+        {"publishedfileid": "1559212036", "result": 1, "title": " CF ", "time_updated": 1700000000, "file_size": "538560"},
+        {"publishedfileid": "2", "result": 1, "file_size": 1024},
+        {"publishedfileid": "3", "result": 1, "file_size": "0"},
+        {"publishedfileid": "4", "result": 9}
+      ]}}"#,
+    )
+    .unwrap();
+    let items: HashMap<u64, WorkshopItem> = details_by_id(details).collect();
+    assert_eq!(
+      items[&1559212036],
+      WorkshopItem { title: Some("CF".into()), time_updated: Some(1700000000), size: Some(538560) }
+    );
+    assert_eq!(items[&2].size, Some(1024));
+    assert_eq!(items[&3].size, None);
+    assert!(!items.contains_key(&4));
   }
 }

@@ -12,6 +12,7 @@ import type {
   Install,
   LaunchRequest,
   Mod,
+  ModCheck,
   ModProgress,
   Ping,
   Problem,
@@ -61,8 +62,10 @@ export const backend = {
   /** On Linux, the system's memory map limit when it's too low for DayZ, or `null` when it's fine. */
   lowMapCount: (): Promise<number | null> => (isPreview ? Promise.resolve(null) : invoke("low_map_count")),
 
-  installedMods: (dayzDir: string, ids: number[]): Promise<number[]> =>
-    isPreview ? Promise.resolve([]) : invoke("installed_mods", { dayzDir: dayzDir || null, ids }),
+  installedMods: (dayzDir: string, ids: number[]): Promise<ModCheck> =>
+    isPreview
+      ? Promise.resolve({ installed: [], outdated: [], sizes: {} })
+      : invoke("installed_mods", { dayzDir: dayzDir || null, ids }),
 
   /** Of the given installed mods, those the server runs a different version of. Empty when it can't be checked. */
   modsDifferingFromServer: (dayzDir: string, serverId: string, ids: number[]): Promise<DifferingMod[]> =>

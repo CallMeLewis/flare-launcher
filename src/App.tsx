@@ -24,6 +24,7 @@ import { useAppMenuOffer } from "@/hooks/use-app-menu-offer";
 import { useStoredState } from "@/hooks/use-stored-state";
 import { useSubscribedMods } from "@/hooks/use-subscribed-mods";
 import { backend, errorMessage, hasSystemTitleBar } from "@/lib/backend";
+import { withReportedSizes } from "@/lib/format";
 import { followLanguage } from "@/lib/i18n";
 import { launchArgs } from "@/lib/launch-options";
 import { serverCounts, type ModJob } from "@/lib/mods";
@@ -426,10 +427,18 @@ export function App() {
           toast.error(t`DayZ wasn't found`, { description: t`Set the DayZ folder in Settings.` });
           return;
         }
-        setJob({ serverId: server.id, phase: "checking", startsGame: startGame, progress: [] });
+        const job: Omit<PlayJob, "phase"> = {
+          serverId: server.id,
+          startsGame: startGame,
+          progress: [],
+          sizes: {},
+          outdated: [],
+        };
+        setJob({ ...job, phase: "checking" });
         const mods = await backend.serverMods(server.id);
         const ids = mods.map((mod) => mod.steamWorkshopId);
-        const installed = new Set(await backend.installedMods(settings.dayzDir, ids));
+        const check = await backend.installedMods(settings.dayzDir, ids);
+        const installed = new Set(check.installed);
         const missing = ids.filter((id) => !installed.has(id));
 
         if (!startGame && missing.length === 0) {
@@ -441,9 +450,10 @@ export function App() {
           // Downloading subscribes to them again.
           setUnsubscribedIds((ids) => new Set([...ids].filter((id) => !missing.includes(id))));
           const queued = missing.map((id) => ({ id, status: "queued" as const, downloaded: 0, total: 0 }));
-          setJob({ serverId: server.id, phase: "downloading", startsGame: startGame, progress: queued });
+          const { sizes, outdated } = check;
+          setJob({ ...job, phase: "downloading", progress: queued, sizes, outdated });
           const finished = await backend.downloadMods(missing, (progress) =>
-            setJob((current) => current && { ...current, progress }),
+            setJob((current) => current && { ...current, progress, sizes: withReportedSizes(current.sizes, progress) }),
           );
           setInstallVersion((version) => version + 1);
           if (!finished) {
@@ -462,7 +472,7 @@ export function App() {
           }
         }
 
-        setJob({ serverId: server.id, phase: "starting", startsGame: true, progress: [] });
+        setJob({ ...job, phase: "starting", startsGame: true });
         const start: GameStart = { server, modCount: ids.length, stage: "starting" };
         showGameStart(start);
         await backend.launch({

@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { downloadFraction, formatAgo, formatBytes, joinAddress, joinLink } from "./format";
+import {
+  downloadBytes,
+  downloadFraction,
+  formatAgo,
+  formatBytes,
+  joinAddress,
+  joinLink,
+  withReportedSizes,
+} from "./format";
 import type { ModProgress } from "./types";
 
 describe("formatBytes", () => {
@@ -31,6 +39,45 @@ describe("downloadFraction", () => {
 
   it("is complete once every mod is installed", () => {
     expect(downloadFraction([mod("installed"), mod("installed", 10, 10)])).toBe(1);
+  });
+});
+
+describe("downloadBytes", () => {
+  const mod = (id: number, status: ModProgress["status"], downloaded = 0, total = 0): ModProgress => ({
+    id,
+    status,
+    downloaded,
+    total,
+  });
+
+  it("adds up every mod, using Steam's size once it reports one", () => {
+    const sizes = { 1: 100, 2: 1000, 3: 50 };
+    expect(downloadBytes([mod(1, "installed"), mod(2, "downloading", 300, 800), mod(3, "queued")], sizes)).toEqual({
+      downloaded: 400,
+      total: 950,
+    });
+  });
+
+  it("is unknown while any mod's size is", () => {
+    expect(downloadBytes([mod(1, "queued"), mod(2, "queued")], { 1: 100 })).toBeNull();
+    expect(downloadBytes([], {})).toBeNull();
+  });
+});
+
+describe("withReportedSizes", () => {
+  it("keeps Steam's size for a mod after it finishes", () => {
+    const reported = withReportedSizes({ 1: 1000, 2: 50 }, [
+      { id: 1, status: "downloading", downloaded: 10, total: 200 },
+      { id: 2, status: "queued", downloaded: 0, total: 0 },
+    ]);
+    expect(reported).toEqual({ 1: 200, 2: 50 });
+    const finished = [{ id: 1, status: "installed" as const, downloaded: 0, total: 0 }];
+    expect(downloadBytes(finished, withReportedSizes(reported, finished))).toEqual({ downloaded: 200, total: 200 });
+  });
+
+  it("returns the same sizes when nothing new is reported", () => {
+    const sizes = { 1: 100 };
+    expect(withReportedSizes(sizes, [{ id: 1, status: "downloading", downloaded: 5, total: 100 }])).toBe(sizes);
   });
 });
 

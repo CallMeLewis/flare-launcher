@@ -38,7 +38,7 @@ import { useLowMapCount } from "@/hooks/use-low-map-count";
 import type { PingResult } from "@/hooks/use-pings";
 import { backend, errorMessage } from "@/lib/backend";
 import { countryName } from "@/lib/countries";
-import { downloadFraction, formatAgo, formatBytes, formatMinutes, joinAddress } from "@/lib/format";
+import { downloadBytes, downloadFraction, formatAgo, formatBytes, formatMinutes, joinAddress } from "@/lib/format";
 import { copyJoinLink } from "@/lib/share";
 import { mapName } from "@/lib/maps";
 import type { Install, Mod, ModProgress, PlayJob, ServerRow } from "@/lib/types";
@@ -92,6 +92,9 @@ export function ServerDetail({
   const { t, i18n } = useLingui();
   const [mods, setMods] = useState<Mod[] | null>(null);
   const [installed, setInstalled] = useState<ReadonlySet<number> | null>(null);
+  // The size of each mod on the Workshop, and which installed ones are out of date, to say what joining downloads.
+  const [sizes, setSizes] = useState<Record<number, number>>({});
+  const [outdated, setOutdated] = useState<ReadonlySet<number>>(new Set());
   // Up-to-date mods the server runs a different version of, with when each was updated on the Workshop. The server
   // hasn't downloaded the update, or hasn't restarted since.
   const [differing, setDiffering] = useState<ReadonlyMap<number, number | null>>(new Map());
@@ -130,6 +133,8 @@ export function ServerDetail({
     latestCheck.current += 1;
     setMods(null);
     setInstalled(null);
+    setSizes({});
+    setOutdated(new Set());
     setDiffering(new Map());
     setModsFailed(false);
     setCheckFailed(false);
@@ -217,10 +222,13 @@ export function ServerDetail({
       .modsDifferingFromServer(dayzDir, server.id, modIds)
       .then((found) => check === latestCheck.current && setDiffering(new Map(found.map((m) => [m.id, m.updatedAt]))))
       .catch(() => {});
-    const ids = await backend.installedMods(dayzDir, modIds).catch(() => null);
+    const found = await backend.installedMods(dayzDir, modIds).catch(() => null);
     if (check !== latestCheck.current) return;
-    setCheckFailed(!ids);
-    if (ids) setInstalled(new Set(ids));
+    setCheckFailed(!found);
+    if (!found) return;
+    setInstalled(new Set(found.installed));
+    setOutdated(new Set(found.outdated));
+    setSizes(found.sizes);
     // installVersion is a dependency so a finished download triggers a re-check.
     // oxlint-disable-next-line react-hooks/exhaustive-deps
   }, [mods, canCheckMods, dayzDir, installVersion]);
@@ -253,7 +261,14 @@ export function ServerDetail({
   const downloading = job?.phase === "downloading" ? job.progress : null;
   const progressById = useMemo(() => new Map(downloading?.map((p) => [p.id, p])), [downloading]);
 
-  const missing = mods && installed ? mods.filter((mod) => !installed.has(mod.steamWorkshopId)).length : 0;
+  const toDownload = mods && installed ? mods.filter((mod) => !installed.has(mod.steamWorkshopId)) : [];
+  const missing = toDownload.length;
+  // Only given when the Workshop said how big every one is, so the total is never short.
+  const downloadSize = toDownload.every((mod) => sizes[mod.steamWorkshopId] !== undefined)
+    ? formatBytes(toDownload.reduce((sum, mod) => sum + sizes[mod.steamWorkshopId], 0))
+    : null;
+  // An update downloads only what changed, so the Workshop's size is the most it can be.
+  const updating = toDownload.some((mod) => outdated.has(mod.steamWorkshopId));
   // A mod still to download is counted as missing, not as differing.
   const differs = (id: number) => differing.has(id) && installed?.has(id) === true;
   const differingCount = mods ? mods.filter((mod) => differs(mod.steamWorkshopId)).length : 0;
@@ -262,7 +277,7 @@ export function ServerDetail({
   const modGroups =
     mods && installed && (missing > 0 || differingCount > 0)
       ? [
-          { key: "missing", label: t`To download`, mods: mods.filter((mod) => !installed.has(mod.steamWorkshopId)) },
+          { key: "missing", label: t`To download`, mods: toDownload },
           {
             key: "differs",
             label: t`Different from the server`,
@@ -458,11 +473,21 @@ export function ServerDetail({
               className={cn("text-xs", missing > 0 || differingCount > 0 ? "text-warning" : "text-success")}
               aria-live="polite"
             >
-              {missing > 0
-                ? t`${plural(missing, { one: "# to download", other: "# to download" })}`
-                : differingCount > 0
-                  ? t`${plural(differingCount, { one: "# differs from the server", other: "# differ from the server" })}`
-                  : t`All up to date`}
+              {missing > 0 ? (
+                <>
+                  {t`${plural(missing, { one: "# to download", other: "# to download" })}`}
+                  {downloadSize !== null && (
+                    <>
+                      {" · "}
+                      <span className="data">{updating ? t`up to ${downloadSize}` : downloadSize}</span>
+                    </>
+                  )}
+                </>
+              ) : differingCount > 0 ? (
+                t`${plural(differingCount, { one: "# differs from the server", other: "# differ from the server" })}`
+              ) : (
+                t`All up to date`
+              )}
             </p>
           )}
         </div>
@@ -642,7 +667,13 @@ export function ServerDetail({
         )}
 
         {downloading ? (
-          <DownloadStatus progress={downloading} startsGame={job?.startsGame ?? true} onCancel={onCancelDownload} />
+          <DownloadStatus
+            progress={downloading}
+            sizes={job?.sizes ?? {}}
+            outdated={job?.outdated ?? []}
+            startsGame={job?.startsGame ?? true}
+            onCancel={onCancelDownload}
+          />
         ) : (
           <div className="flex">
             <Button
@@ -788,23 +819,37 @@ function ModRow({
 
 function DownloadStatus({
   progress,
+  sizes,
+  outdated,
   startsGame,
   onCancel,
 }: {
   progress: ModProgress[];
+  /** Each mod's size, where known. */
+  sizes: Record<number, number>;
+  /** Mods being updated, which download only what changed. */
+  outdated: number[];
   /** Whether DayZ starts once the mods are in. */
   startsGame: boolean;
   onCancel: () => void;
 }) {
   const { t } = useLingui();
   const done = progress.filter((p) => p.status === "installed").length;
-  // Steam only reports sizes for the mods it is downloading right now.
-  const active = progress.filter((p) => p.status === "downloading");
-  const downloaded = active.reduce((sum, p) => sum + p.downloaded, 0);
-  const total = active.reduce((sum, p) => sum + p.total, 0);
   const count = progress.length;
+  // Across every mod when all their sizes are known. Otherwise only the mods Steam is downloading right now, the only
+  // ones it reports sizes for.
+  const bytes = downloadBytes(progress, sizes);
+  const overall = bytes !== null;
+  const active = progress.filter((p) => p.status === "downloading");
+  const { downloaded, total } = bytes ?? {
+    downloaded: active.reduce((sum, p) => sum + p.downloaded, 0),
+    total: active.reduce((sum, p) => sum + p.total, 0),
+  };
+  // An update Steam hasn't started on yet counts at its full size, though only what changed downloads.
+  const atMost = overall && progress.some((p) => outdated.includes(p.id) && p.status === "queued");
   const downloadedSize = formatBytes(downloaded);
   const totalSize = formatBytes(total);
+  const fraction = overall && total > 0 ? downloaded / total : downloadFraction(progress);
 
   return (
     <div className="flex flex-col gap-3">
@@ -819,9 +864,13 @@ function DownloadStatus({
             </Trans>
           </span>
         </div>
-        <Progress value={downloadFraction(progress) * 100} aria-label={t`Mod download progress`} />
+        <Progress value={fraction * 100} aria-label={t`Mod download progress`} />
         <p className="data text-xs text-muted-foreground">
-          {total > 0 ? t`${downloadedSize} of ${totalSize}` : t`Waiting for Steam`}
+          {total === 0
+            ? t`Waiting for Steam`
+            : atMost
+              ? t`${downloadedSize} of up to ${totalSize}`
+              : t`${downloadedSize} of ${totalSize}`}
         </p>
       </div>
       <Button variant="secondary" onClick={onCancel} className="w-full">

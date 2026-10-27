@@ -270,4 +270,12 @@ mod live_tests {
     assert!(times[&1559212036] > 1_600_000_000);
     assert!(!times.contains_key(&1));
   }
+
+  #[tokio::test]
+  #[ignore = "needs network access"]
+  async fn reads_how_big_workshop_mods_are() {
+    let http = reqwest::Client::builder().user_agent("FlareLauncher/test").build().unwrap();
+    let items = workshop::item_details(&http, &[1559212036]).await.unwrap();
+    assert!(items[&1559212036].size.is_some_and(|bytes| bytes > 100_000));
+  }
 }

@@ -462,23 +462,45 @@ pub fn open_folder(app: tauri::AppHandle, dayz_dir: Option<String>, folder: Fold
   opened.map_err(|e| crate::text!("The folder couldn't be opened: {error}", error = e).into())
 }
 
-/// Returns which of the given Workshop mods are installed and up to date. A mod updated on the Workshop since Steam
-/// last downloaded it is left out, so it is downloaded again before joining: a server kicks a player whose copy is
-/// older than its own. When the Workshop can't be reached, every installed mod counts.
+/// Which of a server's mods are ready, and how big the rest are to download.
+#[derive(Serialize, Debug, Default, PartialEq)]
+#[serde(rename_all = "camelCase")]
+pub struct ModCheck {
+  /// Installed and up to date.
+  pub installed: Vec<u64>,
+  /// Installed, but older than the Workshop's copy. Updating one downloads only what changed.
+  pub outdated: Vec<u64>,
+  /// Each mod's size on the Workshop in bytes, where it said.
+  pub sizes: HashMap<u64, u64>,
+}
+
+/// Checks which of the given Workshop mods are installed and up to date. A mod updated on the Workshop since Steam
+/// last downloaded it counts as outdated, so it is downloaded again before joining: a server kicks a player whose copy
+/// is older than its own. When the Workshop can't be reached, every installed mod counts as up to date and no sizes
+/// are known.
 #[tauri::command]
 pub async fn installed_mods(
   http: tauri::State<'_, reqwest::Client>,
   dayz_dir: Option<String>,
   ids: Vec<u64>,
-) -> crate::error::Result<Vec<u64>> {
-  let Some(install) = locate(dayz_dir.as_deref()) else { return Ok(Vec::new()) };
-  let installed: Vec<u64> = ids.into_iter().filter(|&id| install.is_mod_installed(id)).collect();
-  let latest = crate::workshop::latest_update_times(&http, &installed).await.unwrap_or_else(|e| {
+) -> crate::error::Result<ModCheck> {
+  let Some(install) = locate(dayz_dir.as_deref()) else { return Ok(ModCheck::default()) };
+  let workshop = crate::workshop::item_details(&http, &ids).await.unwrap_or_else(|e| {
     log::warn!("could not check the Workshop for mod updates: {e}");
     HashMap::new()
   });
   let local = install.installed_update_times();
-  Ok(installed.into_iter().filter(|id| up_to_date(local.get(id), latest.get(id))).collect())
+  let mut check = ModCheck::default();
+  for id in ids.into_iter().filter(|&id| install.is_mod_installed(id)) {
+    let latest = workshop.get(&id).and_then(|item| item.time_updated);
+    if up_to_date(local.get(&id), latest.as_ref()) {
+      check.installed.push(id);
+    } else {
+      check.outdated.push(id);
+    }
+  }
+  check.sizes = workshop.into_iter().filter_map(|(id, item)| Some((id, item.size?))).collect();
+  Ok(check)
 }
 
 /// A mod the player is subscribed to.

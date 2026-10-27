@@ -41,6 +41,10 @@ msgstr "{done} von {count}"
 msgid "{downloadedSize} of {totalSize}"
 msgstr "{downloadedSize} von {totalSize}"
 
+#: src/components/server-detail.tsx
+msgid "{downloadedSize} of up to {totalSize}"
+msgstr "{downloadedSize} von bis zu {totalSize}"
+
 #: src/lib/backend-messages.ts
 msgid "{error}"
 msgstr "{error}"
@@ -1905,6 +1909,10 @@ msgstr "Das Beenden des Abos wurde unerwartet abgebrochen: {error}"
 #: src/components/mods-page.tsx
 msgid "Unsubscribing…"
 msgstr "Abo wird beendet…"
+
+#: src/components/server-detail.tsx
+msgid "up to {downloadSize}"
+msgstr "bis zu {downloadSize}"
 
 #: src/components/mods-page.tsx
 #: src/components/server-detail.tsx

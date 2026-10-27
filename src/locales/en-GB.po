@@ -41,6 +41,10 @@ msgstr "{done} of {count}"
 msgid "{downloadedSize} of {totalSize}"
 msgstr "{downloadedSize} of {totalSize}"
 
+#: src/components/server-detail.tsx
+msgid "{downloadedSize} of up to {totalSize}"
+msgstr "{downloadedSize} of up to {totalSize}"
+
 #: src/lib/backend-messages.ts
 msgid "{error}"
 msgstr "{error}"
@@ -1905,6 +1909,10 @@ msgstr "Unsubscribing stopped unexpectedly: {error}"
 #: src/components/mods-page.tsx
 msgid "Unsubscribing…"
 msgstr "Unsubscribing…"
+
+#: src/components/server-detail.tsx
+msgid "up to {downloadSize}"
+msgstr "up to {downloadSize}"
 
 #: src/components/mods-page.tsx
 #: src/components/server-detail.tsx

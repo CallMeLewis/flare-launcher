@@ -86,6 +86,20 @@ export type PlayJob = {
   /** False when the player only wants the mods downloaded. */
   startsGame: boolean;
   progress: ModProgress[];
+  /** Each mod's size in bytes, where known: Steam's once it reports one, before that the Workshop's. */
+  sizes: Record<number, number>;
+  /** Mods already on this computer being updated, which download only what changed. */
+  outdated: number[];
+};
+
+/** Which of a server's mods are ready, and how big the rest are to download. */
+export type ModCheck = {
+  /** Installed and up to date. */
+  installed: number[];
+  /** Installed, but older than the Workshop's copy. Updating one downloads only what changed. */
+  outdated: number[];
+  /** Each mod's size on the Workshop in bytes, by id, where it said. */
+  sizes: Record<number, number>;
 };
 
 export type Install = {

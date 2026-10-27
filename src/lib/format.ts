@@ -35,8 +35,9 @@ export function formatBytes(bytes: number): string {
 }
 
 /**
- * Overall progress of a set of mod downloads, from 0 to 1. Each mod counts
- * equally because Steam only reports a mod's size once it starts downloading.
+ * Overall progress of a set of mod downloads, from 0 to 1, for when their sizes
+ * aren't all known. Each mod counts equally because Steam only reports a mod's
+ * size once it starts downloading.
  */
 export function downloadFraction(progress: ModProgress[]): number {
   if (progress.length === 0) return 0;
@@ -45,6 +46,33 @@ export function downloadFraction(progress: ModProgress[]): number {
     return acc + (p.total > 0 ? Math.min(p.downloaded / p.total, 1) : 0);
   }, 0);
   return sum / progress.length;
+}
+
+/**
+ * The sizes known for a set of mods, with Steam's for each it has started on. Steam's is exact, and for an update
+ * it's only what changed, so it's kept once the mod finishes and Steam stops reporting it.
+ */
+export function withReportedSizes(sizes: Record<number, number>, progress: ModProgress[]): Record<number, number> {
+  const reported = progress.filter((p) => p.total > 0 && sizes[p.id] !== p.total);
+  if (reported.length === 0) return sizes;
+  return { ...sizes, ...Object.fromEntries(reported.map((p) => [p.id, p.total])) };
+}
+
+/** Bytes downloaded so far and in all across a set of mod downloads, or `null` while any mod's size is unknown. */
+export function downloadBytes(
+  progress: ModProgress[],
+  sizes: Record<number, number>,
+): { downloaded: number; total: number } | null {
+  let downloaded = 0;
+  let total = 0;
+  for (const p of progress) {
+    const size = p.total > 0 ? p.total : sizes[p.id];
+    if (size === undefined) return null;
+    total += size;
+    if (p.status === "installed") downloaded += size;
+    else if (p.status === "downloading") downloaded += Math.min(p.downloaded, size);
+  }
+  return total > 0 ? { downloaded, total } : null;
 }
 
 /** A wait in whole minutes, as `40 min` or `1 h 20 min`. */
