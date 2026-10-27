@@ -36,6 +36,7 @@ import {
   NO_FILTERS,
   activeFilterCount,
   compareGameVersions,
+  filterChips,
   filterServers,
   countryCounts,
   mapCounts,
@@ -376,6 +377,15 @@ export function App() {
     [view, sorted, favourites],
   );
   const playersShown = useMemo(() => listed.reduce((sum, row) => sum + row.players, 0), [listed]);
+  // The filters pass over favourites, so with any on, a line under them says what follows is what the filters matched.
+  const pinned = view === "all" ? listed.filter((row) => favourites.has(row.id)).length : 0;
+  const divider =
+    pinned > 0 && filterChips(filters).length > 0
+      ? {
+          at: pinned,
+          label: pinned < listed.length ? t`Servers matching your filters` : t`No other servers match your filters`,
+        }
+      : null;
 
   // Ordering by ping needs a result for every listed server, not just those on screen.
   useEffect(() => {
@@ -686,6 +696,7 @@ export function App() {
                     search={search}
                     modNames={servers.modNames}
                     gameVersion={gameVersion}
+                    divider={divider}
                     empty={
                       inView.length === 0 && view === "lan" ? (
                         <Message

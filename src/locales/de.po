@@ -1113,6 +1113,10 @@ msgstr "Noch keine Favoriten"
 msgid "No mods match"
 msgstr "Keine passenden Mods"
 
+#: src/App.tsx
+msgid "No other servers match your filters"
+msgstr "Keine weiteren Server entsprechen deinen Filtern"
+
 #: src/components/filter-menu.tsx
 #: src/lib/filter.ts
 msgid "No password"
@@ -1469,6 +1473,10 @@ msgstr "Servertyp"
 #: src/components/server-table.tsx
 msgid "Servers"
 msgstr "Server"
+
+#: src/App.tsx
+msgid "Servers matching your filters"
+msgstr "Server, die deinen Filtern entsprechen"
 
 #: src/components/filter-menu.tsx
 msgid "Servers that stop answering"

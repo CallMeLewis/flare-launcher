@@ -1,4 +1,14 @@
-import { memo, useEffect, useRef, useState, type KeyboardEvent, type MouseEvent, type ReactNode } from "react";
+import {
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEvent,
+  type MouseEvent,
+  type ReactNode,
+} from "react";
 import type { MessageDescriptor } from "@lingui/core";
 import { msg } from "@lingui/core/macro";
 import { Trans, useLingui } from "@lingui/react/macro";
@@ -89,8 +99,12 @@ type Props = {
   modNames: readonly string[];
   /** The DayZ version on this computer, to mark servers running another. */
   gameVersion: string | null;
+  /** A labelled line before the row at `at`, to set the pinned favourites apart from the servers the filters matched. */
+  divider: { at: number; label: string } | null;
   empty: ReactNode;
 };
+
+const DIVIDER_HEIGHT = 28;
 
 export function ServerTable({
   rows,
@@ -108,21 +122,33 @@ export function ServerTable({
   search,
   modNames,
   gameVersion,
+  divider,
   empty,
 }: Props) {
   const { t, i18n } = useLingui();
   const scroller = useRef<HTMLDivElement>(null);
   // The server the right-click menu is for.
   const [menuRow, setMenuRow] = useState<ServerRow | null>(null);
+  const dividerAt = divider?.at ?? null;
+  // What each place in the list holds: a server, or `null` for the divider.
+  const places = useMemo(
+    () => (dividerAt === null ? rows : [...rows.slice(0, dividerAt), null, ...rows.slice(dividerAt)]),
+    [rows, dividerAt],
+  );
+  // Keyed by server, so the virtualizer works out the places again when the divider moves.
+  const getItemKey = useCallback((index: number) => places[index]?.id ?? "divider", [places]);
   const virtualizer = useVirtualizer({
-    count: rows.length,
+    count: places.length,
     getScrollElement: () => scroller.current,
-    estimateSize: () => ROW_HEIGHT,
+    estimateSize: (index) => (places[index] === null ? DIVIDER_HEIGHT : ROW_HEIGHT),
+    getItemKey,
     overscan: 12,
   });
   const items = virtualizer.getVirtualItems();
   const first = items[0]?.index ?? 0;
   const last = items[items.length - 1]?.index ?? -1;
+  /** Where the server at `index` in `rows` sits in the list, past the divider. */
+  const placeOf = (index: number) => (dividerAt !== null && index >= dividerAt ? index + 1 : index);
 
   // Ping the rows on screen once scrolling settles.
   const { request } = pings;
@@ -130,12 +156,15 @@ export function ServerTable({
     if (last < first) return;
     const timer = setTimeout(() => {
       request(
-        rows.slice(first, last + 1).map((row) => row.id),
+        places
+          .slice(first, last + 1)
+          .filter((row) => row !== null)
+          .map((row) => row.id),
         true,
       );
     }, 200);
     return () => clearTimeout(timer);
-  }, [rows, first, last, request]);
+  }, [places, first, last, request]);
 
   function onKeyDown(event: KeyboardEvent<HTMLDivElement>) {
     // Keys pressed on a sort header belong to that button, not the list.
@@ -169,7 +198,7 @@ export function ServerTable({
     }
     event.preventDefault();
     onSelect(rows[next].id);
-    virtualizer.scrollToIndex(next);
+    virtualizer.scrollToIndex(placeOf(next));
   }
 
   /** From the keyboard, opens the menu under the selected row as if it had been right-clicked. */
@@ -218,7 +247,7 @@ export function ServerTable({
           role="grid"
           aria-label={t`Servers`}
           aria-readonly
-          aria-rowcount={rows.length + 1}
+          aria-rowcount={places.length + 1}
           tabIndex={0}
           aria-activedescendant={selectedId ? `server-${selectedId}` : undefined}
           onKeyDown={onKeyDown}
@@ -280,7 +309,22 @@ export function ServerTable({
             ) : (
               <div className="relative w-full" style={{ height: virtualizer.getTotalSize() }}>
                 {items.map((item) => {
-                  const row = rows[item.index];
+                  const row = places[item.index];
+                  if (row === null) {
+                    return (
+                      <div
+                        key="divider"
+                        role="row"
+                        aria-rowindex={item.index + 2}
+                        style={{ transform: `translateY(${item.start}px)`, height: DIVIDER_HEIGHT }}
+                        className="absolute inset-x-0 top-0 flex items-center border-b border-border/50 bg-card/60 pl-9 text-xs text-muted-foreground"
+                      >
+                        <div role="gridcell" aria-colspan={HEADERS.length + 1}>
+                          {divider?.label}
+                        </div>
+                      </div>
+                    );
+                  }
                   return (
                     <Row
                       key={row.id}
