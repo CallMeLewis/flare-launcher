@@ -535,6 +535,10 @@ msgid "DayZ folder"
 msgstr "Carpeta de DayZ"
 
 #: src/components/first-run-dialog.tsx
+msgid "DayZ found through Steam at {folder}"
+msgstr "DayZ encontrado a través de Steam en {folder}"
+
+#: src/components/first-run-dialog.tsx
 msgid "DayZ goes straight to loading when it starts."
 msgstr "DayZ pasa directamente a la pantalla de carga al iniciarse."
 

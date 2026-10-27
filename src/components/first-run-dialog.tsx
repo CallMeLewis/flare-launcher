@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { Trans, useLingui } from "@lingui/react/macro";
 import { SettingRow, SettingsGroup } from "@flare/ui";
-import { THEMES } from "@/components/settings-dialog";
+import { CircleCheck } from "lucide-react";
+import { DayzFolderField, THEMES } from "@/components/settings-dialog";
 import { Button } from "@flare/ui/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@flare/ui/ui/dialog";
 import { Input } from "@flare/ui/ui/input";
@@ -10,12 +11,14 @@ import { Switch } from "@flare/ui/ui/switch";
 import { ToggleGroup, ToggleGroupItem } from "@flare/ui/ui/toggle-group";
 import { addToAppMenu, markAppMenuOffered } from "@/hooks/use-app-menu-offer";
 import { backend } from "@/lib/backend";
-import type { Settings, Theme } from "@/lib/types";
+import type { Install, Settings, Theme } from "@/lib/types";
 import appIcon from "../../src-tauri/icons/128x128@2x.png";
 
 type Props = {
   open: boolean;
   settings: Settings;
+  /** `undefined` while DayZ is still being looked for. */
+  install: Install | null | undefined;
   onChange: (settings: Settings) => void;
   onDone: () => void;
 };
@@ -24,7 +27,7 @@ type Props = {
  * The few choices worth making before the first game, shown once. Each applies as it's made, like Settings, so leaving
  * at any point keeps what was chosen and every other setting keeps its default.
  */
-export function FirstRunDialog({ open, settings, onChange, onDone }: Props) {
+export function FirstRunDialog({ open, settings, install, onChange, onDone }: Props) {
   const { t, i18n } = useLingui();
   const set = (patch: Partial<Settings>) => onChange({ ...settings, ...patch });
   // Only an AppImage that isn't in the app menu yet is offered it, and it's added on finishing: adding may move the
@@ -65,6 +68,18 @@ export function FirstRunDialog({ open, settings, onChange, onDone }: Props) {
             </DialogDescription>
           </div>
         </div>
+
+        {/* Where DayZ is, so a player it wasn't found for learns here rather than from a greyed-out Play. */}
+        {install && !settings.dayzDir ? (
+          <p className="-mt-2 flex items-start gap-1.5 text-xs text-muted-foreground">
+            <CircleCheck className="mt-0.5 size-3.5 shrink-0 text-success" aria-hidden />
+            <span className="selectable break-all">{t`DayZ found through Steam at ${{ folder: install.dayzDir }}`}</span>
+          </p>
+        ) : (
+          install !== undefined && (
+            <DayzFolderField id="setup-dayz-dir" settings={settings} onChange={set} install={install} />
+          )
+        )}
 
         <SettingsGroup title={t`In game`}>
           <SettingRow

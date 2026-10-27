@@ -779,6 +779,7 @@ export function App() {
       <FirstRunDialog
         open={setupOpen}
         settings={settings}
+        install={install}
         onChange={setSettings}
         onDone={() => {
           setSetupOpen(false);
