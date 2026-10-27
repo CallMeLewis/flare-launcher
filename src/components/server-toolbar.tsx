@@ -463,7 +463,7 @@ function SmartSearch({
         aria-autocomplete="list"
         autoComplete="off"
         spellCheck={false}
-        placeholder={suggest ? t`Search servers, maps or mods` : t`Search name, map, IP or mod`}
+        placeholder={t`Search name, map, IP or mod`}
         value={filters.search}
         onChange={(event) => {
           onChange({ search: event.target.value });

@@ -1372,10 +1372,6 @@ msgstr "Buscar por nombre, mapa, IP o mod"
 msgid "Search servers"
 msgstr "Buscar servidores"
 
-#: src/components/server-toolbar.tsx
-msgid "Search servers, maps or mods"
-msgstr "Buscar servidores, mapas o mods"
-
 #: src/App.tsx
 msgid "Search the network again"
 msgstr "Volver a buscar en la red"
