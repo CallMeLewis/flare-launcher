@@ -158,7 +158,7 @@ pub fn from_query(addr: SocketAddr, info: Info, mods: Vec<Mod>) -> Option<Stored
     players: info.players.into(),
     max_players: info.max_players.into(),
     password: info.password,
-    first_person_only: has("no3rd"),
+    first_person_only: first_person_only(has("no3rd"), &info.version),
     // Community servers say they run their own hive or an external one.
     official: !has("privHive") && !has("external"),
     verified: false,
@@ -171,6 +171,20 @@ pub fn from_query(addr: SocketAddr, info: Info, mods: Vec<Mod>) -> Option<Stored
     mods: Vec::new(),
   };
   Some(StoredServer { row, mods, listed: false })
+}
+
+/// Whether a server only lets players see in first person, from whether its keywords carry `no3rd`.
+///
+/// From 1.30, DayZ servers send `no3rd` the wrong way round: when third person is on, or on in vehicles only, and not
+/// when it's off. Lists built from the tags, the fallback among them, carry the mistake too, so this turns it back.
+/// When a DayZ update fixes it, stop turning it from that version on (see "DayZ's mistakes" in docs/development.md).
+fn first_person_only(no3rd: bool, version: &str) -> bool {
+  let mut parts = version.trim().split('.').map(str::parse::<u32>);
+  let backwards = match (parts.next(), parts.next()) {
+    (Some(Ok(major)), Some(Ok(minor))) => (major, minor) >= (1, 30),
+    _ => false,
+  };
+  no3rd != backwards
 }
 
 fn country_of(ip: IpAddr) -> Option<String> {
@@ -192,7 +206,8 @@ fn into_stored(api: ApiServer) -> StoredServer {
     players: api.players,
     max_players: api.max_players,
     password: api.password,
-    first_person_only: api.first_person_only,
+    // The fallback list passes on `no3rd` as it comes.
+    first_person_only: first_person_only(api.first_person_only, &api.version),
     official: api.shard == "public",
     verified: false,
     battl_eye: api.battl_eye,
@@ -616,5 +631,26 @@ mod tests {
 
     let no_port = Info { game_port: None, ..Info::default() };
     assert!(from_query("192.168.1.20:27016".parse().unwrap(), no_port, Vec::new()).is_none());
+  }
+
+  #[test]
+  fn reads_no3rd_the_other_way_round_from_dayz_1_30() {
+    let first_person = |keywords: &str, version: &str| {
+      let info = Info { version: version.into(), game_port: Some(2302), keywords: keywords.into(), ..Info::default() };
+      from_query("192.168.1.20:27016".parse().unwrap(), info, Vec::new()).unwrap().row.first_person_only
+    };
+    assert!(first_person("battleye,no3rd,privHive", "1.29.163709"));
+    assert!(!first_person("battleye,privHive", "1.29.163709"));
+    assert!(!first_person("battleye,no3rd,privHive", "1.30.164200"));
+    assert!(first_person("battleye,privHive", "1.30.164200"));
+    assert!(!first_person("battleye,no3rd,privHive", "1.31.1"));
+    assert!(first_person("battleye,no3rd,privHive", ""), "no version to go by");
+
+    let body = br#"{"status":0,"result":[
+      {"endpoint":{"ip":"1.2.3.4","port":2303},"gamePort":2302,"name":"A","version":"1.30.164200","firstPersonOnly":true},
+      {"endpoint":{"ip":"5.6.7.8","port":2303},"gamePort":2302,"name":"B","version":"1.30.164200","firstPersonOnly":false}
+    ]}"#;
+    let servers = parse_list(body).unwrap();
+    assert!(!servers["1.2.3.4:2303"].row.first_person_only && servers["5.6.7.8:2303"].row.first_person_only);
   }
 }

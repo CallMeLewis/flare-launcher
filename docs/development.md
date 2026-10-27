@@ -115,6 +115,21 @@ list and pings servers, but joining, mod downloads and launching through Proton 
 installed. The Discord status has been tried against Discord on Windows, but not on Linux, including its Flatpak and
 Snap packages. Join links haven't been opened from a browser on either platform.
 
+## DayZ's mistakes
+
+Workarounds for things DayZ itself gets wrong. Check them against each DayZ update, and remove each one once DayZ fixes
+it.
+
+- **`no3rd` the wrong way round, from DayZ 1.30.** A server's `no3rd` tag should mean first person only, but 1.30
+  servers send it when third person is on (`thirdPersonView` 1, or `disable3rdPerson=0` when that's not set) or on in
+  vehicles only (2), and leave it off when third person is off (0). Checked against the 1.30.164200 server program
+  and with server names in the list: 3PP servers carried it, 1PP servers mostly didn't. In game, the server applies
+  the setting correctly; only the tag is wrong. The launcher reads it the
+  other way round for servers on 1.30 or later, both for servers it asks directly and in the fallback list
+  (`first_person_only` in `src-tauri/src/servers.rs`); the launcher's own list is already corrected by its crawler
+  (`Settings::from_keywords` in flare-common's `flare-a2s`). When an update fixes it, stop at that version in both.
+  To check, start a server with `thirdPersonView = 0;` in `serverDZ.cfg`: a fixed server sends `no3rd`.
+
 ## Languages
 
 The interface is translated with [Lingui](https://lingui.dev). It's written in British English (`en-GB`), which is
