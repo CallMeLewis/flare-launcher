@@ -55,8 +55,9 @@ export function ServerToolbar({
   refreshLabel,
   onAddServer,
 }: Props) {
-  const { i18n } = useLingui();
+  const { t, i18n } = useLingui();
   const set = (patch: Partial<Filters>) => onChange({ ...filters, ...patch });
+  const filtersElsewhere = t`Filters only apply to All servers.`;
   const chips = filterChips(filters, (code) => countryName(code, i18n.locale));
   const filtersOn = chips.length;
   const shownCount = i18n.number(shown);
@@ -141,6 +142,13 @@ export function ServerToolbar({
             onClear={reset}
             onMore={() => setMenuOpen(true)}
           />
+        )}
+
+        {/* Saved lists show every server in them, so filters set on All servers would otherwise seem to have gone. */}
+        {!filtersEnabled && chips.length > 0 && (
+          <p className="min-w-0 truncate pl-1 text-xs text-muted-foreground" title={filtersElsewhere}>
+            {filtersElsewhere}
+          </p>
         )}
 
         <div className="ml-auto flex shrink-0 items-center gap-2 pl-2">
