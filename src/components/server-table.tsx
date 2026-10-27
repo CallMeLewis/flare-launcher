@@ -480,12 +480,12 @@ const Row = memo(function Row({
         )}
         {versionNote && (
           <span className="shrink-0 text-warning" title={versionNote}>
-            <TriangleAlert className="size-3" aria-label={versionNote} />
+            <TriangleAlert className="size-3" role="img" aria-label={versionNote} />
           </span>
         )}
         {row.password && (
           <span className="shrink-0 text-warning" title={t`Password protected`}>
-            <Lock className="size-3" aria-label={t`Password protected`} />
+            <Lock className="size-3" role="img" aria-label={t`Password protected`} />
           </span>
         )}
         {row.firstPersonOnly && (
@@ -537,7 +537,7 @@ const Row = memo(function Row({
       <div role="gridcell" className={cn("flex items-center gap-1.5 text-muted-foreground", TIME_COLUMN)}>
         {row.time && !unlisted && (
           <>
-            <TimeIcon className="size-3" aria-label={isNight(row.time) ? t`Night` : t`Day`} />
+            <TimeIcon className="size-3" role="img" aria-label={isNight(row.time) ? t`Night` : t`Day`} />
             <span className="data text-xs">{row.time}</span>
           </>
         )}

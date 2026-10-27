@@ -725,6 +725,7 @@ function FavouritesStar({ favourites }: { favourites: string[] }) {
       <Star
         className="size-3"
         fill="currentColor"
+        role="img"
         aria-label={t`Used by ${plural(favouriteCount, { one: "# favourite server", other: "# favourite servers" })}`}
       />
     </span>

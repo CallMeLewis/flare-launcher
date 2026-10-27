@@ -113,13 +113,17 @@ export function GameStartDialog({ start, onClose }: { start: GameStart | null; o
 function Step({ state, title, detail }: { state: StepState; title: string; detail?: string }) {
   const { t } = useLingui();
   const icons: Record<StepState, ReactNode> = {
-    done: <CircleCheck className="size-4 text-success" aria-label={t`Done`} />,
+    done: <CircleCheck className="size-4 text-success" role="img" aria-label={t`Done`} />,
     current: (
-      <Loader2 className="size-4 animate-spin text-primary motion-reduce:animate-none" aria-label={t`In progress`} />
+      <Loader2
+        className="size-4 animate-spin text-primary motion-reduce:animate-none"
+        role="img"
+        aria-label={t`In progress`}
+      />
     ),
-    pending: <Circle className="size-4 text-muted-foreground/60" aria-label={t`Not started`} />,
-    warning: <CircleAlert className="size-4 text-warning" aria-label={t`Taking longer than usual`} />,
-    error: <CircleX className="size-4 text-danger" aria-label={t`Failed`} />,
+    pending: <Circle className="size-4 text-muted-foreground/60" role="img" aria-label={t`Not started`} />,
+    warning: <CircleAlert className="size-4 text-warning" role="img" aria-label={t`Taking longer than usual`} />,
+    error: <CircleX className="size-4 text-danger" role="img" aria-label={t`Failed`} />,
   };
 
   return (

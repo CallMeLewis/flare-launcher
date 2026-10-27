@@ -781,7 +781,7 @@ function ModRow({
   return (
     <li className="group flex h-8 items-center gap-2 rounded-md px-2 text-[13px] hover:bg-accent/50">
       {status === "installed" ? (
-        <CircleCheck className="size-3.5 shrink-0 text-success" aria-label={t`Installed`} />
+        <CircleCheck className="size-3.5 shrink-0 text-success" role="img" aria-label={t`Installed`} />
       ) : status === "differs" ? (
         <span
           className="shrink-0"
@@ -791,19 +791,24 @@ function ModRow({
               : t`The server doesn't have the latest version from the Workshop, updated ${updated}`
           }
         >
-          <TriangleAlert className="size-3.5 text-warning" aria-label={t`Different version from the server`} />
+          <TriangleAlert
+            className="size-3.5 text-warning"
+            role="img"
+            aria-label={t`Different version from the server`}
+          />
         </span>
       ) : status === "missing" ? (
-        <CircleAlert className="size-3.5 shrink-0 text-warning" aria-label={t`Missing or out of date`} />
+        <CircleAlert className="size-3.5 shrink-0 text-warning" role="img" aria-label={t`Missing or out of date`} />
       ) : status === "downloading" ? (
         <Loader2
           className="size-3.5 shrink-0 animate-spin text-primary motion-reduce:animate-none"
+          role="img"
           aria-label={t`Downloading`}
         />
       ) : status === "queued" ? (
-        <Clock className="size-3.5 shrink-0 text-muted-foreground" aria-label={t`Waiting to download`} />
+        <Clock className="size-3.5 shrink-0 text-muted-foreground" role="img" aria-label={t`Waiting to download`} />
       ) : status === "failed" ? (
-        <CircleX className="size-3.5 shrink-0 text-danger" aria-label={t`Download failed`} />
+        <CircleX className="size-3.5 shrink-0 text-danger" role="img" aria-label={t`Download failed`} />
       ) : (
         <span className="size-3.5 shrink-0" />
       )}
