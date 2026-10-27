@@ -28,8 +28,8 @@ msgid "{differingCount, plural, one {# differs from the server} other {# differ 
 msgstr "{differingCount, plural, one {# diffère de la version du serveur} other {# diffèrent des versions du serveur}}"
 
 #: src/components/server-detail.tsx
-msgid "{differingCount, plural, one {The server doesn't have the latest version of # mod from the Workshop. You can usually still join, but the mod may not work as it should until the server downloads the update and restarts. If it's your server, update its mods and restart it.} other {The server doesn't have the latest version of # mods from the Workshop. You can usually still join, but the mods may not work as they should until the server downloads the updates and restarts. If it's your server, update its mods and restart it.}}"
-msgstr "{differingCount, plural, one {Le serveur ne dispose pas de la dernière version de # mod du Workshop. Vous pouvez généralement quand même rejoindre le serveur, mais le mod risque de ne pas fonctionner correctement tant que le serveur n’aura pas téléchargé la mise à jour et redémarré. Si c’est votre serveur, mettez ses mods à jour et redémarrez-le.} other {Le serveur ne dispose pas de la dernière version de # mods du Workshop. Vous pouvez généralement quand même rejoindre le serveur, mais les mods risquent de ne pas fonctionner correctement tant que le serveur n’aura pas téléchargé les mises à jour et redémarré. Si c’est votre serveur, mettez ses mods à jour et redémarrez-le.}}"
+msgid "{differingCount, plural, one {The server doesn't have the latest version of # mod. You can usually still join, but it may not work as it should until the server updates.} other {The server doesn't have the latest version of # mods. You can usually still join, but they may not work as they should until the server updates.}}"
+msgstr "{differingCount, plural, one {Le serveur ne dispose pas de la dernière version de # mod. Vous pouvez généralement vous connecter quand même, mais ce mod risque de ne pas fonctionner correctement tant que le serveur ne sera pas à jour.} other {Le serveur ne dispose pas de la dernière version de # mods. Vous pouvez généralement vous connecter quand même, mais ces mods risquent de ne pas fonctionner correctement tant que le serveur ne sera pas à jour.}}"
 
 #: src/components/mods-page.tsx
 #: src/components/server-detail.tsx
@@ -1831,8 +1831,8 @@ msgid "This server isn't answering, so it's probably offline or restarting. You 
 msgstr "Ce serveur ne répond pas, il est sans doute hors ligne ou en train de redémarrer. Vous pouvez quand même essayer de le rejoindre."
 
 #: src/components/server-detail.tsx
-msgid "This server isn't in the server list right now, so it's probably offline. It comes back once the server is up again."
-msgstr "Ce serveur n’est pas dans la liste des serveurs pour le moment, il est donc sans doute hors ligne. Il reviendra dès qu’il sera de nouveau en ligne."
+msgid "This server isn't in the server list right now, so it's probably offline."
+msgstr "Ce serveur ne figure pas dans la liste des serveurs actuellement, il est donc probablement hors ligne."
 
 #: src/App.tsx
 msgid "This server needs a password"
@@ -1847,8 +1847,8 @@ msgid "This server runs a newer version of DayZ ({serverVersion}) than this comp
 msgstr "Ce serveur utilise une version de DayZ ({serverVersion}) plus récente que celle de cet ordinateur ({gameVersion}). Mettez DayZ à jour dans Steam, puis rejoignez le serveur."
 
 #: src/components/server-detail.tsx
-msgid "This server runs an older version of DayZ ({serverVersion}) than this computer ({gameVersion}), usually because it hasn't updated yet. It's likely to turn you away until it does."
-msgstr "Ce serveur utilise une version de DayZ ({serverVersion}) plus ancienne que celle de cet ordinateur ({gameVersion}), généralement parce qu’il n’a pas encore été mis à jour. Il refusera probablement votre connexion tant que la mise à jour ne sera pas faite."
+msgid "This server runs an older version of DayZ ({serverVersion}) than this computer ({gameVersion}). It's likely to turn you away until it updates."
+msgstr "Ce serveur utilise une version de DayZ ({serverVersion}) plus ancienne que celle de cet ordinateur ({gameVersion}). Il refusera probablement votre connexion tant qu’il ne sera pas à jour."
 
 #: src/components/server-table.tsx
 #: src/lib/filter.ts

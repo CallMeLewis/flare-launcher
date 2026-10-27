@@ -28,8 +28,8 @@ msgid "{differingCount, plural, one {# differs from the server} other {# differ 
 msgstr "{differingCount, plural, one {# weicht vom Server ab} other {# weichen vom Server ab}}"
 
 #: src/components/server-detail.tsx
-msgid "{differingCount, plural, one {The server doesn't have the latest version of # mod from the Workshop. You can usually still join, but the mod may not work as it should until the server downloads the update and restarts. If it's your server, update its mods and restart it.} other {The server doesn't have the latest version of # mods from the Workshop. You can usually still join, but the mods may not work as they should until the server downloads the updates and restarts. If it's your server, update its mods and restart it.}}"
-msgstr "{differingCount, plural, one {Auf dem Server ist nicht die neueste Version von # Mod aus dem Workshop installiert. Du kannst normalerweise trotzdem beitreten, aber die Mod funktioniert möglicherweise nicht wie vorgesehen, bis der Server die Aktualisierung heruntergeladen hat und neu gestartet wurde. Wenn es dein Server ist, aktualisiere seine Mods und starte ihn neu.} other {Auf dem Server sind nicht die neuesten Versionen von # Mods aus dem Workshop installiert. Du kannst normalerweise trotzdem beitreten, aber die Mods funktionieren möglicherweise nicht wie vorgesehen, bis der Server die Aktualisierungen heruntergeladen hat und neu gestartet wurde. Wenn es dein Server ist, aktualisiere seine Mods und starte ihn neu.}}"
+msgid "{differingCount, plural, one {The server doesn't have the latest version of # mod. You can usually still join, but it may not work as it should until the server updates.} other {The server doesn't have the latest version of # mods. You can usually still join, but they may not work as they should until the server updates.}}"
+msgstr "{differingCount, plural, one {Der Server hat nicht die neueste Version von # Mod. Du kannst normalerweise trotzdem beitreten, aber die Mod funktioniert möglicherweise nicht richtig, bis der Server aktualisiert wird.} other {Der Server hat nicht die neuesten Versionen von # Mods. Du kannst normalerweise trotzdem beitreten, aber die Mods funktionieren möglicherweise nicht richtig, bis der Server aktualisiert wird.}}"
 
 #: src/components/mods-page.tsx
 #: src/components/server-detail.tsx
@@ -1831,8 +1831,8 @@ msgid "This server isn't answering, so it's probably offline or restarting. You 
 msgstr "Dieser Server antwortet nicht, ist also wahrscheinlich offline oder startet neu. Du kannst trotzdem versuchen beizutreten."
 
 #: src/components/server-detail.tsx
-msgid "This server isn't in the server list right now, so it's probably offline. It comes back once the server is up again."
-msgstr "Dieser Server ist gerade nicht in der Serverliste, also wahrscheinlich offline. Er erscheint wieder, sobald er wieder online ist."
+msgid "This server isn't in the server list right now, so it's probably offline."
+msgstr "Dieser Server ist gerade nicht in der Serverliste und daher wahrscheinlich offline."
 
 #: src/App.tsx
 msgid "This server needs a password"
@@ -1847,8 +1847,8 @@ msgid "This server runs a newer version of DayZ ({serverVersion}) than this comp
 msgstr "Dieser Server verwendet eine neuere Version von DayZ ({serverVersion}) als dieser Computer ({gameVersion}). Aktualisiere DayZ in Steam und tritt dann bei."
 
 #: src/components/server-detail.tsx
-msgid "This server runs an older version of DayZ ({serverVersion}) than this computer ({gameVersion}), usually because it hasn't updated yet. It's likely to turn you away until it does."
-msgstr "Dieser Server verwendet eine ältere Version von DayZ ({serverVersion}) als dieser Computer ({gameVersion}), meist weil er noch nicht aktualisiert wurde. Bis dahin wird er dich wahrscheinlich abweisen."
+msgid "This server runs an older version of DayZ ({serverVersion}) than this computer ({gameVersion}). It's likely to turn you away until it updates."
+msgstr "Auf diesem Server läuft eine ältere Version von DayZ ({serverVersion}) als auf diesem Computer ({gameVersion}). Er wird dich wahrscheinlich abweisen, bis er aktualisiert wird."
 
 #: src/components/server-table.tsx
 #: src/lib/filter.ts

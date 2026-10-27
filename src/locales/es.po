@@ -28,8 +28,8 @@ msgid "{differingCount, plural, one {# differs from the server} other {# differ 
 msgstr "{differingCount, plural, one {# difiere de la versión del servidor} other {# difieren de las versiones del servidor}}"
 
 #: src/components/server-detail.tsx
-msgid "{differingCount, plural, one {The server doesn't have the latest version of # mod from the Workshop. You can usually still join, but the mod may not work as it should until the server downloads the update and restarts. If it's your server, update its mods and restart it.} other {The server doesn't have the latest version of # mods from the Workshop. You can usually still join, but the mods may not work as they should until the server downloads the updates and restarts. If it's your server, update its mods and restart it.}}"
-msgstr "{differingCount, plural, one {El servidor no tiene la última versión de # mod de Workshop. Normalmente puedes unirte de todos modos, pero puede que el mod no funcione como debería hasta que el servidor descargue la actualización y se reinicie. Si es tu servidor, actualiza sus mods y reinícialo.} other {El servidor no tiene la última versión de # mods de Workshop. Normalmente puedes unirte de todos modos, pero puede que los mods no funcionen como deberían hasta que el servidor descargue las actualizaciones y se reinicie. Si es tu servidor, actualiza sus mods y reinícialo.}}"
+msgid "{differingCount, plural, one {The server doesn't have the latest version of # mod. You can usually still join, but it may not work as it should until the server updates.} other {The server doesn't have the latest version of # mods. You can usually still join, but they may not work as they should until the server updates.}}"
+msgstr "{differingCount, plural, one {El servidor no tiene la última versión de # mod. Normalmente puedes unirte de todos modos, pero puede que no funcione como debería hasta que el servidor se actualice.} other {El servidor no tiene la última versión de # mods. Normalmente puedes unirte de todos modos, pero puede que no funcionen como deberían hasta que el servidor se actualice.}}"
 
 #: src/components/mods-page.tsx
 #: src/components/server-detail.tsx
@@ -1831,8 +1831,8 @@ msgid "This server isn't answering, so it's probably offline or restarting. You 
 msgstr "Este servidor no responde, así que probablemente esté desconectado o reiniciándose. Aun así, puedes intentar unirte."
 
 #: src/components/server-detail.tsx
-msgid "This server isn't in the server list right now, so it's probably offline. It comes back once the server is up again."
-msgstr "Este servidor no está ahora mismo en la lista de servidores, así que probablemente esté desconectado. Volverá cuando el servidor esté de nuevo en línea."
+msgid "This server isn't in the server list right now, so it's probably offline."
+msgstr "Este servidor no aparece en la lista de servidores ahora mismo, así que probablemente esté desconectado."
 
 #: src/App.tsx
 msgid "This server needs a password"
@@ -1847,8 +1847,8 @@ msgid "This server runs a newer version of DayZ ({serverVersion}) than this comp
 msgstr "Este servidor usa una versión de DayZ ({serverVersion}) más reciente que la de este ordenador ({gameVersion}). Actualiza DayZ en Steam, luego únete."
 
 #: src/components/server-detail.tsx
-msgid "This server runs an older version of DayZ ({serverVersion}) than this computer ({gameVersion}), usually because it hasn't updated yet. It's likely to turn you away until it does."
-msgstr "Este servidor usa una versión de DayZ ({serverVersion}) más antigua que la de este ordenador ({gameVersion}), normalmente porque aún no se ha actualizado. Es probable que rechace tu conexión hasta que lo haga."
+msgid "This server runs an older version of DayZ ({serverVersion}) than this computer ({gameVersion}). It's likely to turn you away until it updates."
+msgstr "Este servidor utiliza una versión de DayZ ({serverVersion}) anterior a la de este ordenador ({gameVersion}). Es probable que rechace tu conexión hasta que se actualice."
 
 #: src/components/server-table.tsx
 #: src/lib/filter.ts

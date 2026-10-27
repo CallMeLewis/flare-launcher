@@ -545,13 +545,13 @@ export function ServerDetail({
         {offline && (
           <Notice>
             {unlisted
-              ? t`This server isn't in the server list right now, so it's probably offline. It comes back once the server is up again.`
+              ? t`This server isn't in the server list right now, so it's probably offline.`
               : t`This server isn't answering, so it's probably offline or restarting. You can still try to join.`}
           </Notice>
         )}
         {versionDiffers === -1 && (
           <Notice>
-            {t`This server runs an older version of DayZ (${serverVersion}) than this computer (${gameVersion}), usually because it hasn't updated yet. It's likely to turn you away until it does.`}
+            {t`This server runs an older version of DayZ (${serverVersion}) than this computer (${gameVersion}). It's likely to turn you away until it updates.`}
           </Notice>
         )}
         {versionDiffers === 1 && (
@@ -562,9 +562,9 @@ export function ServerDetail({
         {differingCount > 0 && !downloading && (
           <Notice>
             {t`${plural(differingCount, {
-              one: "The server doesn't have the latest version of # mod from the Workshop. You can usually still join, but the mod may not work as it should until the server downloads the update and restarts. If it's your server, update its mods and restart it.",
+              one: "The server doesn't have the latest version of # mod. You can usually still join, but it may not work as it should until the server updates.",
               other:
-                "The server doesn't have the latest version of # mods from the Workshop. You can usually still join, but the mods may not work as they should until the server downloads the updates and restarts. If it's your server, update its mods and restart it.",
+                "The server doesn't have the latest version of # mods. You can usually still join, but they may not work as they should until the server updates.",
             })}`}
           </Notice>
         )}

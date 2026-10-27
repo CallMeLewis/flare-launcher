@@ -28,8 +28,8 @@ msgid "{differingCount, plural, one {# differs from the server} other {# differ 
 msgstr "{differingCount, plural, one {# differs from the server} other {# differ from the server}}"
 
 #: src/components/server-detail.tsx
-msgid "{differingCount, plural, one {The server doesn't have the latest version of # mod from the Workshop. You can usually still join, but the mod may not work as it should until the server downloads the update and restarts. If it's your server, update its mods and restart it.} other {The server doesn't have the latest version of # mods from the Workshop. You can usually still join, but the mods may not work as they should until the server downloads the updates and restarts. If it's your server, update its mods and restart it.}}"
-msgstr "{differingCount, plural, one {The server doesn't have the latest version of # mod from the Workshop. You can usually still join, but the mod may not work as it should until the server downloads the update and restarts. If it's your server, update its mods and restart it.} other {The server doesn't have the latest version of # mods from the Workshop. You can usually still join, but the mods may not work as they should until the server downloads the updates and restarts. If it's your server, update its mods and restart it.}}"
+msgid "{differingCount, plural, one {The server doesn't have the latest version of # mod. You can usually still join, but it may not work as it should until the server updates.} other {The server doesn't have the latest version of # mods. You can usually still join, but they may not work as they should until the server updates.}}"
+msgstr "{differingCount, plural, one {The server doesn't have the latest version of # mod. You can usually still join, but it may not work as it should until the server updates.} other {The server doesn't have the latest version of # mods. You can usually still join, but they may not work as they should until the server updates.}}"
 
 #: src/components/mods-page.tsx
 #: src/components/server-detail.tsx
@@ -1831,8 +1831,8 @@ msgid "This server isn't answering, so it's probably offline or restarting. You 
 msgstr "This server isn't answering, so it's probably offline or restarting. You can still try to join."
 
 #: src/components/server-detail.tsx
-msgid "This server isn't in the server list right now, so it's probably offline. It comes back once the server is up again."
-msgstr "This server isn't in the server list right now, so it's probably offline. It comes back once the server is up again."
+msgid "This server isn't in the server list right now, so it's probably offline."
+msgstr "This server isn't in the server list right now, so it's probably offline."
 
 #: src/App.tsx
 msgid "This server needs a password"
@@ -1847,8 +1847,8 @@ msgid "This server runs a newer version of DayZ ({serverVersion}) than this comp
 msgstr "This server runs a newer version of DayZ ({serverVersion}) than this computer ({gameVersion}). Update DayZ in Steam, then join."
 
 #: src/components/server-detail.tsx
-msgid "This server runs an older version of DayZ ({serverVersion}) than this computer ({gameVersion}), usually because it hasn't updated yet. It's likely to turn you away until it does."
-msgstr "This server runs an older version of DayZ ({serverVersion}) than this computer ({gameVersion}), usually because it hasn't updated yet. It's likely to turn you away until it does."
+msgid "This server runs an older version of DayZ ({serverVersion}) than this computer ({gameVersion}). It's likely to turn you away until it updates."
+msgstr "This server runs an older version of DayZ ({serverVersion}) than this computer ({gameVersion}). It's likely to turn you away until it updates."
 
 #: src/components/server-table.tsx
 #: src/lib/filter.ts
