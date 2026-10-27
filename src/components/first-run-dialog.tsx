@@ -52,7 +52,8 @@ export function FirstRunDialog({ open, settings, onChange, onDone }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={(next) => !next && finish()}>
-      <DialogContent className="gap-6 sm:max-w-xl" showCloseButton={false}>
+      {/* Scrolls rather than running off a short window: on Linux it can hold an extra row for the app menu. */}
+      <DialogContent className="max-h-[calc(100dvh-2rem)] gap-6 overflow-y-auto sm:max-w-xl" showCloseButton={false}>
         <div className="flex items-center gap-4">
           <img src={appIcon} alt="" className="size-12 shrink-0" />
           <div className="flex flex-col gap-1">
