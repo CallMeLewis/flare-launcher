@@ -153,6 +153,23 @@ export function FirstRunDialog({ open, settings, onChange, onDone }: Props) {
               </SelectContent>
             </Select>
           </SettingRow>
+          {/* On by default, so it's offered here: it tells the player's friends something about them. */}
+          <SettingRow
+            id="setup-discord-status"
+            label={t`Discord activity`}
+            description={
+              settings.afterLaunch === "close"
+                ? t`Lets your Discord friends see you're using Flare Launcher. It closes when DayZ starts, so they won't see when you're in game.`
+                : t`Lets your Discord friends see you're using Flare Launcher and when you're in game. Never which server you're on.`
+            }
+          >
+            <Switch
+              id="setup-discord-status"
+              aria-describedby="setup-discord-status-description"
+              checked={settings.discordStatus}
+              onCheckedChange={(checked) => set({ discordStatus: checked })}
+            />
+          </SettingRow>
           {offerAppMenu && (
             <SettingRow
               id="setup-app-menu"
