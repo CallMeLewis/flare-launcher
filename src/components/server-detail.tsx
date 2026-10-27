@@ -651,17 +651,24 @@ export function ServerDetail({
                 checked={remember}
                 disabled={!storeAvailable}
                 onCheckedChange={(state) => changeRemember(state === true)}
-                aria-describedby={storeAvailable ? undefined : "remember-password-hint"}
+                aria-describedby={storeAvailable && !remember ? undefined : "remember-password-hint"}
                 className="mt-px"
               />
               <div className="flex flex-col gap-0.5">
                 <Label htmlFor="remember-password" className="text-[13px] leading-4 font-normal">
                   <Trans>Remember password</Trans>
                 </Label>
-                {!storeAvailable && (
+                {!storeAvailable ? (
                   <span id="remember-password-hint" className="text-xs text-muted-foreground">
                     <Trans>Needs a password store on this computer, such as GNOME Keyring or KWallet.</Trans>
                   </span>
+                ) : (
+                  // It's only saved on joining, so ticking the box alone would otherwise look like it had done nothing.
+                  remember && (
+                    <span id="remember-password-hint" className="text-xs text-muted-foreground">
+                      {saved ? t`Saved on this computer.` : t`Saved when you select Play.`}
+                    </span>
+                  )
                 )}
               </div>
             </div>

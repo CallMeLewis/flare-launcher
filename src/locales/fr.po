@@ -1360,6 +1360,14 @@ msgstr "Identique à la mienne"
 msgid "Same as mine <0>({gameVersion})</0>"
 msgstr "Identique à la mienne <0>({gameVersion})</0>"
 
+#: src/components/server-detail.tsx
+msgid "Saved on this computer."
+msgstr "Enregistré sur cet ordinateur."
+
+#: src/components/server-detail.tsx
+msgid "Saved when you select Play."
+msgstr "Enregistré lorsque vous sélectionnez Jouer."
+
 #: src/App.tsx
 msgid "Search again"
 msgstr "Relancer la recherche"

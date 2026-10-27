@@ -1360,6 +1360,14 @@ msgstr "Wie meine Version"
 msgid "Same as mine <0>({gameVersion})</0>"
 msgstr "Wie meine Version <0>({gameVersion})</0>"
 
+#: src/components/server-detail.tsx
+msgid "Saved on this computer."
+msgstr "Auf diesem Computer gespeichert."
+
+#: src/components/server-detail.tsx
+msgid "Saved when you select Play."
+msgstr "Wird gespeichert, wenn du auf Spielen klickst."
+
 #: src/App.tsx
 msgid "Search again"
 msgstr "Erneut suchen"
