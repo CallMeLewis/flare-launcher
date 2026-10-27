@@ -292,15 +292,6 @@ function FoldersSection({
     };
   }, [open, install, settings.dayzDir]);
 
-  async function browse() {
-    try {
-      const chosen = await backend.pickFolder(t`Choose the DayZ folder`, install?.dayzDir ?? settings.dayzDir);
-      if (chosen) onChange({ dayzDir: chosen });
-    } catch (e) {
-      toast.error(t`Couldn't open the folder picker`, { description: errorMessage(e) });
-    }
-  }
-
   function reveal(folder: "game" | "workshop") {
     backend
       .openFolder(settings.dayzDir, folder)
@@ -309,50 +300,7 @@ function FoldersSection({
 
   return (
     <>
-      <Field id="dayz-dir" label={t`DayZ folder`}>
-        <div className="flex gap-2">
-          <Input
-            id="dayz-dir"
-            placeholder={t`Found automatically from Steam`}
-            autoComplete="off"
-            spellCheck={false}
-            value={settings.dayzDir}
-            onChange={(event) => onChange({ dayzDir: event.target.value })}
-            className="data text-xs"
-          />
-          {!isPreview && (
-            <Button variant="secondary" onClick={browse} className="shrink-0">
-              <Trans>Browse</Trans>
-            </Button>
-          )}
-        </div>
-        {install ? (
-          <p className="flex items-start gap-1.5 text-xs text-muted-foreground">
-            <CircleCheck className="mt-0.5 size-3.5 shrink-0 text-success" aria-hidden />
-            <span className="selectable break-all">
-              {settings.dayzDir ? t`Using this folder.` : t`Found through Steam at ${{ folder: install.dayzDir }}`}
-            </span>
-          </p>
-        ) : (
-          install === null && (
-            <p className="flex items-start gap-1.5 text-xs text-warning">
-              <CircleAlert className="mt-0.5 size-3.5 shrink-0" aria-hidden />
-              {settings.dayzDir
-                ? t`DayZ_x64.exe isn't in that folder. Choose the folder DayZ is installed in.`
-                : t`DayZ wasn't found through Steam. Choose the folder it is installed in.`}
-            </p>
-          )
-        )}
-        {settings.dayzDir && (
-          <button
-            type="button"
-            onClick={() => onChange({ dayzDir: "" })}
-            className="self-start text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground"
-          >
-            <Trans>Find it through Steam instead</Trans>
-          </button>
-        )}
-      </Field>
+      <DayzFolderField id="dayz-dir" settings={settings} onChange={onChange} install={install} />
 
       {install && (
         <>
@@ -395,6 +343,77 @@ function FoldersSection({
         </>
       )}
     </>
+  );
+}
+
+/** The DayZ folder: found through Steam, or one the player chose. First-time setup shows it too when DayZ isn't found. */
+export function DayzFolderField({
+  id,
+  settings,
+  onChange,
+  install,
+}: {
+  id: string;
+  settings: Settings;
+  onChange: (patch: Partial<Settings>) => void;
+  install: Install | null | undefined;
+}) {
+  const { t } = useLingui();
+
+  async function browse() {
+    try {
+      const chosen = await backend.pickFolder(t`Choose the DayZ folder`, install?.dayzDir ?? settings.dayzDir);
+      if (chosen) onChange({ dayzDir: chosen });
+    } catch (e) {
+      toast.error(t`Couldn't open the folder picker`, { description: errorMessage(e) });
+    }
+  }
+
+  return (
+    <Field id={id} label={t`DayZ folder`}>
+      <div className="flex gap-2">
+        <Input
+          id={id}
+          placeholder={t`Found automatically from Steam`}
+          autoComplete="off"
+          spellCheck={false}
+          value={settings.dayzDir}
+          onChange={(event) => onChange({ dayzDir: event.target.value })}
+          className="data text-xs"
+        />
+        {!isPreview && (
+          <Button variant="secondary" onClick={browse} className="shrink-0">
+            <Trans>Browse</Trans>
+          </Button>
+        )}
+      </div>
+      {install ? (
+        <p className="flex items-start gap-1.5 text-xs text-muted-foreground">
+          <CircleCheck className="mt-0.5 size-3.5 shrink-0 text-success" aria-hidden />
+          <span className="selectable break-all">
+            {settings.dayzDir ? t`Using this folder.` : t`Found through Steam at ${{ folder: install.dayzDir }}`}
+          </span>
+        </p>
+      ) : (
+        install === null && (
+          <p className="flex items-start gap-1.5 text-xs text-warning">
+            <CircleAlert className="mt-0.5 size-3.5 shrink-0" aria-hidden />
+            {settings.dayzDir
+              ? t`DayZ_x64.exe isn't in that folder. Choose the folder DayZ is installed in.`
+              : t`DayZ wasn't found through Steam. Choose the folder it is installed in.`}
+          </p>
+        )
+      )}
+      {settings.dayzDir && (
+        <button
+          type="button"
+          onClick={() => onChange({ dayzDir: "" })}
+          className="self-start text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground"
+        >
+          <Trans>Find it through Steam instead</Trans>
+        </button>
+      )}
+    </Field>
   );
 }
 
