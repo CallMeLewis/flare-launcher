@@ -1218,6 +1218,7 @@ msgstr "Ábrelo como cualquier otra aplicación. Se moverá a tu carpeta Applica
 msgid "Open mods folder"
 msgstr "Abrir carpeta de mods"
 
+#: src/App.tsx
 #: src/components/mods-page.tsx
 msgid "Open Settings"
 msgstr "Abrir Ajustes"

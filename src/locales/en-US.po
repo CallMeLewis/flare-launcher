@@ -1218,6 +1218,7 @@ msgstr ""
 msgid "Open mods folder"
 msgstr ""
 
+#: src/App.tsx
 #: src/components/mods-page.tsx
 msgid "Open Settings"
 msgstr ""

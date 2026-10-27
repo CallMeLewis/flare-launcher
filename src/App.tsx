@@ -425,7 +425,10 @@ export function App() {
           return;
         }
         if (!install) {
-          toast.error(t`DayZ wasn't found`, { description: t`Set the DayZ folder in Settings.` });
+          toast.error(t`DayZ wasn't found`, {
+            description: t`Set the DayZ folder in Settings.`,
+            action: { label: t`Open Settings`, onClick: () => setSettingsOpen(true) },
+          });
           return;
         }
         const job: Omit<PlayJob, "phase"> = {
