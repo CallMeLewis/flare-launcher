@@ -824,12 +824,14 @@ function ModRow({
           variant="ghost"
           size="xs"
           aria-label={t`Open ${name} in the Steam Workshop`}
+          title={t`Open in the Steam Workshop`}
           onClick={() =>
             backend
               .openWorkshopPage(mod.steamWorkshopId)
               .catch((e) => toast.error(t`Couldn't open the Workshop page`, { description: errorMessage(e) }))
           }
-          className="shrink-0 text-muted-foreground opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
+          // Faint until the row is hovered, like on the Mods page, rather than hidden until then.
+          className="shrink-0 text-muted-foreground/70 hover:text-foreground group-hover:text-muted-foreground"
         >
           <ExternalLink aria-hidden />
         </Button>

@@ -1207,6 +1207,7 @@ msgid "Open Flare Launcher like any other app. The file moves to your Applicatio
 msgstr "Öffne Flare Launcher wie jede andere App. Die Datei wird in deinen Applications-Ordner verschoben."
 
 #: src/components/mods-page.tsx
+#: src/components/server-detail.tsx
 msgid "Open in the Steam Workshop"
 msgstr "Im Steam Workshop öffnen"
 
