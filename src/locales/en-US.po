@@ -894,6 +894,10 @@ msgstr ""
 msgid "It was removed from the Workshop or made private. Your copy still works, but it won't get updates."
 msgstr ""
 
+#: src/App.tsx
+msgid "It's likely to turn you away. The panel on the right says why, and has Play anyway."
+msgstr ""
+
 #: src/lib/share.ts
 msgid "Join link copied"
 msgstr ""
@@ -1230,6 +1234,10 @@ msgstr ""
 #: src/components/server-detail.tsx
 #: src/components/server-table.tsx
 msgid "Play"
+msgstr ""
+
+#: src/components/server-detail.tsx
+msgid "Play anyway"
 msgstr ""
 
 #: src/components/filter-menu.tsx
@@ -1828,6 +1836,10 @@ msgstr ""
 
 #: src/App.tsx
 msgid "This server needs a password"
+msgstr ""
+
+#: src/App.tsx
+msgid "This server runs a different version of DayZ"
 msgstr ""
 
 #: src/components/server-detail.tsx

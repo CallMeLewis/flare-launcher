@@ -35,6 +35,7 @@ import {
   DEFAULT_SORT,
   NO_FILTERS,
   activeFilterCount,
+  compareGameVersions,
   filterServers,
   countryCounts,
   mapCounts,
@@ -518,6 +519,23 @@ export function App() {
     [install, settings, setRecentIds, unlisted, showGameStart, t],
   );
 
+  // Joining from the list, by double-click, Enter or its menu, skips the panel's warnings. A server on another version
+  // of DayZ is likely to turn the player away, so it's only selected, for them to read why and choose Play anyway.
+  const playFromList = useCallback(
+    (server: ServerRow) => {
+      const differs = compareGameVersions(server.version, gameVersion);
+      if (differs === -1 || differs === 1) {
+        setSelectedId(server.id);
+        toast.info(t`This server runs a different version of DayZ`, {
+          description: t`It's likely to turn you away. The panel on the right says why, and has Play anyway.`,
+        });
+        return;
+      }
+      void play(server);
+    },
+    [play, gameVersion, t],
+  );
+
   // Updates or verifies mods from the mods page. Both are the same request to Steam, which checks an installed mod's
   // files before downloading what's missing. Shares the lock with joining, as both talk to Steam.
   const [modJob, setModJob] = useState<ModJob | null>(null);
@@ -656,7 +674,7 @@ export function App() {
                     onSort={setSort}
                     selectedId={selectedId}
                     onSelect={setSelectedId}
-                    onPlay={play}
+                    onPlay={playFromList}
                     onLoadMods={(server) => void play(server, "", false)}
                     favourites={favourites}
                     unlisted={unlisted}

@@ -116,6 +116,8 @@ export function ServerDetail({
   const serverVersion = server.version;
   const gameVersion = install?.gameVersion ?? null;
   const versionDiffers = compareGameVersions(serverVersion, gameVersion);
+  // The server is likely to turn the player away, so Play isn't shown in green, which means ready to go.
+  const wrongVersion = versionDiffers === -1 || versionDiffers === 1;
   const [mapCountOpen, setMapCountOpen] = useState(false);
   // Shows on the address for a moment after copying it.
   const [copied, setCopied] = useState(false);
@@ -678,6 +680,7 @@ export function ServerDetail({
           <div className="flex">
             <Button
               size="lg"
+              variant={wrongVersion ? "secondary" : "default"}
               disabled={!canPlay}
               onClick={join}
               // While joining this server the button shows progress, so it isn't greyed out like a disabled one.
@@ -694,17 +697,23 @@ export function ServerDetail({
                 ? t`Starting DayZ…`
                 : job || checking
                   ? t`Checking mods`
-                  : missing > 0
-                    ? t`${plural(missing, { one: "Download # mod and play", other: "Download # mods and play" })}`
-                    : t`Play`}
+                  : wrongVersion
+                    ? t`Play anyway`
+                    : missing > 0
+                      ? t`${plural(missing, { one: "Download # mod and play", other: "Download # mods and play" })}`
+                      : t`Play`}
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
                   size="lg"
+                  variant={wrongVersion ? "secondary" : "default"}
                   aria-label={t`More options`}
                   disabled={!canCheckMods || checking || busy}
-                  className="rounded-l-none border-l border-primary-foreground/25 px-3"
+                  className={cn(
+                    "rounded-l-none border-l px-3",
+                    wrongVersion ? "border-foreground/15" : "border-primary-foreground/25",
+                  )}
                 >
                   <ChevronDown aria-hidden />
                 </Button>

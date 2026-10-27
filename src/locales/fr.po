@@ -894,6 +894,10 @@ msgstr "Il ouvre ce serveur dans Flare Launcher, ou vous propose de télécharge
 msgid "It was removed from the Workshop or made private. Your copy still works, but it won't get updates."
 msgstr "Il a été retiré du Workshop ou rendu privé. Votre copie fonctionne toujours, mais ne recevra plus de mises à jour."
 
+#: src/App.tsx
+msgid "It's likely to turn you away. The panel on the right says why, and has Play anyway."
+msgstr "Il risque de refuser votre connexion. Le panneau de droite explique pourquoi et propose le bouton Jouer quand même."
+
 #: src/lib/share.ts
 msgid "Join link copied"
 msgstr "Lien de connexion copié"
@@ -1231,6 +1235,10 @@ msgstr "Ping"
 #: src/components/server-table.tsx
 msgid "Play"
 msgstr "Jouer"
+
+#: src/components/server-detail.tsx
+msgid "Play anyway"
+msgstr "Jouer quand même"
 
 #: src/components/filter-menu.tsx
 #: src/components/server-detail.tsx
@@ -1829,6 +1837,10 @@ msgstr "Ce serveur n’est pas dans la liste des serveurs pour le moment, il est
 #: src/App.tsx
 msgid "This server needs a password"
 msgstr "Ce serveur nécessite un mot de passe"
+
+#: src/App.tsx
+msgid "This server runs a different version of DayZ"
+msgstr "Ce serveur utilise une version différente de DayZ"
 
 #: src/components/server-detail.tsx
 msgid "This server runs a newer version of DayZ ({serverVersion}) than this computer ({gameVersion}). Update DayZ in Steam, then join."
