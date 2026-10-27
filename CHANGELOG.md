@@ -2,34 +2,23 @@
 
 What changed in each version of Flare Launcher, newest first.
 
-## 1.6.0-beta.5 - 2026-10-24
+## 1.6.0 - 2026-10-27
 
-- New Verified tag beside a server's name in the server list, and Verified owner in the server panel, for servers whose owners have proved they run them. Server owners can verify theirs at flarelauncher.app/owners.
-
-## 1.6.0-beta.4 - 2026-10-24
-
-- The server panel now sorts a server's mods into To download, Different from the server and Up to date when any need something, so the ones to deal with stand out.
-- Mods that are up to date, and installed mods in the server panel, are shown in green again.
-
-## 1.6.0-beta.3 - 2026-10-24
-
-- Improved the server list: it now includes more servers, its player counts are more up to date, and Refresh is faster.
-- Fixed some buttons not changing colour when you point at them in dark mode.
-
-## 1.6.0-beta.2 - 2026-10-23
-
-- Improved the look: a deeper navy in dark mode with matching light colours, clearer fonts for text and numbers, server and mod names in regular weight so long lists are easier to scan, and the current page marked with a green bar in the sidebar.
-- Mods that are up to date on the Mods page, and installed mods in the server panel, are now shown quietly, so colour only marks mods that need an update or didn't download.
-- Keyboard focus is now shown the same way on every button, field and control.
-
-## 1.6.0-beta.1 - 2026-10-23
-
-- New warning when a server runs a different version of DayZ than yours: a mark next to its name in the server list, a note above Play saying which is newer, and a Same as mine choice under Game version in the Filters menu.
-- New menu when you right-click a server in the list, with Play, Load mods, favourites, Copy address and Copy join link.
+- New Verified tag beside a server's name in the server list, and Verified owner in the server panel, for servers whose owners have proved they run them, which also show their full name where DayZ would cut it short. Server owners can verify theirs at flarelauncher.app/owners.
+- New warning when a server runs a different version of DayZ than yours: a mark next to its name in the server list, a note in the server panel saying which is newer with Play anyway in place of Play, and a Same as mine choice under Game version in the Filters menu. Double-clicking such a server selects it rather than joining.
+- New menu when you right-click a server in the list, with Play, Download mods only, favourites, Copy address and Copy join link. Load mods, next to Play, is now called Download mods only too.
 - New join links: Copy join link, in a server's right-click menu or next to its address in the server panel, gives a link that opens the server in Flare Launcher, or offers the launcher to download when it isn't installed.
-- Improved the warning about a server running a different version of your mods: it says the server needs to update and restart, hovering a mod shows when it was updated on the Workshop, and the warning goes by itself within a minute of the server catching up.
+- Improved the server list: it now includes more servers, its player counts are more up to date, and Refresh is faster.
+- Improved the look: a deeper navy in dark mode with matching light colours, clearer fonts for text and numbers, server and mod names in regular weight so long lists are easier to scan, and the current page marked with a green bar in the sidebar.
+- The server panel now says how much a server's mods take to download before you join, and a download's progress now covers all of them.
+- The server panel now sorts a server's mods into To download, Different from the server and Up to date when any need something, so the ones to deal with stand out.
+- Improved the warning about a server running a different version of your mods: it's shorter, hovering a mod shows when it was updated on the Workshop, and the warning goes by itself within a minute of the server catching up.
 - Improved mod downloads: they now stop with a message saying what happened when Steam closes or stops making progress, and one mod failing no longer stops the others.
 - Improved the messages when mods can't be set up in the DayZ folder, such as when a folder of the same name is in the way.
+- First-time setup now says whether DayZ was found, lets you choose its folder if it wasn't, and offers Discord activity.
+- It's now clearer what your filters apply to: a line under your favourites at the top of All servers marks where the filtered servers start, and Favourites, Recent and LAN say that filters only apply to All servers.
+- Remember password now says when the password will be saved and when it has been.
+- Keyboard focus is now shown the same way on every button, field and control, and screen readers now read out the icons that show a mod's or a server's status.
 - If something goes wrong in the launcher's window, it now offers to reload instead of staying blank.
 - Fixed the mod version warning showing for some Linux servers that hold a mod's files twice, though they run the same version.
 
