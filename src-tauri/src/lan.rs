@@ -6,7 +6,7 @@
 
 use std::collections::{HashMap, HashSet};
 use std::net::{IpAddr, Ipv4Addr, SocketAddr};
-use std::time::Duration;
+use std::time::{Duration, SystemTime};
 
 use futures::StreamExt;
 use if_addrs::IfAddr;
@@ -16,7 +16,7 @@ use tokio::time::Instant;
 
 use crate::error::{Error, Result};
 use crate::query::{self, HEADER, INFO_REQUEST};
-use crate::servers::{self, ServerCache, ServerRow, StoredServer};
+use crate::servers::{self, ServerCache, ServerRow, StoredServer, VerifiedCache};
 use crate::text;
 
 /// The query ports a search covers. DayZ uses 27016 unless the server sets another.
@@ -128,11 +128,16 @@ pub async fn search_lan(cache: State<'_, ServerCache>) -> Result<Vec<ServerRow>>
 }
 
 /// Asks saved servers that aren't in the server list for their details, by their `ip:queryPort` ids. Returns those
-/// that answered.
+/// that answered, with the badge on those the list recently called verified.
 #[tauri::command]
-pub async fn query_servers(cache: State<'_, ServerCache>, ids: Vec<String>) -> Result<Vec<ServerRow>> {
+pub async fn query_servers(
+  cache: State<'_, ServerCache>,
+  verified: State<'_, VerifiedCache>,
+  ids: Vec<String>,
+) -> Result<Vec<ServerRow>> {
   let addrs = ids.iter().take(MAX_SAVED).filter_map(|id| id.parse().ok()).collect();
-  let found = ask_all(addrs).await;
+  let mut found = ask_all(addrs).await;
+  verified.mark(&mut found, SystemTime::now());
   Ok(cache.remember(found))
 }
 
@@ -196,8 +201,13 @@ fn pick(port: Option<u16>, answers: &[(u16, Option<u16>)]) -> Option<u16> {
 
 /// Finds a server from an address the player typed, such as `192.168.1.20:2302` or `play.example.com`.
 #[tauri::command]
-pub async fn find_server(cache: State<'_, ServerCache>, address: String) -> Result<ServerRow> {
-  let server = find(&address).await?;
+pub async fn find_server(
+  cache: State<'_, ServerCache>,
+  verified: State<'_, VerifiedCache>,
+  address: String,
+) -> Result<ServerRow> {
+  let mut server = find(&address).await?;
+  verified.mark([&mut server], SystemTime::now());
   Ok(cache.remember(vec![server]).remove(0))
 }
 

@@ -303,6 +303,46 @@ pub struct OwnListCache {
 #[derive(Default)]
 pub struct OwnCache(pub tokio::sync::Mutex<Option<OwnListCache>>);
 
+/// How long a server the list marked verified keeps its badge while it's shown from elsewhere. The crawler keeps a
+/// quiet server listed for up to this long too.
+const VERIFIED_FOR: Duration = Duration::from_secs(60 * 60);
+
+/// The servers the list has marked verified, and when it last did. Only the list says a server is verified, but a
+/// server it leaves out for a while, as during a restart, is asked directly instead, and the fallback list knows
+/// nothing of verifying. So a server keeps its badge through such a gap rather than losing it each time.
+#[derive(Default)]
+pub struct VerifiedCache(RwLock<HashMap<String, SystemTime>>);
+
+impl VerifiedCache {
+  /// Notes what the list says at `now`: the servers it marks verified, and those it lists without the mark, whose
+  /// owners have given them up.
+  pub fn learn(&self, servers: &HashMap<String, StoredServer>, now: SystemTime) {
+    let mut seen = self.0.write().unwrap();
+    for (id, server) in servers {
+      if server.row.verified {
+        seen.insert(id.clone(), now);
+      } else {
+        seen.remove(id);
+      }
+    }
+    seen.retain(|_, at| recent(*at, now));
+  }
+
+  /// Marks the servers the list called verified within [`VERIFIED_FOR`], among servers that didn't come from it.
+  pub fn mark<'a>(&self, servers: impl IntoIterator<Item = &'a mut StoredServer>, now: SystemTime) {
+    let seen = self.0.read().unwrap();
+    for server in servers {
+      if seen.get(&server.row.id).is_some_and(|at| recent(*at, now)) {
+        server.row.verified = true;
+      }
+    }
+  }
+}
+
+fn recent(at: SystemTime, now: SystemTime) -> bool {
+  now.duration_since(at).unwrap_or_default() < VERIFIED_FOR
+}
+
 /// The name to show for a server: the full name its owner gave, while it carries on from the name the server sends,
 /// or else that name. The list only sends a full name that does, but this checks again, as the download site and the
 /// list's crawler do, so a full name can never stand in for an unrelated one.
@@ -451,12 +491,19 @@ pub async fn fetch_servers(
   http: State<'_, reqwest::Client>,
   own: State<'_, OwnCache>,
   cache: State<'_, ServerCache>,
+  verified: State<'_, VerifiedCache>,
 ) -> Result<ServerList> {
+  let now = SystemTime::now();
   let servers = match own_list(&http, &own).await {
-    Ok(servers) => servers,
+    Ok(servers) => {
+      verified.learn(&servers, now);
+      servers
+    }
     Err(e) => {
       log::warn!("server list: using the fallback: {e}");
-      download_list(&http).await?
+      let mut servers = download_list(&http).await?;
+      verified.mark(servers.values_mut(), now);
+      servers
     }
   };
   let list = build_list(&servers);
@@ -544,6 +591,34 @@ mod tests {
     let list = own_list("2026-10-24T00:00:00Z").replacen(r#""verified":true,"#, "", 1);
     let servers = parse_own_list(list.as_bytes(), now).unwrap();
     assert!(!servers["1.2.3.4:2303"].row.verified);
+  }
+
+  #[test]
+  fn keeps_a_badge_for_an_hour_while_the_list_leaves_a_server_out() {
+    let at = |time: &str| humantime::parse_rfc3339(time).unwrap();
+    let listed = parse_own_list(own_list("2026-10-24T00:00:00Z").as_bytes(), at("2026-10-24T00:05:00Z")).unwrap();
+    let verified = VerifiedCache::default();
+    verified.learn(&listed, at("2026-10-24T00:05:00Z"));
+    // Asked directly, or from the fallback list, the same server comes without the badge.
+    let asked = || {
+      let mut server = listed["1.2.3.4:2303"].clone();
+      server.row.verified = false;
+      server
+    };
+    let badge = |time: &str| {
+      let mut server = asked();
+      verified.mark([&mut server], at(time));
+      server.row.verified
+    };
+    assert!(badge("2026-10-24T00:10:00Z"));
+    assert!(badge("2026-10-24T01:04:59Z"));
+    assert!(!badge("2026-10-24T01:05:00Z"), "an hour has passed");
+
+    // Listed again without the mark, its owner has given it up, so it doesn't keep the badge.
+    let mut unverified = listed.clone();
+    unverified.get_mut("1.2.3.4:2303").unwrap().row.verified = false;
+    verified.learn(&unverified, at("2026-10-24T00:20:00Z"));
+    assert!(!badge("2026-10-24T00:25:00Z"));
   }
 
   #[test]

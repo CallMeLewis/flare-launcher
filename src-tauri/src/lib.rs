@@ -95,6 +95,7 @@ pub fn run() {
     .manage(http)
     .manage(servers::ServerCache::default())
     .manage(servers::OwnCache::default())
+    .manage(servers::VerifiedCache::default())
     .manage(Arc::new(workshop::Downloads::default()))
     .manage(links::PendingLink::default())
     .invoke_handler(tauri::generate_handler![

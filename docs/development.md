@@ -160,7 +160,8 @@ own and loaded when chosen in Settings > Launcher. System, the default, uses the
 - `src/`: the interface. `App.tsx` holds the state, `components/` the screens, `lib/filter.ts` the filtering and
   sorting, `lib/backend.ts` every call into Rust, `lib/i18n.ts` loading languages and `locales/` their catalogues.
 - `src-tauri/src/servers.rs`: downloads and caches the server list. A refresh downloads only the player counts when
-  the list hasn't changed.
+  the list hasn't changed. A server the list marked verified keeps its badge for an hour while the list leaves it out,
+  as during a restart, or the fallback list is in use.
 - `src-tauri/src/query.rs`: ICMP ping for latency and Steam A2S_INFO queries for player counts.
 - `src-tauri/src/countries.rs`: finds the country a server's address is in, from the table in
   `src-tauri/data/countries.bin`. `pnpm countries` rebuilds it from DB-IP's free IP to Country Lite database, which
