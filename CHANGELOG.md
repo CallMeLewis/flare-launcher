@@ -2,6 +2,11 @@
 
 What changed in each version of Flare Launcher, newest first.
 
+## 1.6.1-beta.1 - 2026-10-28
+
+- Fixed the Verified tag disappearing from a server for a few minutes, such as while it restarts.
+- Fixed servers on DayZ 1.30 or later found on your local network or added by address showing First person only when they allow third person, and the other way round.
+
 ## 1.6.0 - 2026-10-27
 
 - New Verified tag beside a server's name in the server list, and Verified owner in the server panel, for servers whose owners have proved they run them, which also show their full name where DayZ would cut it short. Server owners can verify theirs at flarelauncher.app/owners.
