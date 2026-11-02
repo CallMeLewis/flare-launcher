@@ -20,7 +20,7 @@ import {
   type ServerType,
   type TimeOfDay,
 } from "@/lib/filter";
-import { CONTINENTS, continentOfCountry } from "@/lib/continents";
+import { CONTINENT_NAMES, CONTINENTS, continentOfCountry } from "@/lib/continents";
 import { countryName } from "@/lib/countries";
 import { cn } from "@/lib/utils";
 
@@ -454,6 +454,8 @@ function ModPicker({
   );
 }
 
+const HEADING = "text-[11px] font-medium tracking-wide text-muted-foreground uppercase";
+
 /**
  * Picks the countries a server has to be in. Each continent with servers in the list sits at the top, to choose or
  * clear all its countries at once, including ones with no servers yet; the countries themselves follow, A to Z.
@@ -468,8 +470,10 @@ function CountryPicker({
   onChange: (chosen: string[]) => void;
 }) {
   const { t, i18n } = useLingui();
+  const id = useId();
   const picked = new Set(chosen);
   const name = (code: string) => countryName(code, i18n.locale);
+  const continentName = (code: string) => i18n._(CONTINENT_NAMES[code]);
 
   const continents = new Map<string, { servers: number; listed: string[] }>();
   for (const { value, count } of countries) {
@@ -486,7 +490,7 @@ function CountryPicker({
       const all = listed.every((country) => picked.has(country));
       return { code, servers, checked: all ? true : some ? ("indeterminate" as const) : false };
     })
-    .sort((a, b) => name(a.code).localeCompare(name(b.code), undefined, { sensitivity: "base" }));
+    .sort((a, b) => continentName(a.code).localeCompare(continentName(b.code), undefined, { sensitivity: "base" }));
 
   const toggleContinent = (continent: string, on: boolean) => {
     const codes = new Set(CONTINENTS[continent]);
@@ -501,7 +505,7 @@ function CountryPicker({
   const inWhole = new Set(whole.flatMap(([, codes]) => codes));
   const single = chosen.length === 1 ? chosen[0] : null;
   const summary = [
-    ...whole.map(([continent]) => name(continent)),
+    ...whole.map(([continent]) => continentName(continent)),
     ...chosen.filter((code) => !inWhole.has(code)).map(name),
   ];
 
@@ -524,44 +528,47 @@ function CountryPicker({
       <PopoverContent
         align="start"
         collisionPadding={12}
-        className="flex max-h-[min(420px,var(--radix-popover-content-available-height))] w-72 flex-col p-0"
+        className="flex max-h-[min(420px,var(--radix-popover-content-available-height))] w-72 flex-col border-input p-0"
       >
-        <div className="flex flex-col gap-0.5 border-b p-1.5">
-          <div className="flex h-6 items-center justify-between px-1.5">
-            <span className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
-              <Trans>Continents</Trans>
-            </span>
-            <Button
-              variant="ghost"
-              size="sm"
-              disabled={chosen.length === 0}
-              onClick={() => onChange([])}
-              className="h-6 px-2 text-xs"
-            >
-              <Trans>All countries</Trans>
-            </Button>
+        <div className="flex min-h-0 flex-col overflow-y-auto p-1.5">
+          <div role="group" aria-labelledby={`${id}-continents`} className="flex flex-col gap-0.5 border-b pb-1.5">
+            <div className="flex h-6 shrink-0 items-center justify-between px-1.5">
+              <span id={`${id}-continents`} className={HEADING}>
+                <Trans>Continents</Trans>
+              </span>
+              {chosen.length > 0 && (
+                <Button variant="ghost" size="sm" onClick={() => onChange([])} className="h-6 px-2 text-xs">
+                  <Trans>Clear selection</Trans>
+                </Button>
+              )}
+            </div>
+            {continentRows.map(({ code, servers, checked }) => (
+              <PickRow
+                key={code}
+                checked={checked}
+                onChange={(on) => toggleContinent(code, on)}
+                label={continentName(code)}
+                count={i18n.number(servers)}
+              />
+            ))}
           </div>
-          {continentRows.map(({ code, servers, checked }) => (
-            <PickRow
-              key={code}
-              checked={checked}
-              onChange={(on) => toggleContinent(code, on)}
-              label={name(code)}
-              count={i18n.number(servers)}
-            />
-          ))}
-        </div>
-        <div role="group" aria-label={t`Countries`} className="flex min-h-0 flex-col gap-0.5 overflow-y-auto p-1.5">
-          {countries.map(({ value, count }) => (
-            <PickRow
-              key={value}
-              checked={picked.has(value)}
-              onChange={(on) => toggleCountry(value, on)}
-              icon={<CountryFlag code={value} decorative />}
-              label={name(value)}
-              count={i18n.number(count)}
-            />
-          ))}
+          <div role="group" aria-labelledby={`${id}-countries`} className="flex flex-col gap-0.5 pt-1.5">
+            <div className="flex h-6 shrink-0 items-center px-1.5">
+              <span id={`${id}-countries`} className={HEADING}>
+                <Trans>Countries</Trans>
+              </span>
+            </div>
+            {countries.map(({ value, count }) => (
+              <PickRow
+                key={value}
+                checked={picked.has(value)}
+                onChange={(on) => toggleCountry(value, on)}
+                icon={<CountryFlag code={value} decorative />}
+                label={name(value)}
+                count={i18n.number(count)}
+              />
+            ))}
+          </div>
         </div>
       </PopoverContent>
     </Popover>

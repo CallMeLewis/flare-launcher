@@ -235,6 +235,10 @@ msgstr "Added to the command line"
 msgid "Address copied"
 msgstr "Address copied"
 
+#: src/lib/continents.ts
+msgid "Africa"
+msgstr "Africa"
+
 #: src/components/filter-menu.tsx
 msgid "All countries"
 msgstr "All countries"
@@ -255,6 +259,10 @@ msgstr "All up to date"
 msgid "All versions"
 msgstr "All versions"
 
+#: src/lib/continents.ts
+msgid "Antarctica"
+msgstr "Antarctica"
+
 #: src/components/filter-menu.tsx
 msgid "Any"
 msgstr "Any"
@@ -270,6 +278,10 @@ msgstr "App menu"
 #: src/lib/shared-messages.ts
 msgid "Appearance"
 msgstr "Appearance"
+
+#: src/lib/continents.ts
+msgid "Asia"
+msgstr "Asia"
 
 #: src/components/filter-menu.tsx
 #: src/lib/filter.ts
@@ -357,6 +369,7 @@ msgstr "Clear filters"
 msgid "Clear search"
 msgstr "Clear search"
 
+#: src/components/filter-menu.tsx
 #: src/components/mods-page.tsx
 msgid "Clear selection"
 msgstr "Clear selection"
@@ -677,6 +690,10 @@ msgstr "Enter it in the panel on the right, then select Play."
 #: src/lib/backend-messages.ts
 msgid "Enter the server's address, such as {example}."
 msgstr "Enter the server's address, such as {example}."
+
+#: src/lib/continents.ts
+msgid "Europe"
+msgstr "Europe"
 
 #: src/components/server-detail.tsx
 msgid "Every mod for this server is installed and up to date."
@@ -1158,6 +1175,10 @@ msgstr "No servers found on your network"
 msgid "No servers match"
 msgstr "No servers match"
 
+#: src/lib/continents.ts
+msgid "North America"
+msgstr "North America"
+
 #: src/components/mods-page.tsx
 msgid "Not downloaded"
 msgstr "Not downloaded"
@@ -1182,6 +1203,10 @@ msgstr "Not started"
 #: src/components/settings-dialog.tsx
 msgid "Nothing extra"
 msgstr "Nothing extra"
+
+#: src/lib/continents.ts
+msgid "Oceania"
+msgstr "Oceania"
 
 #: src/components/filter-menu.tsx
 #: src/components/server-table.tsx
@@ -1538,6 +1563,10 @@ msgstr "Something went wrong"
 #: src/lib/backend.ts
 msgid "Something went wrong."
 msgstr "Something went wrong."
+
+#: src/lib/continents.ts
+msgid "South America"
+msgstr "South America"
 
 #: src/lib/shared-messages.ts
 msgid "Stable"

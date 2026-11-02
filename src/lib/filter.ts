@@ -1,6 +1,6 @@
 import type { MessageDescriptor } from "@lingui/core";
 import { msg, plural } from "@lingui/core/macro";
-import { CONTINENTS } from "./continents";
+import { CONTINENT_NAMES, CONTINENTS } from "./continents";
 import { mapName } from "./maps";
 import type { ServerRow } from "./types";
 
@@ -396,8 +396,8 @@ export function filterChips(filters: Filters, countryName: (code: string) => str
 const COUNTRY_CHIPS = 3;
 
 /**
- * A chip for each whole continent chosen, named by `countryName` from its region code, then one for each other
- * country, or a single one for all of those when there are many.
+ * A chip for each whole continent chosen, then one for each other country, or a single one for all of those when
+ * there are many.
  */
 function countryChips(countries: string[], countryName: (code: string) => string): FilterChip[] {
   const chosen = new Set(countries);
@@ -411,7 +411,7 @@ function countryChips(countries: string[], countryName: (code: string) => string
       chips.push({
         key: `continent:${continent}`,
         prefix: msg`Country`,
-        label: countryName(continent),
+        label: CONTINENT_NAMES[continent],
         clear: without(codes),
       });
       for (const code of codes) chosen.delete(code);

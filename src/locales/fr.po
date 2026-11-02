@@ -235,6 +235,10 @@ msgstr "Ajouté à la ligne de commande"
 msgid "Address copied"
 msgstr "Adresse copiée"
 
+#: src/lib/continents.ts
+msgid "Africa"
+msgstr "Afrique"
+
 #: src/components/filter-menu.tsx
 msgid "All countries"
 msgstr "Tous les pays"
@@ -255,6 +259,10 @@ msgstr "Tout est à jour"
 msgid "All versions"
 msgstr "Toutes les versions"
 
+#: src/lib/continents.ts
+msgid "Antarctica"
+msgstr "Antarctique"
+
 #: src/components/filter-menu.tsx
 msgid "Any"
 msgstr "Tous"
@@ -270,6 +278,10 @@ msgstr "Menu des applications"
 #: src/lib/shared-messages.ts
 msgid "Appearance"
 msgstr "Apparence"
+
+#: src/lib/continents.ts
+msgid "Asia"
+msgstr "Asie"
 
 #: src/components/filter-menu.tsx
 #: src/lib/filter.ts
@@ -357,6 +369,7 @@ msgstr "Effacer les filtres"
 msgid "Clear search"
 msgstr "Effacer la recherche"
 
+#: src/components/filter-menu.tsx
 #: src/components/mods-page.tsx
 msgid "Clear selection"
 msgstr "Effacer la sélection"
@@ -677,6 +690,10 @@ msgstr "Saisissez-le dans le panneau de droite, puis sélectionnez Jouer."
 #: src/lib/backend-messages.ts
 msgid "Enter the server's address, such as {example}."
 msgstr "Saisissez l’adresse du serveur, par exemple {example}."
+
+#: src/lib/continents.ts
+msgid "Europe"
+msgstr "Europe"
 
 #: src/components/server-detail.tsx
 msgid "Every mod for this server is installed and up to date."
@@ -1158,6 +1175,10 @@ msgstr "Aucun serveur trouvé sur votre réseau"
 msgid "No servers match"
 msgstr "Aucun serveur ne correspond"
 
+#: src/lib/continents.ts
+msgid "North America"
+msgstr "Amérique du Nord"
+
 #: src/components/mods-page.tsx
 msgid "Not downloaded"
 msgstr "Non téléchargé"
@@ -1182,6 +1203,10 @@ msgstr "Pas encore commencé"
 #: src/components/settings-dialog.tsx
 msgid "Nothing extra"
 msgstr "Rien de plus"
+
+#: src/lib/continents.ts
+msgid "Oceania"
+msgstr "Océanie"
 
 #: src/components/filter-menu.tsx
 #: src/components/server-table.tsx
@@ -1538,6 +1563,10 @@ msgstr "Une erreur s’est produite"
 #: src/lib/backend.ts
 msgid "Something went wrong."
 msgstr "Une erreur s’est produite."
+
+#: src/lib/continents.ts
+msgid "South America"
+msgstr "Amérique du Sud"
 
 #: src/lib/shared-messages.ts
 msgid "Stable"

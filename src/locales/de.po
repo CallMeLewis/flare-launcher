@@ -235,6 +235,10 @@ msgstr "Zur Befehlszeile hinzugefügt"
 msgid "Address copied"
 msgstr "Adresse kopiert"
 
+#: src/lib/continents.ts
+msgid "Africa"
+msgstr "Afrika"
+
 #: src/components/filter-menu.tsx
 msgid "All countries"
 msgstr "Alle Länder"
@@ -255,6 +259,10 @@ msgstr "Alles aktuell"
 msgid "All versions"
 msgstr "Alle Versionen"
 
+#: src/lib/continents.ts
+msgid "Antarctica"
+msgstr "Antarktis"
+
 #: src/components/filter-menu.tsx
 msgid "Any"
 msgstr "Alle"
@@ -270,6 +278,10 @@ msgstr "App-Menü"
 #: src/lib/shared-messages.ts
 msgid "Appearance"
 msgstr "Darstellung"
+
+#: src/lib/continents.ts
+msgid "Asia"
+msgstr "Asien"
 
 #: src/components/filter-menu.tsx
 #: src/lib/filter.ts
@@ -357,6 +369,7 @@ msgstr "Alle Filter entfernen"
 msgid "Clear search"
 msgstr "Suche leeren"
 
+#: src/components/filter-menu.tsx
 #: src/components/mods-page.tsx
 msgid "Clear selection"
 msgstr "Auswahl aufheben"
@@ -677,6 +690,10 @@ msgstr "Gib es im Bereich rechts ein und klicke dann auf Spielen."
 #: src/lib/backend-messages.ts
 msgid "Enter the server's address, such as {example}."
 msgstr "Gib die Adresse des Servers ein, z. B. {example}."
+
+#: src/lib/continents.ts
+msgid "Europe"
+msgstr "Europa"
 
 #: src/components/server-detail.tsx
 msgid "Every mod for this server is installed and up to date."
@@ -1158,6 +1175,10 @@ msgstr "Keine Server in deinem Netzwerk gefunden"
 msgid "No servers match"
 msgstr "Keine passenden Server"
 
+#: src/lib/continents.ts
+msgid "North America"
+msgstr "Nordamerika"
+
 #: src/components/mods-page.tsx
 msgid "Not downloaded"
 msgstr "Nicht heruntergeladen"
@@ -1182,6 +1203,10 @@ msgstr "Nicht gestartet"
 #: src/components/settings-dialog.tsx
 msgid "Nothing extra"
 msgstr "Nichts Zusätzliches"
+
+#: src/lib/continents.ts
+msgid "Oceania"
+msgstr "Ozeanien"
 
 #: src/components/filter-menu.tsx
 #: src/components/server-table.tsx
@@ -1538,6 +1563,10 @@ msgstr "Etwas ist schiefgelaufen"
 #: src/lib/backend.ts
 msgid "Something went wrong."
 msgstr "Etwas ist schiefgelaufen."
+
+#: src/lib/continents.ts
+msgid "South America"
+msgstr "Südamerika"
 
 #: src/lib/shared-messages.ts
 msgid "Stable"

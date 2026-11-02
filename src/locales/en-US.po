@@ -235,6 +235,10 @@ msgstr ""
 msgid "Address copied"
 msgstr ""
 
+#: src/lib/continents.ts
+msgid "Africa"
+msgstr ""
+
 #: src/components/filter-menu.tsx
 msgid "All countries"
 msgstr ""
@@ -255,6 +259,10 @@ msgstr ""
 msgid "All versions"
 msgstr ""
 
+#: src/lib/continents.ts
+msgid "Antarctica"
+msgstr ""
+
 #: src/components/filter-menu.tsx
 msgid "Any"
 msgstr ""
@@ -269,6 +277,10 @@ msgstr ""
 
 #: src/lib/shared-messages.ts
 msgid "Appearance"
+msgstr ""
+
+#: src/lib/continents.ts
+msgid "Asia"
 msgstr ""
 
 #: src/components/filter-menu.tsx
@@ -357,6 +369,7 @@ msgstr ""
 msgid "Clear search"
 msgstr ""
 
+#: src/components/filter-menu.tsx
 #: src/components/mods-page.tsx
 msgid "Clear selection"
 msgstr ""
@@ -676,6 +689,10 @@ msgstr ""
 
 #: src/lib/backend-messages.ts
 msgid "Enter the server's address, such as {example}."
+msgstr ""
+
+#: src/lib/continents.ts
+msgid "Europe"
 msgstr ""
 
 #: src/components/server-detail.tsx
@@ -1158,6 +1175,10 @@ msgstr ""
 msgid "No servers match"
 msgstr ""
 
+#: src/lib/continents.ts
+msgid "North America"
+msgstr ""
+
 #: src/components/mods-page.tsx
 msgid "Not downloaded"
 msgstr ""
@@ -1181,6 +1202,10 @@ msgstr ""
 
 #: src/components/settings-dialog.tsx
 msgid "Nothing extra"
+msgstr ""
+
+#: src/lib/continents.ts
+msgid "Oceania"
 msgstr ""
 
 #: src/components/filter-menu.tsx
@@ -1537,6 +1562,10 @@ msgstr ""
 
 #: src/lib/backend.ts
 msgid "Something went wrong."
+msgstr ""
+
+#: src/lib/continents.ts
+msgid "South America"
 msgstr ""
 
 #: src/lib/shared-messages.ts

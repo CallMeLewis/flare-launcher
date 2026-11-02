@@ -1,7 +1,9 @@
+import type { MessageDescriptor } from "@lingui/core";
+import { msg } from "@lingui/core/macro";
+
 /**
- * The continents countries are in, by UN M49 region code, which `countryName` also names in the interface language,
- * such as Europe for `150`. North America takes in Central America and the Caribbean. Cyprus is counted in Europe,
- * where players look for it, rather than in Asia as the UN has it.
+ * The continents countries are in, by UN M49 region code. North America takes in Central America and the Caribbean.
+ * Cyprus is counted in Europe, where players look for it, rather than in Asia as the UN has it.
  */
 export const CONTINENTS: Record<string, readonly string[]> = {
   // Africa
@@ -30,6 +32,20 @@ export const CONTINENTS: Record<string, readonly string[]> = {
   "009": "AS AU CK FJ PF GU KI MH FM NR NC NZ NU NF MP PW PG PN WS SB TK TO TV VU WF CX CC HM".split(" "),
   // Antarctica
   AQ: ["AQ"],
+};
+
+/**
+ * Each continent's name. Written out rather than asked of `Intl.DisplayNames`, which names M49 codes in Node but
+ * not in the app's WebView, where Europe would show as `150`.
+ */
+export const CONTINENT_NAMES: Record<string, MessageDescriptor> = {
+  "002": msg`Africa`,
+  "142": msg`Asia`,
+  "150": msg`Europe`,
+  "003": msg`North America`,
+  "005": msg`South America`,
+  "009": msg`Oceania`,
+  AQ: msg`Antarctica`,
 };
 
 const continentOf = new Map(
