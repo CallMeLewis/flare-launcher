@@ -15,6 +15,10 @@ msgstr "{app} ist auf dem neuesten Stand (geprüft um {time}). Klicke, um erneut
 msgid "{app} will close, install the update in the background and open again in a few seconds."
 msgstr "{app} schließt sich, installiert das Update im Hintergrund und öffnet sich in wenigen Sekunden wieder."
 
+#: src/lib/filter.ts
+msgid "{count, plural, one {# country} other {# countries}}"
+msgstr "{count, plural, one {# Land} other {# Länder}}"
+
 #: src/App.tsx
 msgid "{count, plural, one {# mod} other {# mods}} downloaded for {name}"
 msgstr "{count, plural, one {# Mod} other {# Mods}} für {name} heruntergeladen"
@@ -377,6 +381,10 @@ msgstr "Community"
 msgid "Connection"
 msgstr "Verbindung"
 
+#: src/components/filter-menu.tsx
+msgid "Continents"
+msgstr "Kontinente"
+
 #: src/components/map-count-dialog.tsx
 #: src/components/server-detail.tsx
 msgid "Copied"
@@ -498,6 +506,10 @@ msgstr "Mods konnten nicht aktualisiert werden"
 #: src/App.tsx
 msgid "Couldn't verify the mods"
 msgstr "Mods konnten nicht überprüft werden"
+
+#: src/components/filter-menu.tsx
+msgid "Countries"
+msgstr "Länder"
 
 #: src/components/filter-menu.tsx
 #: src/components/server-detail.tsx

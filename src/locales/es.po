@@ -15,6 +15,10 @@ msgstr "{app} está actualizado (comprobado a las {time}). Selecciona para volve
 msgid "{app} will close, install the update in the background and open again in a few seconds."
 msgstr "{app} se cerrará, instalará la actualización en segundo plano y se volverá a abrir en unos segundos."
 
+#: src/lib/filter.ts
+msgid "{count, plural, one {# country} other {# countries}}"
+msgstr "{count, plural, one {# país} other {# países}}"
+
 #: src/App.tsx
 msgid "{count, plural, one {# mod} other {# mods}} downloaded for {name}"
 msgstr "{count, plural, one {# mod descargado} other {# mods descargados}} para {name}"
@@ -377,6 +381,10 @@ msgstr "Comunidad"
 msgid "Connection"
 msgstr "Conexión"
 
+#: src/components/filter-menu.tsx
+msgid "Continents"
+msgstr "Continentes"
+
 #: src/components/map-count-dialog.tsx
 #: src/components/server-detail.tsx
 msgid "Copied"
@@ -498,6 +506,10 @@ msgstr "No se pudieron actualizar los mods"
 #: src/App.tsx
 msgid "Couldn't verify the mods"
 msgstr "No se pudieron verificar los mods"
+
+#: src/components/filter-menu.tsx
+msgid "Countries"
+msgstr "Países"
 
 #: src/components/filter-menu.tsx
 #: src/components/server-detail.tsx
