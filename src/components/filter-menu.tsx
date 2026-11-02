@@ -71,7 +71,7 @@ export function FilterMenu({
                 <SelectTrigger size="sm" aria-label={t`Map`} className="w-full text-[13px]">
                   <SelectValue>{filters.map || t`All maps`}</SelectValue>
                 </SelectTrigger>
-                <SelectContent className="max-h-80">
+                <SelectContent className="max-h-80 border-input">
                   <SelectItem value={ANY}>
                     <Trans>All maps</Trans>
                   </SelectItem>
@@ -100,7 +100,7 @@ export function FilterMenu({
                     )}
                   </SelectValue>
                 </SelectTrigger>
-                <SelectContent className="max-h-80">
+                <SelectContent className="max-h-80 border-input">
                   <SelectItem value={ANY}>
                     <Trans>All versions</Trans>
                   </SelectItem>
