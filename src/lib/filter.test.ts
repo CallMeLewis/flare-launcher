@@ -1,5 +1,6 @@
 import { i18n } from "@lingui/core";
 import { describe, expect, it } from "vitest";
+import { CONTINENTS, continentOfCountry } from "./continents";
 import {
   DEFAULT_FILTERS,
   MY_VERSION,
@@ -332,9 +333,33 @@ describe("countries", () => {
   ];
   const names: Record<string, string> = { DE: "Germany", FR: "France" };
 
-  it("keeps only the chosen country's servers", () => {
-    const ids = filterServers(placed, { ...DEFAULT_FILTERS, hasPlayers: false, country: "DE" }).map((r) => r.id);
-    expect(ids).toEqual(["1.1.1.1:2303", "3.3.3.3:2303"]);
+  it("keeps only the chosen countries' servers", () => {
+    const only = (countries: string[]) =>
+      filterServers(placed, { ...DEFAULT_FILTERS, hasPlayers: false, countries }).map((r) => r.id);
+    expect(only(["DE"])).toEqual(["1.1.1.1:2303", "3.3.3.3:2303"]);
+    expect(only(["DE", "FR"])).toEqual(["1.1.1.1:2303", "2.2.2.2:2303", "3.3.3.3:2303"]);
+    expect(only([])).toHaveLength(4);
+  });
+
+  it("puts every country in one continent", () => {
+    const seen = Object.values(CONTINENTS).flat();
+    expect(new Set(seen).size).toBe(seen.length);
+    expect(seen.every((code) => /^[A-Z]{2}$/.test(code))).toBe(true);
+    expect(continentOfCountry("DE")).toBe("150");
+    expect(continentOfCountry("US")).toBe("003");
+  });
+
+  it("shows a whole continent as one chip and many other countries as one", () => {
+    const countries = [...CONTINENTS["009"], "DE", "FR", "US", "BR"];
+    const chips = filterChips({ ...DEFAULT_FILTERS, hasPlayers: false, countries });
+    expect(chips.map((chip) => chip.key)).toEqual(["continent:009", "countries"]);
+    expect(chips[0].clear).toEqual({ countries: ["DE", "FR", "US", "BR"] });
+    expect(chips[1].clear).toEqual({ countries: CONTINENTS["009"] });
+    const few = filterChips({ ...DEFAULT_FILTERS, hasPlayers: false, countries: ["DE", "FR"] });
+    expect(few.map((chip) => [chip.label, chip.clear])).toEqual([
+      ["DE", { countries: ["FR"] }],
+      ["FR", { countries: ["DE"] }],
+    ]);
   });
 
   it("counts countries in the order of their names", () => {

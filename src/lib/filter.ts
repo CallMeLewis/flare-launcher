@@ -1,5 +1,6 @@
 import type { MessageDescriptor } from "@lingui/core";
-import { msg } from "@lingui/core/macro";
+import { msg, plural } from "@lingui/core/macro";
+import { CONTINENTS } from "./continents";
 import { mapName } from "./maps";
 import type { ServerRow } from "./types";
 
@@ -14,8 +15,8 @@ export type Filters = {
   map: string;
   /** Game version, MY_VERSION for the one on this computer, or an empty string for any version. */
   version: string;
-  /** Two-letter country code, or an empty string for any country. */
-  country: string;
+  /** Two-letter codes of the countries a server has to be in, any one of them, or none for any country. */
+  countries: string[];
   serverType: ServerType;
   hasPlayers: boolean;
   notFull: boolean;
@@ -35,7 +36,7 @@ export const DEFAULT_FILTERS: Filters = {
   search: "",
   map: "",
   version: "",
-  country: "",
+  countries: [],
   serverType: "any",
   hasPlayers: true,
   notFull: false,
@@ -197,12 +198,13 @@ export function filterServers(
   const terms = searchTerms(filters.search);
   const modsByTerm = terms.map((term) => modsMatching(modNames, term));
   const required = filters.requiredMods.map((name) => positionsNamed(modNames, name));
+  const countries = new Set(filters.countries);
   return rows.filter((row) => {
     if (filters.map && mapName(row.map) !== filters.map) return false;
     if (filters.version === MY_VERSION) {
       if (compareGameVersions(row.version, gameVersion) ?? 0) return false;
     } else if (filters.version && row.version !== filters.version) return false;
-    if (filters.country && row.country !== filters.country) return false;
+    if (countries.size > 0 && !countries.has(row.country ?? "")) return false;
     if (filters.serverType === "official" && !row.official) return false;
     if (filters.serverType === "community" && row.official) return false;
     if (filters.hasPlayers && row.players === 0) return false;
@@ -349,8 +351,7 @@ export function filterChips(filters: Filters, countryName: (code: string) => str
       label: filters.version === MY_VERSION ? msg`Same as mine` : filters.version,
       clear: { version: "" },
     });
-  if (filters.country)
-    chips.push({ key: "country", prefix: msg`Country`, label: countryName(filters.country), clear: { country: "" } });
+  chips.push(...countryChips(filters.countries, countryName));
   if (filters.serverType !== "any")
     chips.push({
       key: "serverType",
@@ -388,6 +389,44 @@ export function filterChips(filters: Filters, countryName: (code: string) => str
     });
   if (filters.noPassword) chips.push({ key: "noPassword", label: msg`No password`, clear: { noPassword: false } });
   if (filters.battlEye) chips.push({ key: "battlEye", label: msg`BattlEye on`, clear: { battlEye: false } });
+  return chips;
+}
+
+// More countries than this outside whole continents share one chip, so picking many doesn't flood the toolbar.
+const COUNTRY_CHIPS = 3;
+
+/**
+ * A chip for each whole continent chosen, named by `countryName` from its region code, then one for each other
+ * country, or a single one for all of those when there are many.
+ */
+function countryChips(countries: string[], countryName: (code: string) => string): FilterChip[] {
+  const chosen = new Set(countries);
+  const without = (codes: Iterable<string>) => {
+    const removed = new Set(codes);
+    return { countries: countries.filter((code) => !removed.has(code)) };
+  };
+  const chips: FilterChip[] = [];
+  for (const [continent, codes] of Object.entries(CONTINENTS))
+    if (codes.every((code) => chosen.has(code))) {
+      chips.push({
+        key: `continent:${continent}`,
+        prefix: msg`Country`,
+        label: countryName(continent),
+        clear: without(codes),
+      });
+      for (const code of codes) chosen.delete(code);
+    }
+  const rest = countries.filter((code) => chosen.has(code));
+  if (rest.length > COUNTRY_CHIPS) {
+    const count = rest.length;
+    chips.push({
+      key: "countries",
+      label: msg`${plural(count, { one: "# country", other: "# countries" })}`,
+      clear: without(rest),
+    });
+  } else
+    for (const code of rest)
+      chips.push({ key: `country:${code}`, prefix: msg`Country`, label: countryName(code), clear: without([code]) });
   return chips;
 }
 

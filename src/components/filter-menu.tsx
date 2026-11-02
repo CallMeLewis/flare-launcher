@@ -1,11 +1,12 @@
 import { useId, useState, type ReactNode } from "react";
 import { Plural, Trans, useLingui } from "@lingui/react/macro";
-import { Search, X } from "lucide-react";
+import { ChevronDown, Search, X } from "lucide-react";
 import { CountryFlag } from "@/components/country-flag";
 import { Button } from "@flare/ui/ui/button";
 import { Checkbox } from "@flare/ui/ui/checkbox";
 import { Input } from "@flare/ui/ui/input";
 import { Label } from "@flare/ui/ui/label";
+import { Popover, PopoverContent, PopoverTrigger } from "@flare/ui/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@flare/ui/ui/select";
 import { ToggleGroup, ToggleGroupItem } from "@flare/ui/ui/toggle-group";
 import { useActiveOption } from "@/hooks/use-active-option";
@@ -19,6 +20,7 @@ import {
   type ServerType,
   type TimeOfDay,
 } from "@/lib/filter";
+import { CONTINENTS, continentOfCountry } from "@/lib/continents";
 import { countryName } from "@/lib/countries";
 import { cn } from "@/lib/utils";
 
@@ -120,35 +122,11 @@ export function FilterMenu({
               </Select>
             </Field>
             <Field label={t`Country`}>
-              <Select
-                value={filters.country || ANY}
-                onValueChange={(country) => onChange({ country: country === ANY ? "" : country })}
-              >
-                <SelectTrigger size="sm" aria-label={t`Country`} className="w-full text-[13px]">
-                  <SelectValue>
-                    {filters.country ? (
-                      <span className="flex min-w-0 items-center gap-2">
-                        <CountryFlag code={filters.country} decorative />
-                        <span className="truncate">{countryName(filters.country, i18n.locale)}</span>
-                      </span>
-                    ) : (
-                      t`All countries`
-                    )}
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent className="max-h-80">
-                  <SelectItem value={ANY}>
-                    <Trans>All countries</Trans>
-                  </SelectItem>
-                  {countries.map(({ value, count: servers }) => (
-                    <SelectItem key={value} value={value}>
-                      <CountryFlag code={value} decorative />
-                      {countryName(value, i18n.locale)}
-                      <span className="data ml-1 text-xs text-muted-foreground">{i18n.number(servers)}</span>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <CountryPicker
+                countries={countries}
+                chosen={filters.countries}
+                onChange={(chosen) => onChange({ countries: chosen })}
+              />
             </Field>
             <Field label={t`Server type`}>
               <Segmented<ServerType>
@@ -472,6 +450,146 @@ function ModPicker({
           ))}
         </div>
       )}
+    </div>
+  );
+}
+
+/**
+ * Picks the countries a server has to be in. Each continent with servers in the list sits at the top, to choose or
+ * clear all its countries at once, including ones with no servers yet; the countries themselves follow, A to Z.
+ */
+function CountryPicker({
+  countries,
+  chosen,
+  onChange,
+}: {
+  countries: Option[];
+  chosen: string[];
+  onChange: (chosen: string[]) => void;
+}) {
+  const { t, i18n } = useLingui();
+  const picked = new Set(chosen);
+  const name = (code: string) => countryName(code, i18n.locale);
+
+  const continents = new Map<string, { servers: number; listed: string[] }>();
+  for (const { value, count } of countries) {
+    const continent = continentOfCountry(value);
+    if (!continent) continue;
+    const entry = continents.get(continent) ?? { servers: 0, listed: [] };
+    entry.servers += count;
+    entry.listed.push(value);
+    continents.set(continent, entry);
+  }
+  const continentRows = [...continents]
+    .map(([code, { servers, listed }]) => {
+      const some = listed.some((country) => picked.has(country));
+      const all = listed.every((country) => picked.has(country));
+      return { code, servers, checked: all ? true : some ? ("indeterminate" as const) : false };
+    })
+    .sort((a, b) => name(a.code).localeCompare(name(b.code), undefined, { sensitivity: "base" }));
+
+  const toggleContinent = (continent: string, on: boolean) => {
+    const codes = new Set(CONTINENTS[continent]);
+    const rest = chosen.filter((code) => !codes.has(code));
+    onChange(on ? [...rest, ...codes] : rest);
+  };
+  const toggleCountry = (code: string, on: boolean) =>
+    onChange(on ? [...chosen, code] : chosen.filter((other) => other !== code));
+
+  // Whole continents by name, then the other countries, as the chips above the list show them.
+  const whole = Object.entries(CONTINENTS).filter(([, codes]) => codes.every((code) => picked.has(code)));
+  const inWhole = new Set(whole.flatMap(([, codes]) => codes));
+  const single = chosen.length === 1 ? chosen[0] : null;
+  const summary = [
+    ...whole.map(([continent]) => name(continent)),
+    ...chosen.filter((code) => !inWhole.has(code)).map(name),
+  ];
+
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          size="sm"
+          aria-label={t`Country`}
+          className="w-full justify-between gap-2 px-3 text-[13px] font-normal"
+        >
+          <span className="flex min-w-0 items-center gap-2">
+            {single && <CountryFlag code={single} decorative />}
+            <span className="truncate">{summary.length > 0 ? summary.join(", ") : t`All countries`}</span>
+          </span>
+          <ChevronDown className="size-4 shrink-0 opacity-50" aria-hidden />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent
+        align="start"
+        collisionPadding={12}
+        className="flex max-h-[min(420px,var(--radix-popover-content-available-height))] w-72 flex-col p-0"
+      >
+        <div className="flex flex-col gap-0.5 border-b p-1.5">
+          <div className="flex h-6 items-center justify-between px-1.5">
+            <span className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
+              <Trans>Continents</Trans>
+            </span>
+            <Button
+              variant="ghost"
+              size="sm"
+              disabled={chosen.length === 0}
+              onClick={() => onChange([])}
+              className="h-6 px-2 text-xs"
+            >
+              <Trans>All countries</Trans>
+            </Button>
+          </div>
+          {continentRows.map(({ code, servers, checked }) => (
+            <PickRow
+              key={code}
+              checked={checked}
+              onChange={(on) => toggleContinent(code, on)}
+              label={name(code)}
+              count={i18n.number(servers)}
+            />
+          ))}
+        </div>
+        <div role="group" aria-label={t`Countries`} className="flex min-h-0 flex-col gap-0.5 overflow-y-auto p-1.5">
+          {countries.map(({ value, count }) => (
+            <PickRow
+              key={value}
+              checked={picked.has(value)}
+              onChange={(on) => toggleCountry(value, on)}
+              icon={<CountryFlag code={value} decorative />}
+              label={name(value)}
+              count={i18n.number(count)}
+            />
+          ))}
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+function PickRow({
+  checked,
+  onChange,
+  icon,
+  label,
+  count,
+}: {
+  checked: boolean | "indeterminate";
+  onChange: (checked: boolean) => void;
+  icon?: ReactNode;
+  label: string;
+  count: string;
+}) {
+  const id = useId();
+  return (
+    <div className="flex h-7 shrink-0 items-center gap-2 rounded-sm px-1.5 hover:bg-accent">
+      <Checkbox id={id} checked={checked} onCheckedChange={(state) => onChange(state === true)} />
+      <Label htmlFor={id} className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 text-[13px] font-normal">
+        {icon}
+        <span className="truncate">{label}</span>
+        <span className="data ml-auto shrink-0 text-xs text-muted-foreground">{count}</span>
+      </Label>
     </div>
   );
 }
