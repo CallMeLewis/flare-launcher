@@ -1,0 +1,13 @@
+"$schema" = "schemas/schema.json"
+
+[default]
+description = "Lets the window show the app's update status and check, download and install updates when the user asks."
+permissions = [
+  "allow-status",
+  "allow-check",
+  "allow-download",
+  "allow-install",
+  "allow-settings",
+  "allow-set-auto-check",
+  "allow-set-channel",
+]

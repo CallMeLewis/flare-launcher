@@ -27,13 +27,18 @@ import { CountryFlag } from "@/components/country-flag";
 import { MapCountDialog } from "@/components/map-count-dialog";
 import { PingValue } from "@/components/server-table";
 import { compareGameVersions, isNight, untilDayChange } from "@/lib/filter";
-import { Button } from "@flare/ui/ui/button";
-import { Checkbox } from "@flare/ui/ui/checkbox";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@flare/ui/ui/dropdown-menu";
-import { Input } from "@flare/ui/ui/input";
-import { Label } from "@flare/ui/ui/label";
-import { Progress } from "@flare/ui/ui/progress";
-import { Skeleton } from "@flare/ui/ui/skeleton";
+import { Button } from "@/ui/components/button";
+import { Checkbox } from "@/ui/components/checkbox";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/ui/components/dropdown-menu";
+import { Input } from "@/ui/components/input";
+import { Label } from "@/ui/components/label";
+import { Progress } from "@/ui/components/progress";
+import { Skeleton } from "@/ui/components/skeleton";
 import { useLowMapCount } from "@/hooks/use-low-map-count";
 import type { PingResult } from "@/hooks/use-pings";
 import { backend, errorMessage } from "@/lib/backend";

@@ -2,11 +2,18 @@ import { useEffect, useState } from "react";
 import { Trans, useLingui } from "@lingui/react/macro";
 import { LoaderCircle } from "lucide-react";
 import { toast } from "sonner";
-import { Button } from "@flare/ui/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@flare/ui/ui/dialog";
-import { Label } from "@flare/ui/ui/label";
-import { Skeleton } from "@flare/ui/ui/skeleton";
-import { Textarea } from "@flare/ui/ui/textarea";
+import { Button } from "@/ui/components/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/ui/components/dialog";
+import { Label } from "@/ui/components/label";
+import { Skeleton } from "@/ui/components/skeleton";
+import { Textarea } from "@/ui/components/textarea";
 import { backend, errorMessage } from "@/lib/backend";
 import { closeReport, useReportRequest } from "@/lib/report";
 import type { Report } from "@/lib/types";

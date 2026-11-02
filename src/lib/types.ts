@@ -1,4 +1,4 @@
-import type { UpdateChannel } from "@flare/ui";
+import type { UpdateChannel } from "@/ui";
 
 export type ServerRow = {
   /** `ip:queryPort`, unique per server. */

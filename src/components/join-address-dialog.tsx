@@ -1,10 +1,17 @@
 import { useState } from "react";
 import { Trans, useLingui } from "@lingui/react/macro";
 import { LoaderCircle } from "lucide-react";
-import { Button } from "@flare/ui/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@flare/ui/ui/dialog";
-import { Input } from "@flare/ui/ui/input";
-import { Label } from "@flare/ui/ui/label";
+import { Button } from "@/ui/components/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/ui/components/dialog";
+import { Input } from "@/ui/components/input";
+import { Label } from "@/ui/components/label";
 import { backend, errorMessage } from "@/lib/backend";
 import type { ServerRow } from "@/lib/types";
 

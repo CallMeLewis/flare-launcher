@@ -1,4 +1,4 @@
-import { MESSAGES } from "@flare/ui";
+import { MESSAGES } from "@/ui";
 import { describe, expect, it } from "vitest";
 import { SHARED_MESSAGES } from "./shared-messages";
 

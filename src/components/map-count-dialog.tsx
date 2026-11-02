@@ -2,8 +2,15 @@ import { useEffect, useRef, useState } from "react";
 import { Trans, useLingui } from "@lingui/react/macro";
 import { Check, Copy } from "lucide-react";
 import { toast } from "sonner";
-import { Button } from "@flare/ui/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@flare/ui/ui/dialog";
+import { Button } from "@/ui/components/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/ui/components/dialog";
 
 /** Raises `vm.max_map_count` to what DayZ needs (as in `launch.rs`), now and after every restart. */
 const COMMANDS = `echo "vm.max_map_count = 1048576" | sudo tee /etc/sysctl.d/dayz.conf

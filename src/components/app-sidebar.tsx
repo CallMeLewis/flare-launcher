@@ -2,7 +2,7 @@ import { Clock, List, Network, Package, Star, type LucideIcon } from "lucide-rea
 import type { MessageDescriptor } from "@lingui/core";
 import { msg } from "@lingui/core/macro";
 import { useLingui } from "@lingui/react/macro";
-import { AppSidebar as FlareSidebar, type SidebarItem } from "@flare/ui";
+import { AppSidebar as FlareSidebar, type SidebarItem } from "@/ui";
 
 export type View = "all" | "favourites" | "recent" | "lan" | "mods";
 

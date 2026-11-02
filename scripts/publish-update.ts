@@ -1,6 +1,6 @@
-// Publishes the launcher's releases to GitHub and its update feed, with the release script every Flare app shares
-// (@flare/release, in the flare-common repo beside this one). The builds are made and published by the Release
-// workflow (.github/workflows/release.yml), which runs when a v<version> tag is pushed.
+// Publishes the launcher's releases to GitHub and its update feed, with the release script in scripts/release. The
+// builds are made and published by the Release workflow (.github/workflows/release.yml), which runs when a v<version>
+// tag is pushed.
 //
 //   node scripts/publish-update.ts release           (pnpm release) tag the commit and push the tag, once CI passed on
 //                                                    it, which starts the Release workflow
@@ -14,7 +14,7 @@
 // Launcher, and kept: installed copies check this address for updates. It must match the feed given to the updater
 // plugin in src-tauri/src/lib.rs. Every release carries every build, so no player is left with a feed that has nothing
 // for them.
-import { release } from "@flare/release";
+import { release } from "./release/release.js";
 import { homedir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -31,8 +31,6 @@ await release({
   feed: "dayz-server-launcher",
   keyPath: process.env.DZSL_UPDATE_SIGNING_KEY ?? join(homedir(), ".dayz-server-launcher", "update-signing-key"),
   script: "node scripts/publish-update.ts",
-  // Beside this repo, as the launcher links to it, and on the tag in .flare-common-version.
-  common: { dir: resolve(root, "..", "flare-common"), versionFile: join(root, ".flare-common-version") },
   builds: [
     {
       platform: "windows-x86_64",

@@ -1,9 +1,9 @@
 import { msg } from "@lingui/core/macro";
 
 /**
- * Every message the Flare apps' shared interface (@flare/ui) shows and their shared updater sends, so they're extracted
- * for translation like the launcher's own. They're shown through `backendText`, which looks each one up by its English,
- * as for the backend's own text. A test keeps this list in step with @flare/ui's MESSAGES.
+ * Every message the window frame (src/ui) shows and the updater plugin sends, so they're extracted for translation like
+ * the rest of the launcher's. They're shown through `backendText`, which looks each one up by its English, as for the
+ * backend's own text. A test keeps this list in step with the frame's MESSAGES.
  */
 export const SHARED_MESSAGES = [
   msg({ message: "Appearance" }),

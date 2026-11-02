@@ -5,7 +5,7 @@ import {
   SettingRow,
   SettingsDialog as FlareSettingsDialog,
   SettingsGroup,
-} from "@flare/ui";
+} from "@/ui";
 import {
   CircleAlert,
   CircleCheck,
@@ -22,11 +22,11 @@ import type { MessageDescriptor } from "@lingui/core";
 import { msg } from "@lingui/core/macro";
 import { Plural, Trans, useLingui } from "@lingui/react/macro";
 import { toast } from "sonner";
-import { Button } from "@flare/ui/ui/button";
-import { Input } from "@flare/ui/ui/input";
-import { Label } from "@flare/ui/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@flare/ui/ui/select";
-import { Switch } from "@flare/ui/ui/switch";
+import { Button } from "@/ui/components/button";
+import { Input } from "@/ui/components/input";
+import { Label } from "@/ui/components/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/ui/components/select";
+import { Switch } from "@/ui/components/switch";
 import { backend, errorMessage, isPreview } from "@/lib/backend";
 import { addToAppMenu } from "@/hooks/use-app-menu-offer";
 import { LOCALES } from "@/lib/i18n";

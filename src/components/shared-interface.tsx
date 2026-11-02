@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { FlareProvider, type InstallNotice } from "@flare/ui";
+import { FlareProvider, type InstallNotice } from "@/ui";
 import { useLingui } from "@lingui/react/macro";
 import { backendText } from "@/lib/backend-messages";
 
@@ -15,7 +15,7 @@ function useInstallNotice(): InstallNotice {
 }
 
 /**
- * Gives the Flare apps' shared interface (@flare/ui) the launcher's name, version and notes, in the player's language.
+ * Gives the window frame (src/ui) the launcher's name, version and notes, in the player's language.
  * Inside the I18nProvider, so it follows a change of language.
  */
 export function SharedInterface({ children }: { children: ReactNode }) {

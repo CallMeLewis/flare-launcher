@@ -1,0 +1,22 @@
+[package]
+name = "tauri-plugin-flare-updater"
+version = "0.1.0"
+description = "Flare Launcher's self-updates: checks the update feed, downloads and installs on request"
+authors = ["CallMeLewis"]
+license = "GPL-3.0-or-later"
+repository = "https://github.com/CallMeLewis/flare-launcher"
+publish = false
+edition = "2024"
+rust-version = "1.94"
+# Tauri passes a plugin's permissions to the app through this.
+links = "tauri-plugin-flare-updater"
+
+[dependencies]
+tauri = "2"
+tauri-plugin-updater = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["time"] }
+
+[build-dependencies]
+tauri-plugin = { version = "2", features = ["build"] }

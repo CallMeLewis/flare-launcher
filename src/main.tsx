@@ -1,4 +1,4 @@
-import { blockWebviewMenu } from "@flare/ui";
+import { blockWebviewMenu } from "@/ui";
 import { i18n } from "@lingui/core";
 import { I18nProvider } from "@lingui/react";
 import { StrictMode } from "react";
@@ -7,7 +7,7 @@ import { App } from "./App";
 import { CrashBoundary } from "@/components/crash-screen";
 import { SharedInterface } from "@/components/shared-interface";
 import { Toaster } from "@/components/ui/sonner";
-import { TooltipProvider } from "@flare/ui/ui/tooltip";
+import { TooltipProvider } from "@/ui/components/tooltip";
 import { backend } from "@/lib/backend";
 import { activateLocale, resolveLocale, savedLanguage } from "@/lib/i18n";
 import { paintTheme, savedTheme } from "@/lib/theme";

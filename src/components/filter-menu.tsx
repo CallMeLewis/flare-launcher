@@ -2,13 +2,13 @@ import { useId, useState, type ReactNode } from "react";
 import { Plural, Trans, useLingui } from "@lingui/react/macro";
 import { ChevronDown, Search, X } from "lucide-react";
 import { CountryFlag } from "@/components/country-flag";
-import { Button } from "@flare/ui/ui/button";
-import { Checkbox } from "@flare/ui/ui/checkbox";
-import { Input } from "@flare/ui/ui/input";
-import { Label } from "@flare/ui/ui/label";
-import { Popover, PopoverContent, PopoverTrigger } from "@flare/ui/ui/popover";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@flare/ui/ui/select";
-import { ToggleGroup, ToggleGroupItem } from "@flare/ui/ui/toggle-group";
+import { Button } from "@/ui/components/button";
+import { Checkbox } from "@/ui/components/checkbox";
+import { Input } from "@/ui/components/input";
+import { Label } from "@/ui/components/label";
+import { Popover, PopoverContent, PopoverTrigger } from "@/ui/components/popover";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/ui/components/select";
+import { ToggleGroup, ToggleGroupItem } from "@/ui/components/toggle-group";
 import { useActiveOption } from "@/hooks/use-active-option";
 import {
   MY_VERSION,

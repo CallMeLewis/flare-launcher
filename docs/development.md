@@ -8,22 +8,11 @@ Linux: see [Windows and Linux](#windows-and-linux).
 Needs Node.js 24, pnpm 11 and rustup, which installs the Rust version pinned in `rust-toolchain.toml` the first time
 it's used. On Linux, Tauri also needs the WebKitGTK development packages.
 
-The updater, much of the interface and the release script are shared by the Flare apps, in the private
-[flare-common](https://github.com/CallMeLewis/flare-common) repo, which the launcher links to from beside this one. Check
-it out next to this repo, on the tag in `.flare-common-version`, and install its packages first:
-
 ```sh
-git clone https://github.com/CallMeLewis/flare-common ../flare-common
-git -C ../flare-common checkout "$(cat .flare-common-version)"
-pnpm --dir ../flare-common install
 pnpm install
 pnpm app          # the desktop app, with hot reload
 pnpm dev          # the interface alone in a browser at http://127.0.0.1:5173
 ```
-
-A change to the shared code is made in flare-common, and shows in the launcher straight away through the link. It
-reaches the launcher's releases once flare-common is tagged and `.flare-common-version` moves to the new tag: see
-flare-common's README.
 
 In a plain browser the interface loads the server list straight from its public API. Ping, mod checks and launching
 only work in the desktop app.
@@ -31,8 +20,8 @@ only work in the desktop app.
 ## Test
 
 ```sh
-pnpm test                                   # frontend unit tests
-cd src-tauri && cargo test                  # backend unit tests
+pnpm test                                   # frontend and release script unit tests
+cd src-tauri && cargo test --workspace      # backend and updater unit tests
 cd src-tauri && cargo test -- --ignored     # live checks against the real server list and Workshop
 pnpm lint                                   # lint the frontend and scripts (cargo clippy covers the backend)
 pnpm format                                 # format the frontend and backend; CI fails on unformatted code
@@ -127,7 +116,7 @@ it.
   the setting correctly; only the tag is wrong. The launcher reads it the
   other way round for servers on 1.30 or later, both for servers it asks directly and in the fallback list
   (`first_person_only` in `src-tauri/src/servers.rs`); the launcher's own list is already corrected by its crawler
-  (`Settings::from_keywords` in flare-common's `flare-a2s`). When an update fixes it, stop at that version in both.
+  (`Settings::from_keywords` in the crawler's `flare-a2s`). When an update fixes it, stop at that version in both.
   To check, start a server with `thirdPersonView = 0;` in `serverDZ.cfg`: a fixed server sends `no3rd`.
 
 ## Languages
@@ -159,6 +148,9 @@ own and loaded when chosen in Settings > Launcher. System, the default, uses the
 
 - `src/`: the interface. `App.tsx` holds the state, `components/` the screens, `lib/filter.ts` the filtering and
   sorting, `lib/backend.ts` every call into Rust, `lib/i18n.ts` loading languages and `locales/` their catalogues.
+- `src/ui/`: the window frame (title bar, sidebar, settings dialog and updates), the theme in `theme.css`, and in
+  `components/` the basic components everything is built from: buttons, dialogs, menus and so on. Its text is
+  translated through the list in `src/lib/shared-messages.ts`, which a test keeps in step with `src/ui/lib/messages.ts`.
 - `src-tauri/src/servers.rs`: downloads and caches the server list. A refresh downloads only the player counts when
   the list hasn't changed. A server the list marked verified keeps its badge for an hour while the list leaves it out,
   as during a restart, or the fallback list is in use.
@@ -173,8 +165,9 @@ own and loaded when chosen in Settings > Launcher. System, the default, uses the
 - `src-tauri/src/workshop.rs`: subscribes to, downloads and unsubscribes from mods through Steamworks.
 - `src-tauri/src/discord.rs`: shows the Discord status, the launcher and whether DayZ is running, never the server.
   Its art comes from the Flare Launcher application in Discord's developer portal, as the asset `logo`.
-- Updates come from `tauri-plugin-flare-updater`, the Flare apps' shared updater, in the flare-common repo beside this
-  one: it checks for, downloads and installs launcher updates.
+- `src-tauri/crates/tauri-plugin-flare-updater/`: checks for, downloads and installs launcher updates. It's a Tauri
+  plugin, so it's a crate of its own in the same Cargo workspace; run Cargo with `--workspace` (or `fmt --all`) to
+  include it.
 - `src-tauri/src/report.rs`: builds and sends the problem report a player can choose to send when something fails,
   with the launcher's last few log lines (kept in memory, never on disk). Reports go to the stats dashboard
   (stats.darkzone.dev), kept separately, where they're read and worked through on its Reports page; a debug build
@@ -183,8 +176,8 @@ own and loaded when chosen in Settings > Launcher. System, the default, uses the
 - `src-tauri/src/links.rs`: reads join links, which select a server for the player to join. They're shared as
   `https://flarelauncher.app/join/<address>`, a page on the download site that opens the launcher.
 - `src-tauri/windows/installer-hooks.nsh`: removes an install made under the launcher's old name.
-- `scripts/`: the release tooling, which gives the Flare apps' shared release script (`@flare/release`, in flare-common)
-  the launcher's builds. `CHANGELOG.md` holds every version's notes, read through the same package.
+- `scripts/`: the release tooling. `publish-update.ts` gives the release script in `scripts/release/` the launcher's
+  builds. `CHANGELOG.md` holds every version's notes, read through `scripts/release/changelog.js`.
 - `docs/scope.md`: what the launcher is for, what it won't do, and how to judge a new feature.
 - `docs/design.md`: the visual rules the launcher follows.
 - `docs/commit-messages.md`: how commit messages are written.

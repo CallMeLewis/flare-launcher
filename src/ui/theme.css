@@ -1,0 +1,189 @@
+/* The launcher's look: colours, fonts, radius and base styles, light by default and dark under .dark. globals.css
+   imports it straight after Tailwind and adds the launcher's own colours after it. See docs/design.md. */
+
+@import "tw-animate-css";
+
+@import "@fontsource/ibm-plex-sans/400.css";
+@import "@fontsource/ibm-plex-sans/500.css";
+@import "@fontsource/ibm-plex-sans/600.css";
+@import "@fontsource-variable/jetbrains-mono";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  color-scheme: light;
+  --radius: 0.5rem;
+
+  /* A navy scale, #0a1b2e to #f2f6fb. The dark theme's surfaces and text are its lower and upper stops, the light theme
+     its top three. Secondary text keeps 4.5:1 on every surface and field edges 3:1 on the background and the card. */
+  --background: #ffffff;
+  --foreground: #0a1b2e;
+  --card: #f2f6fb;
+  --card-foreground: #0a1b2e;
+  --popover: #ffffff;
+  --popover-foreground: #0a1b2e;
+  --primary: #15803d;
+  --primary-foreground: #ffffff;
+  --secondary: #e1e8f0;
+  --secondary-foreground: #0a1b2e;
+  --muted: #e1e8f0;
+  --muted-foreground: #34506d;
+  --accent: #e1e8f0;
+  --accent-foreground: #0a1b2e;
+  --destructive: #c81e1e;
+  --border: #d3dde9;
+  /* Field edges, dark enough to see (3:1). Fills such as switches use --control instead. */
+  --input: #7a8ca6;
+  --control: #c4d2e1;
+  --ring: #15803d;
+
+  --success: #166534;
+  --warning: #92400e;
+  --danger: #c81e1e;
+  /* Windows' own hover colour for the close button in the title bar. */
+  --caption-close: #c42b1c;
+  --row-stripe: #f7f9fc;
+  --row-hover: #ecf1f7;
+  --row-selected: #dcf3e6;
+  --scrollbar: #c4d2e1;
+  --scrollbar-hover: #a1b2c4;
+}
+
+.dark {
+  color-scheme: dark;
+
+  /* The surfaces sit half a stop below the scale's lower stops, so the dark theme stays as dark as it was. */
+  --background: #0a1b2e;
+  --foreground: #e1e8f0;
+  --card: #0e2238;
+  --card-foreground: #e1e8f0;
+  --popover: #112a46;
+  --popover-foreground: #e1e8f0;
+  --primary: #22c55e;
+  --primary-foreground: #04130a;
+  --secondary: #16334f;
+  --secondary-foreground: #e1e8f0;
+  --muted: #16334f;
+  --muted-foreground: #a1b2c4;
+  --accent: #16334f;
+  --accent-foreground: #e1e8f0;
+  --destructive: #dc2626;
+  --border: #162f49;
+  --input: #557392;
+  --control: #1b3b5a;
+  --ring: #22c55e;
+
+  --success: #4ade80;
+  --warning: #fbbf24;
+  --danger: #f87171;
+  --row-stripe: #0c1e32;
+  --row-hover: #132d4a;
+  --row-selected: #10302a;
+  --scrollbar: #1b3b5a;
+  --scrollbar-hover: #34506d;
+}
+
+@theme inline {
+  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono Variable", ui-monospace, "Cascadia Mono", monospace;
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-control: var(--control);
+  --color-ring: var(--ring);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-caption-close: var(--caption-close);
+  --color-row-stripe: var(--row-stripe);
+  --color-row-hover: var(--row-hover);
+  --color-row-selected: var(--row-selected);
+}
+
+@layer base {
+  /* Keyboard focus is a solid 2px outline in the ring colour everywhere: components add `focus-visible:outline-2`
+     and, where there's room, `focus-visible:outline-offset-2`. */
+  * {
+    @apply border-border outline-ring;
+  }
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+  body {
+    @apply bg-background text-foreground font-sans text-sm antialiased;
+    overflow: hidden;
+    user-select: none;
+    cursor: default;
+  }
+  input,
+  textarea,
+  .selectable {
+    user-select: text;
+  }
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]) {
+    cursor: pointer;
+  }
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--scrollbar);
+    border: 2px solid transparent;
+    border-radius: 999px;
+    background-clip: padding-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: var(--scrollbar-hover);
+  }
+  .font-mono {
+    font-variant-numeric: tabular-nums;
+    font-variant-ligatures: none;
+  }
+}
+
+/* Toasts set their own font; keep them on the interface font. */
+[data-sonner-toaster] {
+  font-family: var(--font-sans);
+}
+
+/* Numbers in tables, stats and logs keep their width as they change, and code ligatures stay off so "->" and "!="
+   show as typed. The font's own dotted zero already keeps 0 apart from O. */
+@utility data {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-variant-ligatures: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

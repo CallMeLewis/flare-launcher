@@ -3,7 +3,7 @@ import { LoaderCircle, MousePointerClick, Network, SearchX, ServerCrash, Star } 
 import { toast } from "sonner";
 import { plural, t as translate } from "@lingui/core/macro";
 import { Trans, useLingui } from "@lingui/react/macro";
-import { AppShell } from "@flare/ui";
+import { AppShell } from "@/ui";
 import { AppMark } from "@/components/app-mark";
 import { AppSidebar, type View } from "@/components/app-sidebar";
 import { FirstRunDialog } from "@/components/first-run-dialog";
@@ -16,7 +16,7 @@ import { ServerTable } from "@/components/server-table";
 import { ServerToolbar } from "@/components/server-toolbar";
 import { SettingsDialog } from "@/components/settings-dialog";
 import { Message } from "@/components/message";
-import { Button } from "@flare/ui/ui/button";
+import { Button } from "@/ui/components/button";
 import { useLan } from "@/hooks/use-lan";
 import { usePings } from "@/hooks/use-pings";
 import { useServers } from "@/hooks/use-servers";

@@ -30,7 +30,7 @@ import {
   TriangleAlert,
 } from "lucide-react";
 import { toast } from "sonner";
-import { Skeleton } from "@flare/ui/ui/skeleton";
+import { Skeleton } from "@/ui/components/skeleton";
 import type { PingResult, Pings } from "@/hooks/use-pings";
 import { compareGameVersions, isNight, matchedMod, type Sort, type SortKey } from "@/lib/filter";
 import { CountryFlag } from "@/components/country-flag";

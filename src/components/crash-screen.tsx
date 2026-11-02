@@ -1,6 +1,6 @@
 import { Component, type ErrorInfo, type ReactNode } from "react";
-import { TitleBar } from "@flare/ui";
-import { Button } from "@flare/ui/ui/button";
+import { TitleBar } from "@/ui";
+import { Button } from "@/ui/components/button";
 import { useLingui } from "@lingui/react/macro";
 import { TriangleAlert } from "lucide-react";
 import { AppMark } from "@/components/app-mark";
