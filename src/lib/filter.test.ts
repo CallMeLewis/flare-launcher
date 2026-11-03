@@ -11,6 +11,7 @@ import {
   mapCounts,
   matchedMod,
   filterChips,
+  livePlayers,
   modCounts,
   pickSaved,
   pinFavourites,
@@ -18,6 +19,7 @@ import {
   untilDayChange,
   versionCounts,
   type Filters,
+  type Reachability,
 } from "./filter";
 import type { ServerRow } from "./types";
 
@@ -194,6 +196,39 @@ describe("filterServers", () => {
     expect(names({ maxPing: 100 })).toEqual(["Rearmed EU4", "Vanilla Livonia"]);
     expect(names({ hideOffline: true })).toEqual(["Rearmed EU4", "Vanilla Livonia", "Hardcore 1PP"]);
   });
+
+  it("judges players by the server's own count once it has answered", () => {
+    // The list says Rearmed is full and Livonia empty; the servers have since said otherwise.
+    const reach: Record<string, Reachability> = {
+      "1.1.1.1:2303": { pingMs: 40, offline: false, players: 58, maxPlayers: 60 },
+      "2.2.2.2:2303": { pingMs: 40, offline: false, players: 3, maxPlayers: 60 },
+      "3.3.3.3:2303": { pingMs: null, offline: false, players: null, maxPlayers: null },
+    };
+    const names = (filters: Partial<Filters>) =>
+      filterServers(rows, { ...DEFAULT_FILTERS, hasPlayers: false, ...filters }, [], (id) => reach[id]).map(
+        (r) => r.name,
+      );
+    expect(names({ notFull: true })).toContain("Rearmed EU4");
+    expect(names({ hasPlayers: true })).toContain("Vanilla Livonia");
+    // A server that didn't answer keeps the list's count.
+    expect(names({ hasPlayers: true })).toContain("Hardcore 1PP");
+  });
+});
+
+describe("livePlayers", () => {
+  const row = server({ id: "1.1.1.1:2303", players: 60, maxPlayers: 60 });
+
+  it("prefers the server's own count, falling back to the list's", () => {
+    expect(livePlayers(row, { pingMs: 9, offline: false, players: 41, maxPlayers: 64 })).toEqual({
+      players: 41,
+      maxPlayers: 64,
+    });
+    expect(livePlayers(row, { pingMs: null, offline: true, players: null, maxPlayers: null })).toEqual({
+      players: 60,
+      maxPlayers: 60,
+    });
+    expect(livePlayers(row, undefined)).toEqual({ players: 60, maxPlayers: 60 });
+  });
 });
 
 describe("sortServers", () => {
@@ -207,6 +242,18 @@ describe("sortServers", () => {
     expect(names("players", true)[0]).toBe("Rearmed EU4");
     expect(names("players", false)[0]).toBe("Vanilla Livonia");
     expect(rows[0].name).toBe("Rearmed EU4");
+  });
+
+  it("sorts by the player counts it's given", () => {
+    const live: Record<string, number> = { "2.2.2.2:2303": 99 };
+    const sorted = sortServers(
+      rows,
+      { key: "players", descending: true },
+      () => undefined,
+      undefined,
+      (row) => live[row.id] ?? row.players,
+    );
+    expect(sorted[0].name).toBe("Vanilla Livonia");
   });
 
   it("sorts names without regard to case", () => {

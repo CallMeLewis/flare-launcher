@@ -38,6 +38,7 @@ import {
   compareGameVersions,
   filterChips,
   filterServers,
+  livePlayers,
   countryCounts,
   mapCounts,
   modCounts,
@@ -332,9 +333,11 @@ export function App() {
     [view, filters, search],
   );
   const { get: getPing, request: requestPings } = pings;
-  // The ping filters need results as they arrive, like sorting by ping does.
+  // The ping filters need results as they arrive, like sorting by ping does. So do the player filters, which use a
+  // server's own count once it has answered, though they don't need every server asked.
   const filteringByPing = view === "all" && (filters.maxPing !== null || filters.hideOffline);
-  const filterPingVersion = filteringByPing ? pings.version : 0;
+  const filteringByPlayers = view === "all" && (filters.hasPlayers || filters.notFull);
+  const filterPingVersion = filteringByPing || filteringByPlayers ? pings.version : 0;
   const filtered = useMemo(() => {
     if (view !== "all") return filterServers(inView, applied, servers.modNames);
     // Favourites stay at the top of the full list whatever the filters, so one that empties or goes offline doesn't
@@ -359,6 +362,8 @@ export function App() {
 
   const sortingByPing = sort.key === "ping";
   const pingVersion = sortingByPing ? pings.version : 0;
+  // Player counts are read when the list is sorted, not as each answer arrives: they change by a player or two, and
+  // re-sorting each time would move rows under the pointer. Sorting again picks up the newest counts.
   const sorted = useMemo(
     () =>
       sortServers(
@@ -366,6 +371,7 @@ export function App() {
         sort,
         (id) => getPing(id)?.pingMs,
         (code) => countryName(code, i18n.locale),
+        (row) => livePlayers(row, getPing(row.id)).players,
       ),
     // pingVersion is a dependency so the order updates as results arrive.
     // oxlint-disable-next-line react-hooks/exhaustive-deps
@@ -377,15 +383,21 @@ export function App() {
     [view, sorted, favourites],
   );
   const playersShown = useMemo(() => listed.reduce((sum, row) => sum + row.players, 0), [listed]);
-  // The filters pass over favourites, so with any on, a line under them says what follows is what the filters matched.
+  // Favourites stay at the top whatever the sort and filters, so a line under them sets apart the rest, which the sort
+  // and any filters apply to. Without it a favourite above a closer server makes the sort look broken.
   const pinned = view === "all" ? listed.filter((row) => favourites.has(row.id)).length : 0;
+  const filtering = filterChips(filters).length > 0;
   const divider =
-    pinned > 0 && filterChips(filters).length > 0
-      ? {
+    pinned === 0 || (pinned === listed.length && !filtering)
+      ? null
+      : {
           at: pinned,
-          label: pinned < listed.length ? t`Servers matching your filters` : t`No other servers match your filters`,
-        }
-      : null;
+          label: !filtering
+            ? t`Other servers`
+            : pinned < listed.length
+              ? t`Servers matching your filters`
+              : t`No other servers match your filters`,
+        };
 
   // Ordering by ping needs a result for every listed server, not just those on screen.
   useEffect(() => {
@@ -778,7 +790,7 @@ export function App() {
                 <Message
                   icon={<MousePointerClick className="size-6" aria-hidden />}
                   title={t`Pick a server`}
-                  description={t`Select one to see its mods. Double-click to join straight away.`}
+                  description={t`Select one to see its mods, or select Play on its row to join straight away.`}
                 />
               </aside>
             )}

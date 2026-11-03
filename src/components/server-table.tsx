@@ -10,7 +10,7 @@ import {
   type ReactNode,
 } from "react";
 import type { MessageDescriptor } from "@lingui/core";
-import { msg } from "@lingui/core/macro";
+import { msg, plural } from "@lingui/core/macro";
 import { Trans, useLingui } from "@lingui/react/macro";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import {
@@ -30,9 +30,11 @@ import {
   TriangleAlert,
 } from "lucide-react";
 import { toast } from "sonner";
+import { Button } from "@/ui/components/button";
 import { Skeleton } from "@/ui/components/skeleton";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/ui/components/tooltip";
 import type { PingResult, Pings } from "@/hooks/use-pings";
-import { compareGameVersions, isNight, matchedMod, type Sort, type SortKey } from "@/lib/filter";
+import { compareGameVersions, isNight, livePlayers, matchedMod, type Sort, type SortKey } from "@/lib/filter";
 import { CountryFlag } from "@/components/country-flag";
 import {
   ContextMenu,
@@ -50,7 +52,7 @@ import { cn } from "@/lib/utils";
 const ROW_HEIGHT = 36;
 // Narrow layouts drop the Time column so server names keep their room.
 const COLUMNS =
-  "grid grid-cols-[36px_minmax(0,1fr)_104px_64px_116px_72px] lg:grid-cols-[36px_minmax(0,1fr)_112px_68px_124px_76px_76px] 2xl:grid-cols-[36px_minmax(0,1fr)_168px_84px_148px_96px_96px] items-center";
+  "grid grid-cols-[36px_minmax(0,1fr)_104px_64px_116px_72px] lg:grid-cols-[36px_minmax(0,1fr)_112px_68px_124px_88px_76px] 2xl:grid-cols-[36px_minmax(0,1fr)_168px_84px_148px_104px_96px] items-center";
 const TIME_COLUMN = "max-lg:hidden";
 
 const HEADERS: {
@@ -69,7 +71,7 @@ const HEADERS: {
     key: "ping",
     label: msg`Ping`,
     numeric: true,
-    hint: msg`How long it takes to reach the server and back. Values marked ~ are estimates.`,
+    hint: msg`How long it takes to reach the server and back, in milliseconds. Servers that don't answer pings show an estimate, marked est.`,
   },
 ];
 
@@ -298,7 +300,7 @@ export function ServerTable({
                     <Skeleton className="h-3.5" style={{ width: `${35 + ((i * 37) % 45)}%` }} />
                     <Skeleton className="h-3.5 w-16" />
                     <Skeleton className="h-3.5 w-6" />
-                    <Skeleton className="h-3.5 w-20" />
+                    <Skeleton className="h-3.5 w-12" />
                     <Skeleton className={cn("h-3.5 w-12", TIME_COLUMN)} />
                     <span />
                   </div>
@@ -407,11 +409,18 @@ const Row = memo(function Row({
   onToggleFavourite,
 }: RowProps) {
   // Also re-renders the memoised row when the language changes.
-  const { t } = useLingui();
+  const { t, i18n } = useLingui();
   const name = row.name;
+  // Only a server that changes the speed of time says so.
+  const speed =
+    row.timeAcceleration && row.timeAcceleration !== 1 && !unlisted ? i18n.number(row.timeAcceleration) : null;
   const offline = unlisted || ping?.offline === true;
-  const full = row.maxPlayers > 0 && row.players >= row.maxPlayers;
-  const fill = row.maxPlayers > 0 ? Math.min(row.players / row.maxPlayers, 1) : 0;
+  // Players waiting in DayZ's login queue: when the server is full, and on any server just after a restart.
+  const queue = !offline && ping?.queue ? ping.queue : 0;
+  // The server's own count once it has answered, as the list's can be well out of date, and the queue beside it is
+  // the server's own too.
+  const { players, maxPlayers } = livePlayers(row, ping);
+  const full = maxPlayers > 0 && players >= maxPlayers;
   const TimeIcon = isNight(row.time) ? Moon : Sun;
   const version = row.version;
   const versionDiffers = compareGameVersions(version, gameVersion);
@@ -465,7 +474,7 @@ const Row = memo(function Row({
         </button>
       </div>
 
-      <div role="gridcell" className="flex min-w-0 items-center gap-2 pr-4">
+      <div role="gridcell" className="flex min-w-0 items-center gap-2 pr-3">
         <span className="truncate" title={row.name}>
           {row.name}
         </span>
@@ -507,6 +516,23 @@ const Row = memo(function Row({
             <span className="truncate">{modMatch}</span>
           </span>
         )}
+        {/*
+          Shown on hover, but always laid out, so it never covers the marks before it and names don't shift when it
+          appears. Out of the Tab order like the star: Enter on the list plays the selected server.
+        */}
+        <Button
+          size="xs"
+          tabIndex={-1}
+          onClick={(event) => {
+            event.stopPropagation();
+            onPlay(row);
+          }}
+          onDoubleClick={(event) => event.stopPropagation()}
+          className="invisible ml-auto group-hover:visible"
+        >
+          <Play fill="currentColor" aria-hidden />
+          <Trans>Play</Trans>
+        </Button>
       </div>
 
       <div role="gridcell" className="truncate pr-3 text-muted-foreground" title={mapName(row.map)}>
@@ -522,16 +548,11 @@ const Row = memo(function Row({
           <span className="data w-[52px] text-right text-xs text-muted-foreground">–</span>
         ) : (
           <span className={cn("data w-[52px] text-right text-xs", full && "text-warning")}>
-            {row.players}
-            <span className="text-muted-foreground">/{row.maxPlayers}</span>
+            {players}
+            <span className="text-muted-foreground">/{maxPlayers}</span>
           </span>
         )}
-        <span className="h-1 w-12 overflow-hidden rounded-full bg-muted" aria-hidden>
-          <span
-            className={cn("block h-full rounded-full", full ? "bg-warning" : "bg-primary")}
-            style={{ width: `${fill * 100}%` }}
-          />
-        </span>
+        {queue > 0 && <QueueValue queue={queue} short />}
       </div>
 
       <div role="gridcell" className={cn("flex items-center gap-1.5 text-muted-foreground", TIME_COLUMN)}>
@@ -539,12 +560,17 @@ const Row = memo(function Row({
           <>
             <TimeIcon className="size-3" role="img" aria-label={isNight(row.time) ? t`Night` : t`Day`} />
             <span className="data text-xs">{row.time}</span>
+            {speed && (
+              <span className="data text-[11px] text-muted-foreground/80" title={t`${speed}× speed`}>
+                ×{speed}
+              </span>
+            )}
           </>
         )}
       </div>
 
       <div role="gridcell" className="data pr-3 text-right text-xs">
-        <PingValue ping={ping} offline={offline} />
+        <PingValue ping={ping} offline={offline} unit={false} />
       </div>
     </div>
   );
@@ -561,7 +587,40 @@ function Tag({ title, children }: { title: string; children: ReactNode }) {
   );
 }
 
-export function PingValue({ ping, offline = false }: { ping: PingResult | undefined; offline?: boolean }) {
+/**
+ * How many players are waiting in DayZ's login queue: "+12" in the list, where the hover says what it is, and
+ * "12 queued" where there's room.
+ */
+export function QueueValue({ queue, short = false }: { queue: number; short?: boolean }) {
+  const { t } = useLingui();
+  const label = t`${plural(queue, { one: "# player", other: "# players" })} waiting to join`;
+  if (short) {
+    return (
+      <span className="data text-xs whitespace-nowrap text-warning" title={label}>
+        <span aria-hidden>+{queue}</span>
+        <span className="sr-only">{label}</span>
+      </span>
+    );
+  }
+  return (
+    <span className="text-[11px] font-medium whitespace-nowrap text-warning" title={label}>
+      <Trans comment="Players waiting in a server's login queue, kept as short as possible">
+        <span className="data text-xs">{queue}</span> queued
+      </Trans>
+    </span>
+  );
+}
+
+/** A server's ping, coloured by how good it is. `unit` adds "ms", left off in the list, whose header says it. */
+export function PingValue({
+  ping,
+  offline = false,
+  unit = true,
+}: {
+  ping: PingResult | undefined;
+  offline?: boolean;
+  unit?: boolean;
+}) {
   const { t } = useLingui();
   if (offline) {
     return (
@@ -581,18 +640,36 @@ export function PingValue({ ping, offline = false }: { ping: PingResult | undefi
       </span>
     );
   }
-  return (
-    <span
-      className={pingTone(ping.pingMs)}
-      title={
-        ping.estimated
-          ? t`This server doesn't answer pings, so this is how long it took to answer a status request. That's usually a little higher than the real ping.`
-          : undefined
-      }
-    >
-      {ping.estimated && <span className="text-muted-foreground">~</span>}
+  const value = (
+    <span className={pingTone(ping.pingMs)}>
       {ping.pingMs}
-      <span className="ml-0.5 text-muted-foreground">ms</span>
+      {unit && <span className="ml-0.5 text-muted-foreground">ms</span>}
+    </span>
+  );
+  if (!ping.estimated) return value;
+  // Coloured like a real ping. A status reply usually takes 0–50 ms longer, but one answered by a DDoS protection
+  // service nearer than the server can read lower, so the label and its tooltip say it's an estimate.
+  return (
+    <span className="whitespace-nowrap">
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <span
+            onClick={(event) => event.stopPropagation()}
+            className="mr-1 cursor-help font-sans text-[11px] text-muted-foreground underline decoration-dotted underline-offset-2"
+          >
+            <Trans comment="Short for estimated, before a ping the launcher had to estimate. Kept as short as possible">
+              est.
+            </Trans>
+          </span>
+        </TooltipTrigger>
+        <TooltipContent className="max-w-64">
+          <Trans>
+            This server doesn't answer pings, so this is how long it took to answer a status request. Servers behind
+            DDoS protection may answer from somewhere closer than the server itself.
+          </Trans>
+        </TooltipContent>
+      </Tooltip>
+      {value}
     </span>
   );
 }

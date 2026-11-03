@@ -1,6 +1,6 @@
 import { useId, useState, type ReactNode } from "react";
 import { Plural, Trans, useLingui } from "@lingui/react/macro";
-import { ChevronDown, Search, X } from "lucide-react";
+import { ChevronDown, Info, Search, X } from "lucide-react";
 import { CountryFlag } from "@/components/country-flag";
 import { Button } from "@/ui/components/button";
 import { Checkbox } from "@/ui/components/checkbox";
@@ -9,6 +9,7 @@ import { Label } from "@/ui/components/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/components/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/ui/components/select";
 import { ToggleGroup, ToggleGroupItem } from "@/ui/components/toggle-group";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/ui/components/tooltip";
 import { useActiveOption } from "@/hooks/use-active-option";
 import {
   MY_VERSION,
@@ -156,12 +157,16 @@ export function FilterMenu({
           </Group>
 
           <Group title={t`Connection`}>
-            <Field label={t`Ping`}>
+            {/* The unit is in the label, so each choice fits on one line. */}
+            <Field
+              label={t`Ping (ms)`}
+              hint={t`Servers that don't answer pings are judged by their estimate, marked est. in the list.`}
+            >
               <Segmented<string>
-                label={t`Ping`}
+                label={t`Ping (ms)`}
                 value={filters.maxPing === null ? ANY : String(filters.maxPing)}
                 onChange={(value) => onChange({ maxPing: value === ANY ? null : Number(value) })}
-                options={[[ANY, t`Any`], ...PINGS.map((ms): [string, string] => [String(ms), t`< ${ms} ms`])]}
+                options={[[ANY, t`Any`], ...PINGS.map((ms): [string, string] => [String(ms), `< ${i18n.number(ms)}`])]}
               />
             </Field>
             <Check
@@ -272,12 +277,32 @@ function Group({ title, children }: { title: string; children: ReactNode }) {
   );
 }
 
-function Field({ label, children }: { label: string; children: ReactNode }) {
+/**
+ * A labelled control. `hint` adds an info icon beside the label that shows it on hover or focus; the icon is in the
+ * Tab order and named by the hint, so keyboard and screen reader users get it too.
+ */
+function Field({ label, hint, children }: { label: string; hint?: string; children: ReactNode }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <span className="text-xs text-muted-foreground" aria-hidden>
-        {label}
-      </span>
+      <div className="flex items-center gap-1">
+        <span className="text-xs text-muted-foreground" aria-hidden>
+          {label}
+        </span>
+        {hint && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                type="button"
+                aria-label={hint}
+                className="flex size-4 items-center justify-center rounded-sm text-muted-foreground transition-colors duration-150 hover:text-foreground focus-visible:outline-2"
+              >
+                <Info className="size-3" aria-hidden />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent className="max-w-64">{hint}</TooltipContent>
+          </Tooltip>
+        )}
+      </div>
       {children}
     </div>
   );

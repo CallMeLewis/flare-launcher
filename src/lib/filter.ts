@@ -179,14 +179,33 @@ export function compareGameVersions(server: string, mine: string | null | undefi
   return 0;
 }
 
-/** What is known about a server's connection, for the ping filters. */
-export type Reachability = { pingMs: number | null; offline: boolean };
+/**
+ * What the server said when last asked directly, for the ping and player filters. `players` is `null` when it
+ * didn't answer.
+ */
+export type Reachability = {
+  pingMs: number | null;
+  offline: boolean;
+  players?: number | null;
+  maxPlayers?: number | null;
+};
+
+/**
+ * A server's player count: what it said when last asked directly, or else the list's. The list is only downloaded
+ * when the launcher starts or refreshes, so the server's own answer is usually newer.
+ */
+export function livePlayers(row: ServerRow, live: Reachability | undefined): { players: number; maxPlayers: number } {
+  return live?.players != null
+    ? { players: live.players, maxPlayers: live.maxPlayers ?? row.maxPlayers }
+    : { players: row.players, maxPlayers: row.maxPlayers };
+}
 
 /**
  * Every search term has to match the server's name, address or map, or the
  * name of one of its mods. A server that hasn't been pinged yet passes the
  * ping filters until it has, and one whose version is unknown passes Same as
- * mine. `gameVersion` is the DayZ version on this computer.
+ * mine. The player filters use the server's own count once it has answered.
+ * `gameVersion` is the DayZ version on this computer.
  */
 export function filterServers(
   rows: ServerRow[],
@@ -207,8 +226,11 @@ export function filterServers(
     if (countries.size > 0 && !countries.has(row.country ?? "")) return false;
     if (filters.serverType === "official" && !row.official) return false;
     if (filters.serverType === "community" && row.official) return false;
-    if (filters.hasPlayers && row.players === 0) return false;
-    if (filters.notFull && row.players >= row.maxPlayers) return false;
+    if (filters.hasPlayers || filters.notFull) {
+      const { players, maxPlayers } = livePlayers(row, reachability(row.id));
+      if (filters.hasPlayers && players === 0) return false;
+      if (filters.notFull && players >= maxPlayers) return false;
+    }
     if (filters.maxPing !== null || filters.hideOffline) {
       const reach = reachability(row.id);
       if (filters.hideOffline && reach?.offline) return false;
@@ -247,14 +269,23 @@ export function matchedMod(row: ServerRow, search: string, modNames: readonly st
 /**
  * Sorts a copy of the rows. Servers with no ping result yet always sink to the
  * bottom when sorting by ping, whichever direction is chosen. Countries sort by
- * `countryName`, the name shown for each code, as in the Filters menu.
+ * `countryName`, the name shown for each code, as in the Filters menu. Player
+ * counts come from `playersOf`, so they can be the servers' own.
  */
 export function sortServers(
   rows: ServerRow[],
   sort: Sort,
   pingOf: (id: string) => number | null | undefined,
   countryName: (code: string) => string = (code) => code,
+  playersOf: (row: ServerRow) => number = (row) => row.players,
 ): ServerRow[] {
+  // Each count is looked up once, as a sort compares each row many times.
+  const counts = new Map<ServerRow, number>();
+  const playersIn = (row: ServerRow): number => {
+    let count = counts.get(row);
+    if (count === undefined) counts.set(row, (count = playersOf(row)));
+    return count;
+  };
   const direction = sort.descending ? -1 : 1;
   // Naming a country is slow next to a comparison, so each is named once.
   const countryNames = new Map<string, string>();
@@ -274,7 +305,7 @@ export function sortServers(
         if (!a.country || !b.country) return (a.country ? 0 : 1) - (b.country ? 0 : 1);
         return direction * nameOf(a.country).localeCompare(nameOf(b.country), undefined, { sensitivity: "base" });
       case "players":
-        return direction * (a.players - b.players);
+        return direction * (playersIn(a) - playersIn(b));
       case "time":
         return direction * a.time.localeCompare(b.time);
       case "ping": {
@@ -286,7 +317,7 @@ export function sortServers(
     }
   };
   // Ties fall back to player count so busy servers surface first.
-  return [...rows].sort((a, b) => compare(a, b) || b.players - a.players);
+  return [...rows].sort((a, b) => compare(a, b) || playersIn(b) - playersIn(a));
 }
 
 export type Option = { value: string; count: number };

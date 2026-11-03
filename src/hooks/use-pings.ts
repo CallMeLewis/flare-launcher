@@ -8,6 +8,8 @@ export type PingResult = {
   estimated: boolean;
   players: number | null;
   maxPlayers: number | null;
+  /** Players waiting to join, or `null` when the server didn't answer or doesn't say. */
+  queue: number | null;
   /** Status requests in a row the server hasn't answered. */
   misses: number;
   /** True once the server has missed two status requests in a row while other servers answer. */

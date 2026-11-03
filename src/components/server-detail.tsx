@@ -25,8 +25,8 @@ import {
 import { toast } from "sonner";
 import { CountryFlag } from "@/components/country-flag";
 import { MapCountDialog } from "@/components/map-count-dialog";
-import { PingValue } from "@/components/server-table";
-import { compareGameVersions, isNight, untilDayChange } from "@/lib/filter";
+import { PingValue, QueueValue } from "@/components/server-table";
+import { compareGameVersions, isNight, livePlayers, untilDayChange } from "@/lib/filter";
 import { Button } from "@/ui/components/button";
 import { Checkbox } from "@/ui/components/checkbox";
 import {
@@ -308,8 +308,8 @@ export function ServerDetail({
     />
   );
   const address = joinAddress(server);
-  const players = ping?.players ?? server.players;
-  const maxPlayers = ping?.maxPlayers ?? server.maxPlayers;
+  const { players, maxPlayers } = livePlayers(server, ping);
+  const queue = offline === null && ping?.queue ? ping.queue : 0;
   const canPlay = canCheckMods && !checking && !busy;
   const speed = server.timeAcceleration ? i18n.number(server.timeAcceleration) : "";
   // What an unlisted server last reported is long out of date.
@@ -413,10 +413,17 @@ export function ServerDetail({
           {unlisted ? (
             <span className="data">–</span>
           ) : (
-            <span className="data">
-              {players}
-              <span className="text-muted-foreground">/{maxPlayers}</span>
-            </span>
+            <>
+              <span className="data">
+                {players}
+                <span className="text-muted-foreground">/{maxPlayers}</span>
+              </span>
+              {queue > 0 && (
+                <span className="ml-1.5">
+                  <QueueValue queue={queue} />
+                </span>
+              )}
+            </>
           )}
         </Stat>
         <Stat label={t`Ping`}>

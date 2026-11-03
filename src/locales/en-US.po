@@ -117,6 +117,10 @@ msgstr ""
 msgid "{players, plural, one {<0>{playerCount}</0> player} other {<1>{playerCount}</1> players}}"
 msgstr ""
 
+#: src/components/server-table.tsx
+msgid "{queue, plural, one {# player} other {# players}} waiting to join"
+msgstr ""
+
 #: src/lib/format.ts
 msgid "{rest} min"
 msgstr ""
@@ -130,6 +134,7 @@ msgid "{shown, plural, one {<0>#</0> server match} other {<1>#</1> servers match
 msgstr ""
 
 #: src/components/server-detail.tsx
+#: src/components/server-table.tsx
 msgid "{speed}× speed"
 msgstr ""
 
@@ -149,8 +154,9 @@ msgstr ""
 msgid "+{hidden} more"
 msgstr ""
 
-#: src/components/filter-menu.tsx
-msgid "< {ms} ms"
+#. Players waiting in a server's login queue, kept as short as possible
+#: src/components/server-table.tsx
+msgid "<0>{queue}</0> queued"
 msgstr ""
 
 #: src/components/mods-page.tsx
@@ -691,6 +697,11 @@ msgstr ""
 msgid "Enter the server's address, such as {example}."
 msgstr ""
 
+#. Short for estimated, before a ping the launcher had to estimate. Kept as short as possible
+#: src/components/server-table.tsx
+msgid "est."
+msgstr ""
+
 #: src/lib/continents.ts
 msgid "Europe"
 msgstr ""
@@ -861,7 +872,7 @@ msgid "How DayZ starts when you join a server."
 msgstr ""
 
 #: src/components/server-table.tsx
-msgid "How long it takes to reach the server and back. Values marked ~ are estimates."
+msgid "How long it takes to reach the server and back, in milliseconds. Servers that don't answer pings show an estimate, marked est."
 msgstr ""
 
 #: src/components/mods-page.tsx
@@ -1265,6 +1276,10 @@ msgstr ""
 msgid "Open Settings"
 msgstr ""
 
+#: src/App.tsx
+msgid "Other servers"
+msgstr ""
+
 #: src/components/server-table.tsx
 msgid "Password protected"
 msgstr ""
@@ -1278,11 +1293,14 @@ msgstr ""
 msgid "Pick a server"
 msgstr ""
 
-#: src/components/filter-menu.tsx
 #: src/components/server-detail.tsx
 #: src/components/server-table.tsx
 #: src/lib/filter.ts
 msgid "Ping"
+msgstr ""
+
+#: src/components/filter-menu.tsx
+msgid "Ping (ms)"
 msgstr ""
 
 #: src/components/server-detail.tsx
@@ -1452,8 +1470,8 @@ msgid "Select every mod shown"
 msgstr ""
 
 #: src/App.tsx
-msgid "Select one to see its mods. Double-click to join straight away."
-msgstr "Select one to see its mods. Double-click to join right away."
+msgid "Select one to see its mods, or select Play on its row to join straight away."
+msgstr ""
 
 #: src/components/report-dialog.tsx
 msgid "Send a report"
@@ -1514,6 +1532,10 @@ msgstr ""
 
 #: src/App.tsx
 msgid "Servers matching your filters"
+msgstr ""
+
+#: src/components/filter-menu.tsx
+msgid "Servers that don't answer pings are judged by their estimate, marked est. in the list."
 msgstr ""
 
 #: src/components/filter-menu.tsx
@@ -1877,7 +1899,7 @@ msgid "This is a vanilla server. No mods needed."
 msgstr ""
 
 #: src/components/server-table.tsx
-msgid "This server doesn't answer pings, so this is how long it took to answer a status request. That's usually a little higher than the real ping."
+msgid "This server doesn't answer pings, so this is how long it took to answer a status request. Servers behind DDoS protection may answer from somewhere closer than the server itself."
 msgstr ""
 
 #: src/components/game-start-dialog.tsx

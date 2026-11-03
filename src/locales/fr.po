@@ -117,6 +117,10 @@ msgstr "{name}. Sélectionnez Jouer dans le panneau de droite pour le rejoindre.
 msgid "{players, plural, one {<0>{playerCount}</0> player} other {<1>{playerCount}</1> players}}"
 msgstr "{players, plural, one {<0>{playerCount}</0> joueur} other {<1>{playerCount}</1> joueurs}}"
 
+#: src/components/server-table.tsx
+msgid "{queue, plural, one {# player} other {# players}} waiting to join"
+msgstr "{queue, plural, one {# joueur} other {# joueurs}} en attente de connexion"
+
 #: src/lib/format.ts
 msgid "{rest} min"
 msgstr "{rest} min"
@@ -130,6 +134,7 @@ msgid "{shown, plural, one {<0>#</0> server match} other {<1>#</1> servers match
 msgstr "{shown, plural, one {<0>#</0> serveur correspondant} other {<1>#</1> serveurs correspondants}}"
 
 #: src/components/server-detail.tsx
+#: src/components/server-table.tsx
 msgid "{speed}× speed"
 msgstr "Vitesse ×{speed}"
 
@@ -149,9 +154,10 @@ msgstr "{updateCount, plural, one {Mettre à jour # mod} other {Mettre à jour #
 msgid "+{hidden} more"
 msgstr "+{hidden} de plus"
 
-#: src/components/filter-menu.tsx
-msgid "< {ms} ms"
-msgstr "< {ms} ms"
+#. Players waiting in a server's login queue, kept as short as possible
+#: src/components/server-table.tsx
+msgid "<0>{queue}</0> queued"
+msgstr "<0>{queue}</0> en attente"
 
 #: src/components/mods-page.tsx
 msgid "<0>{selectedCount}</0> selected"
@@ -691,6 +697,11 @@ msgstr "Saisissez-le dans le panneau de droite, puis sélectionnez Jouer."
 msgid "Enter the server's address, such as {example}."
 msgstr "Saisissez l’adresse du serveur, par exemple {example}."
 
+#. Short for estimated, before a ping the launcher had to estimate. Kept as short as possible
+#: src/components/server-table.tsx
+msgid "est."
+msgstr "env."
+
 #: src/lib/continents.ts
 msgid "Europe"
 msgstr "Europe"
@@ -861,8 +872,8 @@ msgid "How DayZ starts when you join a server."
 msgstr "Comment DayZ démarre quand vous rejoignez un serveur."
 
 #: src/components/server-table.tsx
-msgid "How long it takes to reach the server and back. Values marked ~ are estimates."
-msgstr "Temps d’aller-retour jusqu’au serveur. Les valeurs marquées ~ sont des estimations."
+msgid "How long it takes to reach the server and back, in milliseconds. Servers that don't answer pings show an estimate, marked est."
+msgstr "Temps d’aller-retour vers le serveur, en millisecondes. Pour les serveurs qui ne répondent pas aux pings, une estimation est affichée, précédée de la mention env."
 
 #: src/components/mods-page.tsx
 msgid "How many servers in the server list run this mod."
@@ -1265,6 +1276,10 @@ msgstr "Ouvrir le dossier des mods"
 msgid "Open Settings"
 msgstr "Ouvrir les Paramètres"
 
+#: src/App.tsx
+msgid "Other servers"
+msgstr "Autres serveurs"
+
 #: src/components/server-table.tsx
 msgid "Password protected"
 msgstr "Protégé par mot de passe"
@@ -1278,12 +1293,15 @@ msgstr "Vue"
 msgid "Pick a server"
 msgstr "Choisissez un serveur"
 
-#: src/components/filter-menu.tsx
 #: src/components/server-detail.tsx
 #: src/components/server-table.tsx
 #: src/lib/filter.ts
 msgid "Ping"
 msgstr "Ping"
+
+#: src/components/filter-menu.tsx
+msgid "Ping (ms)"
+msgstr "Ping (ms)"
 
 #: src/components/server-detail.tsx
 #: src/components/server-table.tsx
@@ -1452,8 +1470,8 @@ msgid "Select every mod shown"
 msgstr "Sélectionner tous les mods affichés"
 
 #: src/App.tsx
-msgid "Select one to see its mods. Double-click to join straight away."
-msgstr "Sélectionnez-en un pour voir ses mods. Double-cliquez pour le rejoindre directement."
+msgid "Select one to see its mods, or select Play on its row to join straight away."
+msgstr "Sélectionnez un serveur pour voir ses mods, ou sélectionnez Jouer sur sa ligne pour le rejoindre directement."
 
 #: src/components/report-dialog.tsx
 msgid "Send a report"
@@ -1515,6 +1533,10 @@ msgstr "Serveurs"
 #: src/App.tsx
 msgid "Servers matching your filters"
 msgstr "Serveurs correspondant à vos filtres"
+
+#: src/components/filter-menu.tsx
+msgid "Servers that don't answer pings are judged by their estimate, marked est. in the list."
+msgstr "Les serveurs qui ne répondent pas aux pings sont évalués selon leur ping estimé, indiqué par env. dans la liste."
 
 #: src/components/filter-menu.tsx
 msgid "Servers that stop answering"
@@ -1877,8 +1899,8 @@ msgid "This is a vanilla server. No mods needed."
 msgstr "C’est un serveur vanilla. Aucun mod nécessaire."
 
 #: src/components/server-table.tsx
-msgid "This server doesn't answer pings, so this is how long it took to answer a status request. That's usually a little higher than the real ping."
-msgstr "Ce serveur ne répond pas aux pings, c’est donc le temps qu’il a mis à répondre à une demande d’état. Il est en général un peu plus élevé que le vrai ping."
+msgid "This server doesn't answer pings, so this is how long it took to answer a status request. Servers behind DDoS protection may answer from somewhere closer than the server itself."
+msgstr "Ce serveur ne répond pas aux pings. Cette valeur indique donc le temps de réponse à une demande de statut. Les serveurs protégés contre les attaques DDoS peuvent répondre depuis un point plus proche que le serveur lui-même."
 
 #: src/components/game-start-dialog.tsx
 msgid "This server doesn't need any mods."

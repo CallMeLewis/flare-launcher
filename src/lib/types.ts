@@ -49,6 +49,8 @@ export type Ping = {
   estimated: boolean;
   players: number | null;
   maxPlayers: number | null;
+  /** Players waiting to join, or `null` when the server didn't answer or doesn't say. */
+  queue: number | null;
 };
 
 /** A mod the player is subscribed to on the Workshop. */
