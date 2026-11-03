@@ -1,11 +1,14 @@
 import { useCallback, useRef, useState } from "react";
 import { backend } from "@/lib/backend";
+import { COMBINE_WITHIN_MS, combine, estimateMs, type QuerySamples, SETTLED_SAMPLES } from "@/lib/latency";
 
 export type PingResult = {
   /** `null` when the server did not answer. */
   pingMs: number | null;
-  /** True when `pingMs` is the query response time, which reads higher than a real ping. */
+  /** True when `pingMs` is estimated from status replies because the server doesn't answer pings. */
   estimated: boolean;
+  /** The status replies behind an estimate, combined over the last few requests. */
+  query?: QuerySamples;
   players: number | null;
   maxPlayers: number | null;
   /** Players waiting to join, or `null` when the server didn't answer or doesn't say. */
@@ -30,6 +33,9 @@ const MAX_CHUNKS_IN_FLIGHT = 8;
 const STALE_AFTER_MS = 60_000;
 // A single unanswered request can be a lost packet, so a server is asked again soon before it counts as offline.
 const RETRY_AFTER_MS = 3_000;
+// A server that only answers status requests is asked again this soon, a few times, to sharpen its estimate. The
+// requests land at unrelated points in the server's query cycle, which is what makes the fastest reply useful.
+const REFINE_AFTER_MS = 1_200;
 // New results are announced at most this often, as filtering and sorting by ping redo the whole list each time.
 const ANNOUNCE_EVERY_MS = 250;
 
@@ -61,15 +67,26 @@ export function usePings(): Pings {
         .then((pings) => {
           const at = Date.now();
           const retry: string[] = [];
-          for (const { id, ...ping } of pings) {
+          const refine: string[] = [];
+          for (const { id, samples, cached, ...ping } of pings) {
             const answered = ping.players !== null;
             if (answered) anyAnswered.current = true;
-            const misses = answered ? 0 : (results.current.get(id)?.misses ?? 0) + 1;
+            const earlier = results.current.get(id);
+            const misses = answered ? 0 : (earlier?.misses ?? 0) + 1;
             if (misses === 1) retry.push(id);
-            results.current.set(id, { ...ping, misses, offline: misses >= 2 && anyAnswered.current, at });
+            let shown: Pick<PingResult, "pingMs" | "query"> = { pingMs: ping.pingMs };
+            // A copy answered by DDoS protection replies at once, so there's nothing to refine.
+            if (ping.estimated && !cached && ping.pingMs !== null) {
+              const recent = earlier?.query && at - earlier.at < COMBINE_WITHIN_MS ? earlier.query : undefined;
+              const query = combine(recent, { fastestMs: ping.pingMs, samples });
+              shown = { pingMs: estimateMs(query), query };
+              if (query.samples < SETTLED_SAMPLES) refine.push(id);
+            }
+            results.current.set(id, { ...ping, ...shown, misses, offline: misses >= 2 && anyAnswered.current, at });
           }
           if (pings.length > 0) announce.current();
           if (retry.length > 0) setTimeout(() => enqueue.current(retry, true), RETRY_AFTER_MS);
+          if (refine.length > 0) setTimeout(() => enqueue.current(refine, true), REFINE_AFTER_MS);
         })
         .catch(() => {})
         .finally(() => {

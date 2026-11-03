@@ -3,8 +3,9 @@
 //!
 //! Latency comes from an ICMP echo, which reflects the network path a player
 //! will actually get. Player counts come from a Steam A2S_INFO query. A server
-//! takes a while to answer that query, so its response time reads well above
-//! the real latency and is only used as an estimate for hosts that block ICMP.
+//! only gets to queries every 50 ms or so, so one reply reads up to that much
+//! above the real latency; the fastest of several is used as an estimate for
+//! hosts that block ICMP.
 
 use std::collections::{HashMap, HashSet};
 use std::net::{IpAddr, SocketAddr};
@@ -227,13 +228,29 @@ async fn receive(socket: &UdpSocket) -> Option<Vec<u8>> {
   }
 }
 
-/// Sends a query and waits for a reply of the given type. Returns how long it took and the payload after the type
-/// byte.
-async fn request(addr: SocketAddr, prefix: &[u8], challenge: Option<[u8; 4]>, kind: u8) -> Option<(Duration, Vec<u8>)> {
+/// How quickly a server answered one query.
+///
+/// A DayZ server only gets to queries every 50 ms or so, so each reply waits up to that long on top of the network
+/// delay. The fastest of several replies comes closest to the network delay.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct Timing {
+  /// The fastest reply, counting a challenge reply as well as the answer.
+  pub fastest: Duration,
+  /// How many replies were timed.
+  pub replies: u32,
+  /// Whether the server asked for a challenge before answering. DayZ servers do; a DDoS protection service
+  /// answering from a copy of the reply usually doesn't, and then the time says nothing about the server.
+  pub challenged: bool,
+}
+
+/// Sends a query and waits for a reply of the given type. Returns how quickly the server replied and the payload
+/// after the type byte.
+async fn request(addr: SocketAddr, prefix: &[u8], challenge: Option<[u8; 4]>, kind: u8) -> Option<(Timing, Vec<u8>)> {
   let socket = UdpSocket::bind("0.0.0.0:0").await.ok()?;
   socket.connect(addr).await.ok()?;
   let mut request = prefix.to_vec();
   request.extend(challenge.iter().flatten());
+  let mut timing: Option<Timing> = None;
 
   // A server may answer with a challenge that has to be sent back with the query.
   for _ in 0..3 {
@@ -244,20 +261,28 @@ async fn request(addr: SocketAddr, prefix: &[u8], challenge: Option<[u8; 4]>, ki
     if reply.len() < 5 || reply[..4] != HEADER {
       return None;
     }
+    // Every reply waited for the server's next turn at queries in the same way, so each one is a sample.
+    let challenged = reply[4] == CHALLENGE;
+    timing = Some(match timing {
+      None => Timing { fastest: elapsed, replies: 1, challenged },
+      Some(t) => {
+        Timing { fastest: t.fastest.min(elapsed), replies: t.replies + 1, challenged: t.challenged || challenged }
+      }
+    });
     match reply[4] {
       CHALLENGE if reply.len() >= 9 => {
         request.truncate(prefix.len());
         request.extend_from_slice(&reply[5..9]);
       }
-      found if found == kind => return Some((elapsed, reply[5..].to_vec())),
+      found if found == kind => return Some((timing?, reply[5..].to_vec())),
       _ => return None,
     }
   }
   None
 }
 
-/// Queries a server, returning how long it took to answer and what it said.
-pub async fn a2s_info(addr: SocketAddr) -> Option<(Duration, Info)> {
+/// Queries a server, returning how quickly it answered and what it said.
+pub async fn a2s_info(addr: SocketAddr) -> Option<(Timing, Info)> {
   let (elapsed, payload) = request(addr, INFO_REQUEST, None, INFO).await?;
   parse_info(&payload).map(|info| (elapsed, info))
 }
@@ -281,13 +306,29 @@ pub async fn icmp_ping(ip: IpAddr) -> Option<Duration> {
   (reply.status() == IcmpEchoStatus::Success).then(|| reply.round_trip_time())
 }
 
-/// Picks the latency to show: the ICMP round trip when the host answered one,
-/// otherwise the query response time flagged as an estimate.
-fn latency(icmp: Option<Duration>, query: Option<Duration>) -> (Option<u32>, bool) {
+/// What to show for a server's latency.
+#[derive(Debug, PartialEq)]
+struct Latency {
+  ms: Option<u32>,
+  /// True when `ms` is the fastest query reply rather than a ping.
+  estimated: bool,
+  /// How many query replies `ms` is the fastest of. The interface combines these over several requests and takes
+  /// off the wait still left in the fastest one.
+  samples: u32,
+  /// True when the server answered without a challenge, so the reply probably came from a DDoS protection service's
+  /// copy and the time can't be refined.
+  cached: bool,
+}
+
+/// Picks the latency to show: the ICMP round trip when the host answered one, otherwise the fastest query reply
+/// flagged as an estimate.
+fn latency(icmp: Option<Duration>, query: Option<Timing>) -> Latency {
   match (icmp, query) {
-    (Some(rtt), _) => (Some(rtt.as_millis() as u32), false),
-    (None, Some(elapsed)) => (Some(elapsed.as_millis() as u32), true),
-    (None, None) => (None, false),
+    (Some(rtt), _) => Latency { ms: Some(rtt.as_millis() as u32), estimated: false, samples: 0, cached: false },
+    (None, Some(t)) => {
+      Latency { ms: Some(t.fastest.as_millis() as u32), estimated: true, samples: t.replies, cached: !t.challenged }
+    }
+    (None, None) => Latency { ms: None, estimated: false, samples: 0, cached: false },
   }
 }
 
@@ -297,8 +338,12 @@ pub struct Ping {
   pub id: String,
   /// `None` when the server answered neither a ping nor a query.
   pub ping_ms: Option<u32>,
-  /// True when `ping_ms` is the query response time rather than a real ping.
+  /// True when `ping_ms` is the fastest query reply rather than a real ping.
   pub estimated: bool,
+  /// For an estimate, how many query replies `ping_ms` is the fastest of.
+  pub samples: u32,
+  /// For an estimate, true when the server answered without a challenge (see [`Timing::challenged`]).
+  pub cached: bool,
   pub players: Option<u8>,
   pub max_players: Option<u8>,
   /// Players waiting to join, when the server answered and said.
@@ -344,11 +389,13 @@ pub async fn ping_servers(cache: State<'_, ServerCache>, ids: Vec<String>) -> Re
       .into_iter()
       .map(|(id, addr, reply)| {
         let icmp = addr.and_then(|a| pings.get(&a.ip()).copied().flatten());
-        let (ping_ms, estimated) = latency(icmp, reply.as_ref().map(|(elapsed, _)| *elapsed));
+        let shown = latency(icmp, reply.as_ref().map(|(timing, _)| *timing));
         Ping {
           id,
-          ping_ms,
-          estimated,
+          ping_ms: shown.ms,
+          estimated: shown.estimated,
+          samples: shown.samples,
+          cached: shown.cached,
           players: reply.as_ref().map(|(_, info)| info.players),
           max_players: reply.as_ref().map(|(_, info)| info.max_players),
           queue: reply.as_ref().and_then(|(_, info)| info.queue()),
@@ -487,9 +534,18 @@ mod tests {
   #[test]
   fn prefers_icmp_and_flags_query_time_as_an_estimate() {
     let ms = Duration::from_millis;
-    assert_eq!(latency(Some(ms(13)), Some(ms(90))), (Some(13), false));
-    assert_eq!(latency(Some(ms(13)), None), (Some(13), false));
-    assert_eq!(latency(None, Some(ms(90))), (Some(90), true));
-    assert_eq!(latency(None, None), (None, false));
+    let timing = |fastest, challenged| Timing { fastest: ms(fastest), replies: 2, challenged };
+    let ping = |value| Latency { ms: Some(value), estimated: false, samples: 0, cached: false };
+    assert_eq!(latency(Some(ms(13)), Some(timing(90, true))), ping(13));
+    assert_eq!(latency(Some(ms(13)), None), ping(13));
+    assert_eq!(
+      latency(None, Some(timing(90, true))),
+      Latency { ms: Some(90), estimated: true, samples: 2, cached: false }
+    );
+    assert_eq!(
+      latency(None, Some(timing(9, false))),
+      Latency { ms: Some(9), estimated: true, samples: 2, cached: true }
+    );
+    assert_eq!(latency(None, None), Latency { ms: None, estimated: false, samples: 0, cached: false });
   }
 }

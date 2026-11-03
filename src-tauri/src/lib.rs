@@ -201,7 +201,7 @@ mod live_tests {
         "{:>15} ping {:>7} query {:>7}  {}",
         server.row.ip,
         ping.map_or("none".into(), |rtt| format!("{} ms", rtt.as_millis())),
-        query.as_ref().map_or("none".into(), |(elapsed, _)| format!("{} ms", elapsed.as_millis())),
+        query.as_ref().map_or("none".into(), |(timing, _)| format!("{} ms", timing.fastest.as_millis())),
         server.row.name,
       );
       queried += usize::from(query.is_some());
@@ -209,6 +209,51 @@ mod live_tests {
     }
     assert!(queried > 0, "none of the 10 busiest servers answered an A2S_INFO query");
     assert!(pinged > 0, "none of the 10 busiest servers answered an ICMP echo");
+  }
+
+  /// The estimate shown for servers that block pings, checked on servers that answer them: the fastest of three
+  /// status requests a second or so apart, less the wait expected to be left in it (see `src/lib/latency.ts`).
+  #[tokio::test]
+  #[ignore = "needs network access"]
+  async fn status_replies_estimate_the_ping() {
+    let http = reqwest::Client::builder().user_agent("FlareLauncher/test").build().unwrap();
+    let servers = servers::download_list(&http).await.unwrap();
+    let mut errors = Vec::new();
+    for server in servers.values().filter(|s| s.row.players > 0).take(30) {
+      let addr: std::net::SocketAddr = format!("{}:{}", server.row.ip, server.row.query_port).parse().unwrap();
+      let Some(ping) = query::icmp_ping(addr.ip()).await else { continue };
+      let (mut fastest, mut samples, mut challenged) = (u128::MAX, 0, true);
+      for _ in 0..3 {
+        if let Some((timing, _)) = query::a2s_info(addr).await {
+          fastest = fastest.min(timing.fastest.as_millis());
+          samples += timing.replies;
+          challenged &= timing.challenged;
+        }
+        tokio::time::sleep(std::time::Duration::from_millis(1200)).await;
+      }
+      if samples == 0 {
+        continue;
+      }
+      // Answered from a DDoS protection service's copy: the interface shows these as they are, unrefined.
+      if !challenged {
+        println!("{:>15} ping {:>4} ms, answered without a challenge in {fastest} ms", server.row.ip, ping.as_millis());
+        continue;
+      }
+      let estimate = fastest as f64 - 50.0 / f64::from(samples + 1);
+      let error = estimate - ping.as_millis() as f64;
+      println!(
+        "{:>15} ping {:>4} ms, estimate {:>6.1} ms from {samples} replies",
+        server.row.ip,
+        ping.as_millis(),
+        estimate
+      );
+      errors.push(error);
+    }
+    errors.sort_by(f64::total_cmp);
+    assert!(!errors.is_empty(), "no server answered both");
+    let median = errors[errors.len() / 2];
+    println!("median error {median:.1} ms over {} servers", errors.len());
+    assert!(median.abs() < 10.0, "estimates are a median {median:.1} ms off the ping");
   }
 
   #[tokio::test]

@@ -45,8 +45,12 @@ export type Ping = {
   id: string;
   /** `null` when the server did not answer. */
   pingMs: number | null;
-  /** True when `pingMs` is the query response time, which reads higher than a real ping. */
+  /** True when `pingMs` is the fastest status reply rather than a real ping. */
   estimated: boolean;
+  /** For an estimate, how many status replies `pingMs` is the fastest of. */
+  samples: number;
+  /** For an estimate, true when the server answered without a challenge, as a DDoS protection service's copy does. */
+  cached: boolean;
   players: number | null;
   maxPlayers: number | null;
   /** Players waiting to join, or `null` when the server didn't answer or doesn't say. */

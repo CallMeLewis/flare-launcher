@@ -648,8 +648,9 @@ export function PingValue({
     </span>
   );
   if (!ping.estimated) return value;
-  // Coloured like a real ping. A status reply usually takes 0–50 ms longer, but one answered by a DDoS protection
-  // service nearer than the server can read lower, so the label and its tooltip say it's an estimate.
+  // Coloured like a real ping. Worked out from the fastest of several status replies, it usually lands within 10 ms of
+  // one, but a reply from a DDoS protection service nearer than the server can read lower, so the label and its
+  // tooltip say it's an estimate.
   return (
     <span className="whitespace-nowrap">
       <Tooltip>
@@ -665,8 +666,8 @@ export function PingValue({
         </TooltipTrigger>
         <TooltipContent className="max-w-64">
           <Trans>
-            This server doesn't answer pings, so this is how long it took to answer a status request. Servers behind
-            DDoS protection may answer from somewhere closer than the server itself.
+            This server doesn't answer pings, so this is estimated from how quickly it answers status requests. Servers
+            behind DDoS protection may answer from somewhere closer than the server itself.
           </Trans>
         </TooltipContent>
       </Tooltip>
