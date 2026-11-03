@@ -50,9 +50,10 @@ import type { ServerRow } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 const ROW_HEIGHT = 36;
-// Narrow layouts drop the Time column so server names keep their room.
+// Narrow layouts drop the Time column so server names keep their room. Players fits "124/127 +123", Time
+// "06:19 ×12" and Ping "aprox. 247"; anything wider only pushes the numbers apart.
 const COLUMNS =
-  "grid grid-cols-[36px_minmax(0,1fr)_104px_64px_116px_72px] lg:grid-cols-[36px_minmax(0,1fr)_112px_68px_124px_88px_76px] 2xl:grid-cols-[36px_minmax(0,1fr)_168px_84px_148px_104px_96px] items-center";
+  "grid grid-cols-[36px_minmax(0,1fr)_104px_64px_104px_72px] lg:grid-cols-[36px_minmax(0,1fr)_112px_68px_104px_88px_76px] 2xl:grid-cols-[36px_minmax(0,1fr)_168px_84px_120px_104px_84px] items-center";
 const TIME_COLUMN = "max-lg:hidden";
 
 const HEADERS: {
