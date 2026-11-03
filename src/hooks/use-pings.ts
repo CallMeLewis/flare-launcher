@@ -9,6 +9,11 @@ export type PingResult = {
   estimated: boolean;
   /** The status replies behind an estimate, combined over the last few requests. */
   query?: QuerySamples;
+  /**
+   * True when an estimate came from a reply the server's DDoS protection gave without asking the server, which it
+   * may give from somewhere much closer than the server.
+   */
+  cached: boolean;
   players: number | null;
   maxPlayers: number | null;
   /** Players waiting to join, or `null` when the server didn't answer or doesn't say. */
@@ -82,7 +87,14 @@ export function usePings(): Pings {
               shown = { pingMs: estimateMs(query), query };
               if (query.samples < SETTLED_SAMPLES) refine.push(id);
             }
-            results.current.set(id, { ...ping, ...shown, misses, offline: misses >= 2 && anyAnswered.current, at });
+            results.current.set(id, {
+              ...ping,
+              ...shown,
+              cached: ping.estimated && cached,
+              misses,
+              offline: misses >= 2 && anyAnswered.current,
+              at,
+            });
           }
           if (pings.length > 0) announce.current();
           if (retry.length > 0) setTimeout(() => enqueue.current(retry, true), RETRY_AFTER_MS);

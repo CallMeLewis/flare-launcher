@@ -649,8 +649,8 @@ export function PingValue({
   );
   if (!ping.estimated) return value;
   // Coloured like a real ping. Worked out from the fastest of several status replies, it usually lands within 10 ms of
-  // one, but a reply from a DDoS protection service nearer than the server can read lower, so the label and its
-  // tooltip say it's an estimate.
+  // one. A server whose DDoS protection answered for it (it skipped the challenge DayZ servers send) gets its own
+  // tooltip, as the protection can answer from much closer than the server: a US server can read 6 ms from the UK.
   return (
     <span className="whitespace-nowrap">
       <Tooltip>
@@ -665,10 +665,17 @@ export function PingValue({
           </span>
         </TooltipTrigger>
         <TooltipContent className="max-w-64">
-          <Trans>
-            This server doesn't answer pings, so this is estimated from how quickly it answers status requests. Servers
-            behind DDoS protection may answer from somewhere closer than the server itself.
-          </Trans>
+          {ping.cached ? (
+            <Trans>
+              This server doesn't answer pings, and its DDoS protection answered the status request for it, so the
+              server may be much further away than this.
+            </Trans>
+          ) : (
+            <Trans>
+              This server doesn't answer pings, so this is estimated from how quickly it answers status requests.
+              Servers behind DDoS protection may answer from somewhere closer than the server itself.
+            </Trans>
+          )}
         </TooltipContent>
       </Tooltip>
       {value}

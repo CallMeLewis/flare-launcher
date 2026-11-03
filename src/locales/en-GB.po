@@ -1899,6 +1899,10 @@ msgid "This is a vanilla server. No mods needed."
 msgstr "This is a vanilla server. No mods needed."
 
 #: src/components/server-table.tsx
+msgid "This server doesn't answer pings, and its DDoS protection answered the status request for it, so the server may be much further away than this."
+msgstr "This server doesn't answer pings, and its DDoS protection answered the status request for it, so the server may be much further away than this."
+
+#: src/components/server-table.tsx
 msgid "This server doesn't answer pings, so this is estimated from how quickly it answers status requests. Servers behind DDoS protection may answer from somewhere closer than the server itself."
 msgstr "This server doesn't answer pings, so this is estimated from how quickly it answers status requests. Servers behind DDoS protection may answer from somewhere closer than the server itself."
 
