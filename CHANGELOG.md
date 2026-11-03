@@ -2,6 +2,10 @@
 
 What changed in each version of Flare Launcher, newest first.
 
+## 1.7.1 - 2026-11-03
+
+- Improved the est. ping shown for servers that don't answer pings: it's now usually within 10 ms of a real ping instead of reading about 25 ms too high, and hovering over est. warns when a server's DDoS protection answered for it, as the server may then be much further away.
+
 ## 1.7.0 - 2026-11-03
 
 - New queue count next to a server's player count when players are waiting to join, such as +12 in the server list and 12 queued in the server panel.
