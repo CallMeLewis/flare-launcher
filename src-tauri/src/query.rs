@@ -46,6 +46,14 @@ pub struct Info {
   pub keywords: String,
 }
 
+impl Info {
+  /// How many players are waiting to join, which DayZ gives in the keywords as `lqs` and the count, such as `lqs12`.
+  /// `None` when the server doesn't say.
+  pub fn queue(&self) -> Option<u32> {
+    self.keywords.split(',').find_map(|tag| tag.trim().strip_prefix("lqs")?.parse().ok())
+  }
+}
+
 /// Reads the little-endian numbers and null-terminated strings that query replies are made of.
 struct Reader<'a>(&'a [u8]);
 
@@ -293,6 +301,8 @@ pub struct Ping {
   pub estimated: bool,
   pub players: Option<u8>,
   pub max_players: Option<u8>,
+  /// Players waiting to join, when the server answered and said.
+  pub queue: Option<u32>,
 }
 
 #[tauri::command]
@@ -341,6 +351,7 @@ pub async fn ping_servers(cache: State<'_, ServerCache>, ids: Vec<String>) -> Re
           estimated,
           players: reply.as_ref().map(|(_, info)| info.players),
           max_players: reply.as_ref().map(|(_, info)| info.max_players),
+          queue: reply.as_ref().and_then(|(_, info)| info.queue()),
         }
       })
       .collect(),
@@ -385,6 +396,15 @@ mod tests {
         keywords: "battleye,no3rd,privHive,etm4.000000,entm8.000000,14:05".into(),
       })
     );
+  }
+
+  #[test]
+  fn reads_the_queue_from_the_keywords() {
+    let info = |keywords: &str| Info { keywords: keywords.into(), ..Info::default() };
+    assert_eq!(info("battleye,no3rd,privHive,lqs12,etm6.000000,08:41").queue(), Some(12));
+    assert_eq!(info("battleye,lqs0,08:41").queue(), Some(0));
+    assert_eq!(info("battleye,privHive,etm4.000000,14:05").queue(), None);
+    assert_eq!(info("").queue(), None);
   }
 
   #[test]
