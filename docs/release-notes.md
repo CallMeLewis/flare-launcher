@@ -67,6 +67,16 @@ searching by mod name and one for showing the matched mod.
 The test: would the player consider this a separate change? If not, merge it. Don't combine unrelated changes just
 because they were made together, either.
 
+## Crediting contributors
+
+When a change came from a pull request by someone other than the launcher's maintainer, credit them at the end of its
+bullet with their GitHub username: "Fixed the Players column cutting off long counts. Thanks to @username." The GitHub
+release links the name to their profile; the launcher shows it as plain text.
+
+- Credit the people whose pull request made the change, not those who reported or suggested it.
+- When several people's pull requests went into one bullet, name them all: "Thanks to @first and @second."
+- Keep the credit even when the change was reworked before it was merged.
+
 ## Categories and order
 
 Order the bullets in these categories, skipping empty ones, and start each with a word that makes its category clear
@@ -91,5 +101,6 @@ where it helps ("New ...", "Fixed ...", "Removed ..."):
 - Does every new feature say where to find it?
 - Does any feature name (Play, Download mods only, Settings...) appear in more than one bullet? Merge them.
 - Is any other launcher or service named? Remove it.
+- Does every change from another contributor's pull request thank them by their GitHub username?
 - Are the bullets in category order, with any "Action needed:" first?
 - Does every bullet start with `- `, sit on one line and contain no Markdown?
