@@ -2,10 +2,19 @@
 
 What changed in each version of Flare Launcher, newest first.
 
-## 1.6.1-beta.1 - 2026-10-28
+## 1.7.0 - 2026-11-03
 
+- New queue count next to a server's player count when players are waiting to join, such as +12 in the server list and 12 queued in the server panel.
+- New Play button on each server in the list, shown when you hover over it.
+- New time speed next to a server's in-game time in the server list, such as ×6, for servers that speed up time.
+- The Country filter in the Filters menu can now pick several countries at once, or whole continents. Thanks to @bzed.
+- Player counts in the server list now stay current while the launcher is open, and sorting by Players and Hide empty or Hide full servers use the same up-to-date counts.
+- Servers that don't answer pings now show their estimated ping marked est. instead of ~, coloured like any other ping, and hovering over est. explains why; the Ping column no longer repeats ms after every number.
+- The line under your favourites at the top of All servers now always shows, so it's clear the sort applies to the servers below it.
 - Fixed the Verified tag disappearing from a server for a few minutes, such as while it restarts.
 - Fixed servers on DayZ 1.30 or later found on your local network or added by address showing First person only when they allow third person, and the other way round.
+- Fixed the Map and Version lists in the Filters menu blending into the menu behind them.
+- Removed the bar beside each server's player count; full servers still show their count in amber.
 
 ## 1.6.0 - 2026-10-27
 
