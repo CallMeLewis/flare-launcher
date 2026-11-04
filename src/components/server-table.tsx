@@ -485,47 +485,50 @@ const Row = memo(function Row({
       </div>
 
       <div role="gridcell" className="flex min-w-0 items-center gap-2 pr-3">
-        <span className={cn("truncate", selected && "font-semibold")} title={row.name}>
+        <span className={cn("truncate", selected && "font-medium")} title={row.name}>
           {row.name}
         </span>
-        {row.verified && (
-          <span
-            title={t`Verified owner: they've proved they run this server.`}
-            className="flex shrink-0 items-center gap-1 rounded border border-verified/40 bg-verified/10 pr-1.5 pl-1 text-[11px] leading-4 font-semibold text-verified uppercase"
-          >
-            <BadgeCheck className="size-3" aria-hidden />
-            <Trans>Verified</Trans>
-          </span>
-        )}
-        {versionNote && (
-          <span className="shrink-0 text-warning" title={versionNote}>
-            <TriangleAlert className="size-3" role="img" aria-label={versionNote} />
-          </span>
-        )}
-        {row.password && (
-          <span className="shrink-0 text-warning" title={t`Password protected`}>
-            <Lock className="size-3" role="img" aria-label={t`Password protected`} />
-          </span>
-        )}
-        {row.firstPersonOnly && (
-          <Tag title={t`First person only`}>
-            <Trans>1PP</Trans>
-          </Tag>
-        )}
-        {row.official && (
-          <Tag title={t`Official server`}>
-            <Trans>Official</Trans>
-          </Tag>
-        )}
-        {modMatch && (
-          <span
-            title={t`Runs the mod ${modMatch}`}
-            className="flex max-w-[45%] min-w-0 shrink-0 items-center gap-1 rounded border border-primary/30 bg-primary/10 px-1.5 text-xs leading-4 text-foreground/85"
-          >
-            <Puzzle className="size-3 shrink-0 text-primary" aria-hidden />
-            <span className="truncate">{modMatch}</span>
-          </span>
-        )}
+        {/* The marks line up in one column down the list, just before the space kept for Play. */}
+        <span className="ml-auto flex min-w-0 shrink-0 items-center gap-2 pl-1">
+          {row.verified && (
+            <span
+              title={t`Verified owner: they've proved they run this server.`}
+              className="flex shrink-0 items-center gap-1 rounded border border-verified/40 bg-verified/10 pr-1.5 pl-1 text-[11px] leading-4 font-semibold text-verified uppercase"
+            >
+              <BadgeCheck className="size-3" aria-hidden />
+              <Trans>Verified</Trans>
+            </span>
+          )}
+          {versionNote && (
+            <span className="shrink-0 text-warning" title={versionNote}>
+              <TriangleAlert className="size-3" role="img" aria-label={versionNote} />
+            </span>
+          )}
+          {row.password && (
+            <span className="shrink-0 text-warning" title={t`Password protected`}>
+              <Lock className="size-3" role="img" aria-label={t`Password protected`} />
+            </span>
+          )}
+          {row.firstPersonOnly && (
+            <Tag title={t`First person only`}>
+              <Trans>1PP</Trans>
+            </Tag>
+          )}
+          {row.official && (
+            <Tag title={t`Official server`}>
+              <Trans>Official</Trans>
+            </Tag>
+          )}
+          {modMatch && (
+            <span
+              title={t`Runs the mod ${modMatch}`}
+              className="flex max-w-40 min-w-0 items-center gap-1 rounded border border-primary/30 bg-primary/10 px-1.5 text-xs leading-4 text-foreground/85"
+            >
+              <Puzzle className="size-3 shrink-0 text-primary" aria-hidden />
+              <span className="truncate">{modMatch}</span>
+            </span>
+          )}
+        </span>
         {/*
           Shown on hover, but always laid out, so it never covers the marks before it and names don't shift when it
           appears. Out of the Tab order like the star: Enter on the list plays the selected server.
@@ -538,7 +541,7 @@ const Row = memo(function Row({
             onPlay(row);
           }}
           onDoubleClick={(event) => event.stopPropagation()}
-          className="invisible ml-auto group-hover:visible"
+          className="invisible group-hover:visible"
         >
           <Play fill="currentColor" aria-hidden />
           <Trans>Play</Trans>
@@ -625,7 +628,16 @@ function Tag({ title, children }: { title: string; children: ReactNode }) {
  * How many players are waiting in DayZ's login queue: "+12" in the list, where the hover says what it is, and
  * "12 queued" where there's room.
  */
-export function QueueValue({ queue, short = false }: { queue: number; short?: boolean }) {
+export function QueueValue({
+  queue,
+  short = false,
+  muted = false,
+}: {
+  queue: number;
+  short?: boolean;
+  /** Muted where something beside it already marks the server as full, such as the detail panel's bar. */
+  muted?: boolean;
+}) {
   const { t } = useLingui();
   const label = t`${plural(queue, { one: "# player", other: "# players" })} waiting to join`;
   if (short) {
@@ -637,7 +649,10 @@ export function QueueValue({ queue, short = false }: { queue: number; short?: bo
     );
   }
   return (
-    <span className="text-[11px] font-medium whitespace-nowrap text-warning" title={label}>
+    <span
+      className={cn("text-[11px] font-medium whitespace-nowrap", muted ? "text-muted-foreground" : "text-warning")}
+      title={label}
+    >
       <Trans comment="Players waiting in a server's login queue, kept as short as possible">
         <span className="data text-xs">{queue}</span> queued
       </Trans>

@@ -61,10 +61,10 @@ import type { ModProgress, SubscribedMod } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 const ROW_HEIGHT = 36;
-// From 1280px the names stop growing and Status takes the spare room, so each mod's details stay within reading
-// distance of its name. The Workshop link sits right after the name, where the eye already is.
+// From 1280px the spare room is shared out between the columns rather than all going to one, so the row has no long
+// empty stretch. The Workshop link sits right after the name, where the eye already is.
 const COLUMNS =
-  "grid grid-cols-[40px_minmax(0,1fr)_84px_92px_124px_164px] xl:grid-cols-[40px_minmax(0,24rem)_104px_112px_148px_minmax(180px,1fr)] 2xl:grid-cols-[40px_minmax(0,28rem)_136px_136px_168px_minmax(196px,1fr)] items-center";
+  "grid grid-cols-[40px_minmax(0,1fr)_84px_92px_124px_164px] xl:grid-cols-[40px_minmax(0,2.4fr)_minmax(104px,0.8fr)_minmax(104px,0.8fr)_minmax(148px,1fr)_minmax(180px,1.2fr)] items-center";
 
 // Updated reads left to right, so it starts a little after the right-aligned sizes rather than running into them.
 const UPDATED_GAP = "pl-4 2xl:pl-6";

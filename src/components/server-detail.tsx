@@ -441,7 +441,7 @@ export function ServerDetail({
               <Fill players={players} maxPlayers={maxPlayers} className="mt-2 h-1" />
               {queue > 0 && (
                 <span className="mt-1.5 block">
-                  <QueueValue queue={queue} />
+                  <QueueValue queue={queue} muted />
                 </span>
               )}
             </>
@@ -509,7 +509,7 @@ export function ServerDetail({
           </h3>
           {mods && mods.length > 0 && installed && !downloading && (
             <p
-              className={cn("text-xs", missing > 0 || differingCount > 0 ? "text-warning" : "text-success")}
+              className={cn("text-xs", missing > 0 || differingCount > 0 ? "text-muted-foreground" : "text-success")}
               aria-live="polite"
             >
               {missing > 0 ? (

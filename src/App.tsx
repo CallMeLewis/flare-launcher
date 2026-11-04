@@ -51,6 +51,7 @@ import {
   type Sort,
 } from "@/lib/filter";
 import { countryName } from "@/lib/countries";
+import { cn } from "@/lib/utils";
 import type { Install, PlayJob, ServerRow, Settings } from "@/lib/types";
 
 const DEFAULT_SETTINGS: Settings = {
@@ -789,7 +790,13 @@ export function App() {
                 onOpenSettings={() => setSettingsOpen(true)}
               />
             ) : (
-              <aside className="flex w-[300px] shrink-0 lg:w-[340px] xl:w-[400px] border-l bg-card">
+              <aside
+                className={cn(
+                  "flex w-[300px] shrink-0 border-l lg:w-[340px] xl:w-[400px]",
+                  // Beside an empty list the page reads as one surface around the list's message.
+                  listed.length > 0 ? "bg-card" : "bg-background",
+                )}
+              >
                 {/* Beside an empty list there is nothing to pick, and the list's own message says what to do. */}
                 {listed.length > 0 && (
                   <Message
