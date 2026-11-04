@@ -762,7 +762,10 @@ export function App() {
                       )
                     }
                   />
-                  <ServerListStatus shown={listed.length} total={inView.length} players={playersShown} />
+                  {/* An empty list's message already says there's nothing in it. */}
+                  {inView.length > 0 && (
+                    <ServerListStatus shown={listed.length} total={inView.length} players={playersShown} />
+                  )}
                 </>
               )}
             </main>
@@ -787,11 +790,15 @@ export function App() {
               />
             ) : (
               <aside className="flex w-[300px] shrink-0 lg:w-[340px] xl:w-[400px] border-l bg-card">
-                <Message
-                  icon={<MousePointerClick className="size-6" aria-hidden />}
-                  title={t`Pick a server`}
-                  description={t`Select one to see its mods, or select Play on its row to join straight away.`}
-                />
+                {/* Beside an empty list there is nothing to pick, and the list's own message says what to do. */}
+                {listed.length > 0 && (
+                  <Message
+                    quiet
+                    icon={<MousePointerClick className="size-5" aria-hidden />}
+                    title={t`Pick a server`}
+                    description={t`Select one to see its mods, or select Play on its row to join straight away.`}
+                  />
+                )}
               </aside>
             )}
           </>

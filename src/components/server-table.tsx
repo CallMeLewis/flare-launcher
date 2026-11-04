@@ -485,7 +485,7 @@ const Row = memo(function Row({
       </div>
 
       <div role="gridcell" className="flex min-w-0 items-center gap-2 pr-3">
-        <span className={cn("truncate", selected ? "font-semibold" : "font-medium")} title={row.name}>
+        <span className={cn("truncate", selected && "font-semibold")} title={row.name}>
           {row.name}
         </span>
         {row.verified && (
@@ -564,12 +564,9 @@ const Row = memo(function Row({
         {unlisted ? (
           <span className="data w-[52px] text-right text-xs text-muted-foreground">–</span>
         ) : (
-          <span className="flex w-[52px] flex-col items-end gap-1">
-            <span className="data text-xs leading-none">
-              {players}
-              <span className="text-muted-foreground">/{maxPlayers}</span>
-            </span>
-            <Fill players={players} maxPlayers={maxPlayers} />
+          <span className="data w-[52px] text-right text-xs">
+            {players}
+            <span className="text-muted-foreground">/{maxPlayers}</span>
           </span>
         )}
         {queue > 0 && <QueueValue queue={queue} short />}
@@ -597,8 +594,8 @@ const Row = memo(function Row({
 });
 
 /**
- * How full a server is, as a thin bar under its player count. Full servers fill it in the warning colour; the count
- * beside it says the same in numbers.
+ * How full a server is, as a thin bar under its player count in the detail panel. Full servers fill it in the warning
+ * colour; the count above it says the same in numbers.
  */
 export function Fill({ players, maxPlayers, className }: { players: number; maxPlayers: number; className?: string }) {
   const fraction = maxPlayers > 0 ? Math.min(players / maxPlayers, 1) : 0;

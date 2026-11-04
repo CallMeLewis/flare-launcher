@@ -65,7 +65,7 @@ export function FilterMenu({
   return (
     <div className="flex max-h-[min(640px,var(--radix-popover-content-available-height))] flex-col">
       <div className="grid min-h-0 grid-cols-2 overflow-y-auto">
-        <div className="border-r">
+        <div className="border-r border-input/30">
           <Group title={t`Server`}>
             <Field label={t`Map`}>
               <Select value={filters.map || ANY} onValueChange={(map) => onChange({ map: map === ANY ? "" : map })}>
@@ -267,7 +267,7 @@ export function FilterMenu({
 function Group({ title, children }: { title: string; children: ReactNode }) {
   const id = useId();
   return (
-    <section aria-labelledby={id} className="flex flex-col gap-3 border-b px-4 py-3.5 last:border-b-0">
+    <section aria-labelledby={id} className="flex flex-col gap-3 border-b border-input/30 px-4 py-3.5 last:border-b-0">
       <h3 id={id} className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
         {title}
       </h3>

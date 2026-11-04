@@ -39,7 +39,7 @@ export function SettingsDialog({
   onSectionChange?: (section: string) => void;
   footer?: ReactNode;
 }) {
-  const { t } = useFlare();
+  const { app, t } = useFlare();
   const [chosen, setChosen] = useState(sections[0]?.id ?? "");
   const current = section ?? chosen;
   const change = (next: string) => {
@@ -56,8 +56,11 @@ export function SettingsDialog({
         <Tabs value={current} onValueChange={change} orientation="vertical" className="h-full min-h-0 gap-0">
           <div className="flex w-52 shrink-0 flex-col border-r bg-background/40">
             {/* As tall as each section's title on the right, so the two titles and the line under them meet. */}
-            <div className="flex h-16 shrink-0 items-center border-b px-5">
+            <div className="flex h-16 shrink-0 flex-col justify-center border-b px-5">
               <DialogTitle className="text-[15px] font-semibold">{t("Settings")}</DialogTitle>
+              <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                {app.name} <span className="data">{app.version}</span>
+              </p>
             </div>
             <TabsList className="h-auto w-full flex-1 flex-col items-stretch justify-start gap-0.5 bg-transparent p-3">
               {sections.map(({ id, label, icon: Icon, pinned, attention }) => (

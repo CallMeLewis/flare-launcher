@@ -62,9 +62,9 @@ import { cn } from "@/lib/utils";
 
 const ROW_HEIGHT = 36;
 // From 1280px the names stop growing and Status takes the spare room, so each mod's details stay within reading
-// distance of its name and the table still reaches the right edge.
+// distance of its name. The Workshop link sits right after the name, where the eye already is.
 const COLUMNS =
-  "grid grid-cols-[40px_minmax(0,1fr)_84px_92px_124px_164px_44px] xl:grid-cols-[40px_minmax(0,24rem)_104px_112px_148px_minmax(180px,1fr)_48px] 2xl:grid-cols-[40px_minmax(0,28rem)_136px_136px_168px_minmax(196px,1fr)_48px] items-center";
+  "grid grid-cols-[40px_minmax(0,1fr)_84px_92px_124px_164px] xl:grid-cols-[40px_minmax(0,24rem)_104px_112px_148px_minmax(180px,1fr)] 2xl:grid-cols-[40px_minmax(0,28rem)_136px_136px_168px_minmax(196px,1fr)] items-center";
 
 // Updated reads left to right, so it starts a little after the right-aligned sizes rather than running into them.
 const UPDATED_GAP = "pl-4 2xl:pl-6";
@@ -313,43 +313,6 @@ export function ModsPage({
           )}
 
           <div className="ml-auto flex shrink-0 items-center gap-2 pl-2">
-            {listed && (
-              <p className="text-xs whitespace-nowrap text-muted-foreground" aria-live="polite">
-                {rows.length === mods.length ? (
-                  <Plural
-                    value={modCount}
-                    one={
-                      <Trans>
-                        <span className="data text-foreground">#</span> mod
-                      </Trans>
-                    }
-                    other={
-                      <Trans>
-                        <span className="data text-foreground">#</span> mods
-                      </Trans>
-                    }
-                  />
-                ) : (
-                  <Plural
-                    value={modCount}
-                    one={
-                      <Trans>
-                        <span className="data text-foreground">{shown}</span> of # mod
-                      </Trans>
-                    }
-                    other={
-                      <Trans>
-                        <span className="data text-foreground">{shown}</span> of # mods
-                      </Trans>
-                    }
-                  />
-                )}
-                <span className="max-xl:hidden">
-                  {" · "}
-                  <span className="data">{formatBytes(totalSize)}</span>
-                </span>
-              </p>
-            )}
             {toUpdate.length > 0 && !job && (
               <Button
                 variant="secondary"
@@ -413,6 +376,47 @@ export function ModsPage({
       </div>
 
       {body}
+
+      {listed && (
+        <p
+          aria-live="polite"
+          className="h-9 shrink-0 border-t bg-card px-4 text-xs leading-[35px] whitespace-nowrap text-muted-foreground"
+        >
+          {rows.length === mods.length ? (
+            <Plural
+              value={modCount}
+              one={
+                <Trans>
+                  <span className="data text-foreground">#</span> mod
+                </Trans>
+              }
+              other={
+                <Trans>
+                  <span className="data text-foreground">#</span> mods
+                </Trans>
+              }
+            />
+          ) : (
+            <Plural
+              value={modCount}
+              one={
+                <Trans>
+                  <span className="data text-foreground">{shown}</span> of # mod
+                </Trans>
+              }
+              other={
+                <Trans>
+                  <span className="data text-foreground">{shown}</span> of # mods
+                </Trans>
+              }
+            />
+          )}
+          <span>
+            {" · "}
+            <span className="data">{formatBytes(totalSize)}</span>
+          </span>
+        </p>
+      )}
 
       <UnsubscribeDialog
         mods={confirming.mods}
@@ -661,10 +665,26 @@ const ModRow = memo(function ModRow({
         <Checkbox tabIndex={-1} aria-label={t`Select ${name}`} checked={selected} onCheckedChange={toggle} />
       </div>
 
-      <div role="gridcell" className="flex min-w-0 items-center gap-2 pr-4">
+      <div role="gridcell" className="flex min-w-0 items-center gap-1 pr-4">
         <span className={cn("truncate", mod.name === null && "text-muted-foreground")} title={name}>
           {name}
         </span>
+        <Button
+          variant="ghost"
+          size="icon-xs"
+          tabIndex={-1}
+          aria-label={t`Open ${name} in the Steam Workshop`}
+          title={t`Open in the Steam Workshop`}
+          onClick={(event) => {
+            stop(event);
+            backend
+              .openWorkshopPage(mod.id)
+              .catch((e) => toast.error(t`Couldn't open the Workshop page`, { description: errorMessage(e) }));
+          }}
+          className="shrink-0 text-muted-foreground hover:text-foreground [&_svg]:size-3.5"
+        >
+          <ExternalLink aria-hidden />
+        </Button>
       </div>
 
       <div role="gridcell" className="data flex items-center justify-end gap-1.5 pr-4 text-xs">
@@ -696,24 +716,6 @@ const ModRow = memo(function ModRow({
 
       <div role="gridcell" className="min-w-0 pr-3">
         <ModStatus mod={mod} progress={progress} />
-      </div>
-
-      <div role="gridcell" className="flex justify-center" onClick={stop}>
-        <Button
-          variant="ghost"
-          size="icon-xs"
-          tabIndex={-1}
-          aria-label={t`Open ${name} in the Steam Workshop`}
-          title={t`Open in the Steam Workshop`}
-          onClick={() =>
-            backend
-              .openWorkshopPage(mod.id)
-              .catch((e) => toast.error(t`Couldn't open the Workshop page`, { description: errorMessage(e) }))
-          }
-          className="text-foreground/70 hover:text-foreground [&_svg]:size-4"
-        >
-          <ExternalLink aria-hidden />
-        </Button>
       </div>
     </div>
   );
@@ -937,7 +939,6 @@ function LoadingRows() {
           <Skeleton className="ml-auto mr-4 h-3.5 w-14" />
           <Skeleton className="h-3.5 w-20" />
           <Skeleton className="h-3.5 w-24" />
-          <span />
         </div>
       ))}
     </div>
