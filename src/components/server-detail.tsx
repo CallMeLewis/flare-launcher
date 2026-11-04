@@ -18,14 +18,17 @@ import {
   Link2,
   Loader2,
   Lock,
+  MapPin,
+  Moon,
   Play,
   Star,
+  Sun,
   TriangleAlert,
 } from "lucide-react";
 import { toast } from "sonner";
 import { CountryFlag } from "@/components/country-flag";
 import { MapCountDialog } from "@/components/map-count-dialog";
-import { PingValue, QueueValue } from "@/components/server-table";
+import { Fill, PingValue, QueueValue } from "@/components/server-table";
 import { compareGameVersions, isNight, livePlayers, untilDayChange } from "@/lib/filter";
 import { Button } from "@/ui/components/button";
 import { Checkbox } from "@/ui/components/checkbox";
@@ -343,32 +346,48 @@ export function ServerDetail({
     >
       <header className="flex flex-col gap-3 border-b p-4">
         <div className="flex items-start gap-2">
-          <h2
-            title={server.name}
-            className="selectable line-clamp-3 min-w-0 flex-1 text-[15px] leading-snug font-semibold break-words"
-          >
-            {server.name}
-          </h2>
+          <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+            <h2
+              title={server.name}
+              className="selectable line-clamp-3 text-base leading-snug font-semibold break-words"
+            >
+              {server.name}
+            </h2>
+            <p className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+              <span className="flex min-w-0 items-center gap-1.5">
+                <MapPin className="size-3.5 shrink-0" aria-hidden />
+                <span className="truncate">{mapName(server.map)}</span>
+              </span>
+              {server.country && (
+                <span className="flex min-w-0 items-center gap-1.5">
+                  <CountryFlag code={server.country} decorative />
+                  <span className="truncate" title={countryName(server.country, i18n.locale)}>
+                    {countryName(server.country, i18n.locale)}
+                  </span>
+                </span>
+              )}
+              {server.verified && (
+                <span
+                  className="flex items-center gap-1.5 text-verified"
+                  title={t`Verified owner: they've proved they run this server.`}
+                >
+                  <BadgeCheck className="size-3.5" aria-hidden />
+                  <Trans>Verified owner</Trans>
+                </span>
+              )}
+            </p>
+          </div>
           <Button
             variant="ghost"
             size="icon-sm"
             aria-label={favourite ? t`Remove from favourites` : t`Add to favourites`}
             aria-pressed={favourite}
             onClick={() => onToggleFavourite(server.id)}
-            className={cn("-mt-1.5 -mr-1 shrink-0", favourite && "text-warning hover:text-warning")}
+            className={cn("-mt-1 -mr-1 shrink-0", favourite && "text-warning hover:text-warning")}
           >
             <Star className="size-4" fill={favourite ? "currentColor" : "none"} aria-hidden />
           </Button>
         </div>
-        {server.verified && (
-          <p
-            className="-mt-1.5 flex items-center gap-1.5 text-xs text-muted-foreground"
-            title={t`Verified owner: they've proved they run this server.`}
-          >
-            <BadgeCheck className="size-3.5 text-verified" aria-hidden />
-            <Trans>Verified owner</Trans>
-          </p>
-        )}
         <div className="flex gap-2">
           <button
             type="button"
@@ -408,52 +427,58 @@ export function ServerDetail({
         </span>
       </header>
 
-      <dl className="grid grid-cols-2 gap-x-4 gap-y-3 border-b p-4">
-        <Stat label={t`Players`}>
+      {/* The three things players compare servers by, large, then the rest as a short list. */}
+      <dl className="grid grid-cols-3 divide-x border-b">
+        <Tile label={t`Players`}>
           {unlisted ? (
             <span className="data">–</span>
           ) : (
             <>
               <span className="data">
                 {players}
-                <span className="text-muted-foreground">/{maxPlayers}</span>
+                <span className="text-sm text-muted-foreground">/{maxPlayers}</span>
               </span>
+              <Fill players={players} maxPlayers={maxPlayers} className="mt-2 h-1" />
               {queue > 0 && (
-                <span className="ml-1.5">
+                <span className="mt-1.5 block">
                   <QueueValue queue={queue} />
                 </span>
               )}
             </>
           )}
-        </Stat>
-        <Stat label={t`Ping`}>
+        </Tile>
+        <Tile label={t`Ping`}>
           <span className="data">
-            <PingValue ping={ping} offline={offline !== null} />
+            <PingValue ping={ping} offline={offline !== null} unit={false} />
           </span>
-        </Stat>
-        <Stat label={t`Map`}>{mapName(server.map)}</Stat>
-        <Stat label={t`Country`}>
-          {server.country ? (
-            <span className="flex items-center gap-1.5">
-              <CountryFlag code={server.country} decorative />
-              <span className="truncate" title={countryName(server.country, i18n.locale)}>
-                {countryName(server.country, i18n.locale)}
+          {ping?.pingMs != null && offline === null && (
+            <span className="data ml-1 text-xs text-muted-foreground">ms</span>
+          )}
+        </Tile>
+        <Tile label={t`In-game time`}>
+          {/* What an unlisted server last reported is long out of date. */}
+          {server.time && !unlisted ? (
+            <>
+              <span className="flex items-center gap-1.5">
+                {isNight(server.time) ? (
+                  <Moon className="size-4 shrink-0 text-muted-foreground" aria-hidden />
+                ) : (
+                  <Sun className="size-4 shrink-0 text-muted-foreground" aria-hidden />
+                )}
+                <span className="data">{server.time}</span>
               </span>
-            </span>
+              <span className="mt-1 block truncate text-xs text-muted-foreground">
+                {isNight(server.time) ? t`Night` : t`Day`}
+                {server.timeAcceleration ? ` · ${t`${speed}× speed`}` : ""}
+              </span>
+            </>
           ) : (
             <span className="data">–</span>
           )}
-        </Stat>
-        <Stat label={t`In-game time`}>
-          {/* What an unlisted server last reported is long out of date. */}
-          <span className="data">{(!unlisted && server.time) || "–"}</span>
-          {server.time && !unlisted && (
-            <span className="ml-1.5 text-xs text-muted-foreground">
-              {isNight(server.time) ? t`Night` : t`Day`}
-              {server.timeAcceleration ? ` · ${t`${speed}× speed`}` : ""}
-            </span>
-          )}
-        </Stat>
+        </Tile>
+      </dl>
+
+      <dl className="flex flex-col gap-1.5 border-b px-4 py-3">
         <Stat label={dayChange?.night ? t`Daylight in` : t`Dark in`}>
           {dayChange ? (
             <span
@@ -915,11 +940,22 @@ function DownloadStatus({
   );
 }
 
+/** One of the large figures under the server's name. */
+function Tile({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <div className="min-w-0 px-4 py-3">
+      <dt className="text-[11px] font-medium tracking-wider text-muted-foreground uppercase">{label}</dt>
+      <dd className="mt-1 text-lg leading-6 font-medium">{children}</dd>
+    </div>
+  );
+}
+
+/** A line of the short list under the large figures: its name on the left, its value on the right. */
 function Stat({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <div className="min-w-0">
-      <dt className="text-xs text-muted-foreground">{label}</dt>
-      <dd className="truncate text-[13px]" title={typeof children === "string" ? children : undefined}>
+    <div className="flex min-w-0 items-baseline justify-between gap-4 text-[13px]">
+      <dt className="shrink-0 text-muted-foreground">{label}</dt>
+      <dd className="truncate text-right" title={typeof children === "string" ? children : undefined}>
         {children}
       </dd>
     </div>

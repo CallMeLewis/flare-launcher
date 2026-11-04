@@ -257,7 +257,10 @@ export function ServerTable({
           className="flex min-h-0 flex-1 flex-col focus-visible:outline-2 focus-visible:-outline-offset-2"
         >
           <div role="rowgroup" className="overflow-y-hidden border-b bg-card/60 [scrollbar-gutter:stable]">
-            <div role="row" className={cn(COLUMNS, "h-8 text-xs font-medium text-muted-foreground")}>
+            <div
+              role="row"
+              className={cn(COLUMNS, "h-8 text-[11px] font-medium tracking-wider text-muted-foreground uppercase")}
+            >
               <div role="columnheader" aria-label={t`Favourite`} />
               {HEADERS.map((header) => {
                 const active = sort.key === header.key;
@@ -421,7 +424,6 @@ const Row = memo(function Row({
   // The server's own count once it has answered, as the list's can be well out of date, and the queue beside it is
   // the server's own too.
   const { players, maxPlayers } = livePlayers(row, ping);
-  const full = maxPlayers > 0 && players >= maxPlayers;
   const TimeIcon = isNight(row.time) ? Moon : Sun;
   const version = row.version;
   const versionDiffers = compareGameVersions(version, gameVersion);
@@ -540,17 +542,27 @@ const Row = memo(function Row({
         {mapName(row.map)}
       </div>
 
-      <div role="gridcell" className="flex items-center pr-3">
-        {row.country && <CountryFlag code={row.country} />}
+      <div role="gridcell" className="flex items-center gap-1.5 pr-3">
+        {row.country && (
+          <>
+            <CountryFlag code={row.country} />
+            <span className="data text-[11px] text-muted-foreground" aria-hidden>
+              {row.country}
+            </span>
+          </>
+        )}
       </div>
 
       <div role="gridcell" className="flex items-center gap-2 pr-3">
         {unlisted ? (
           <span className="data w-[52px] text-right text-xs text-muted-foreground">–</span>
         ) : (
-          <span className={cn("data w-[52px] text-right text-xs", full && "text-warning")}>
-            {players}
-            <span className="text-muted-foreground">/{maxPlayers}</span>
+          <span className="flex w-[52px] flex-col items-end gap-[3px]">
+            <span className="data text-xs leading-none">
+              {players}
+              <span className="text-muted-foreground">/{maxPlayers}</span>
+            </span>
+            <Fill players={players} maxPlayers={maxPlayers} />
           </span>
         )}
         {queue > 0 && <QueueValue queue={queue} short />}
@@ -576,6 +588,23 @@ const Row = memo(function Row({
     </div>
   );
 });
+
+/**
+ * How full a server is, as a thin bar under its player count. Full servers fill it in the warning colour; the count
+ * beside it says the same in numbers.
+ */
+export function Fill({ players, maxPlayers, className }: { players: number; maxPlayers: number; className?: string }) {
+  const fraction = maxPlayers > 0 ? Math.min(players / maxPlayers, 1) : 0;
+  const full = maxPlayers > 0 && players >= maxPlayers;
+  return (
+    <span className={cn("block h-[3px] w-full overflow-hidden rounded-full bg-control", className)} aria-hidden>
+      <span
+        className={cn("block h-full rounded-full", full ? "bg-warning" : "bg-muted-foreground/70")}
+        style={{ width: `${Math.max(fraction * 100, players > 0 ? 6 : 0)}%` }}
+      />
+    </span>
+  );
+}
 
 function Tag({ title, children }: { title: string; children: ReactNode }) {
   return (

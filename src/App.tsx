@@ -13,7 +13,7 @@ import { ModsPage } from "@/components/mods-page";
 import { ReportDialog } from "@/components/report-dialog";
 import { ServerDetail } from "@/components/server-detail";
 import { ServerTable } from "@/components/server-table";
-import { ServerToolbar } from "@/components/server-toolbar";
+import { ServerListStatus, ServerToolbar } from "@/components/server-toolbar";
 import { SettingsDialog } from "@/components/settings-dialog";
 import { Message } from "@/components/message";
 import { Button } from "@/ui/components/button";
@@ -685,8 +685,6 @@ export function App() {
                     countries={countries}
                     mods={mods}
                     shown={listed.length}
-                    total={inView.length}
-                    players={playersShown}
                     refreshing={view === "lan" ? lan.searching : servers.refreshing}
                     onRefresh={view === "lan" ? lan.search : servers.refresh}
                     refreshLabel={view === "lan" ? t`Search the network again` : t`Refresh server list`}
@@ -764,6 +762,7 @@ export function App() {
                       )
                     }
                   />
+                  <ServerListStatus shown={listed.length} total={inView.length} players={playersShown} />
                 </>
               )}
             </main>

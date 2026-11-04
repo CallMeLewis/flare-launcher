@@ -61,7 +61,13 @@ export function AppSidebar<Id extends string>({
         <Icon className="size-4" aria-hidden />
         <span className="min-w-0 truncate max-xl:sr-only">{label}</span>
         {badge !== undefined && (
-          <span className="data ml-auto text-xs text-muted-foreground max-xl:hidden" aria-label={badgeLabel}>
+          <span
+            className={cn(
+              "data ml-auto rounded px-1.5 text-[11px] leading-5 max-xl:hidden",
+              current ? "bg-background/60 text-foreground" : "text-muted-foreground",
+            )}
+            aria-label={badgeLabel}
+          >
             {badge}
           </span>
         )}
@@ -85,8 +91,18 @@ export function AppSidebar<Id extends string>({
         <nav
           key={section.label}
           aria-label={section.label}
-          className={cn("flex flex-col gap-0.5", index === 0 ? "px-2 pt-3" : "mx-2 mt-3 border-t pt-3")}
+          className={cn(
+            "flex flex-col gap-0.5",
+            index === 0 ? "px-2 pt-3" : "mx-2 mt-3 border-t pt-3 xl:border-t-0 xl:pt-2",
+          )}
         >
+          {/* Named on screen once there's room for the labels; the folded sidebar keeps its divider instead. */}
+          <h2
+            aria-hidden
+            className="px-2.5 pt-1 pb-1.5 text-[11px] font-medium tracking-wider text-muted-foreground uppercase max-xl:hidden"
+          >
+            {section.label}
+          </h2>
           {section.items.map(link)}
         </nav>
       ))}
