@@ -1,7 +1,18 @@
 // Development only: stands in for the Rust backend when the UI runs in a
 // browser. Mirrors `src-tauri/src/servers.rs`.
 
-import type { BackendText, Mod, Problem, Report, ServerList, ServerRow, SubscribedMod } from "./types";
+import type {
+  BackendText,
+  Install,
+  Mod,
+  ModCheck,
+  Ping,
+  Problem,
+  Report,
+  ServerList,
+  ServerRow,
+  SubscribedMod,
+} from "./types";
 
 const OWN_LIST_URL = "https://servers.darkzone.dev/v1/servers";
 const OWN_LIVE_URL = "https://servers.darkzone.dev/v1/live";
@@ -51,10 +62,10 @@ function shownName(name: string, fullName?: string): string {
 
 export async function fetchServers(): Promise<ServerList> {
   try {
-    return await fetchOwnServers();
+    return withPreviewDetails(await fetchOwnServers());
   } catch (e) {
     console.warn("Using the fallback list:", e);
-    return fetchFallbackServers();
+    return withPreviewDetails(await fetchFallbackServers());
   }
 }
 
@@ -151,6 +162,64 @@ async function fetchFallbackServers(): Promise<ServerList> {
 
 export async function serverMods(id: string): Promise<Mod[]> {
   return mods.get(id) ?? [];
+}
+
+// Only the desktop app can ping servers, look up their countries or find DayZ. The browser makes them up, the same
+// for a server every time, so every screen can be worked on with something like what players see.
+
+/** A number from 0 to 1 that is always the same for the same text. */
+function hash(text: string): number {
+  let h = 2166136261;
+  for (let i = 0; i < text.length; i++) h = Math.imul(h ^ text.charCodeAt(i), 16777619);
+  return (h >>> 0) / 4294967296;
+}
+
+const COUNTRIES = ["DE", "GB", "US", "FR", "NL", "PL", "FI", "RU", "CA", "AU", "SE", "CZ"];
+const players = new Map<string, { players: number; maxPlayers: number }>();
+
+/** Gives each server a made-up country, and remembers its players for the pings below. */
+export function withPreviewDetails(list: ServerList): ServerList {
+  players.clear();
+  for (const row of list.servers) players.set(row.id, { players: row.players, maxPlayers: row.maxPlayers });
+  return {
+    ...list,
+    servers: list.servers.map((row) => ({ ...row, country: COUNTRIES[Math.floor(hash(row.ip) * COUNTRIES.length)] })),
+  };
+}
+
+export async function pingServers(ids: string[]): Promise<Ping[]> {
+  await new Promise((resolve) => setTimeout(resolve, 150 + hash(ids.join()) * 350));
+  return ids.map((id) => {
+    const h = hash(id);
+    const known = players.get(id);
+    const full = known !== undefined && known.maxPlayers > 0 && known.players >= known.maxPlayers;
+    return {
+      id,
+      pingMs: Math.round(14 + h * h * 210),
+      estimated: h > 0.88,
+      samples: 1,
+      cached: false,
+      players: known?.players ?? 0,
+      maxPlayers: known?.maxPlayers ?? 0,
+      queue: full ? Math.floor(hash(`${id}q`) * 14) : 0,
+    };
+  });
+}
+
+export const PREVIEW_INSTALL: Install = {
+  dayzDir: "C:\\Program Files (x86)\\Steam\\steamapps\\common\\DayZ",
+  workshopDir: "C:\\Program Files (x86)\\Steam\\steamapps\\workshop\\content\\221100",
+  gameVersion: null,
+};
+
+/** Most of a server's mods are installed; about one in six is still to download. */
+export async function installedMods(ids: number[]): Promise<ModCheck> {
+  const missing = ids.filter((id) => hash(String(id)) < 0.17);
+  return {
+    installed: ids.filter((id) => !missing.includes(id)),
+    outdated: [],
+    sizes: Object.fromEntries(missing.map((id) => [id, Math.round(2e6 + hash(`${id}s`) * 6e8)])),
+  };
 }
 
 // Remembered passwords last until the page reloads, so the Remember option can be tried in the browser.

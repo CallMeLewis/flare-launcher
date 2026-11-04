@@ -14,8 +14,9 @@ pnpm app          # the desktop app, with hot reload
 pnpm dev          # the interface alone in a browser at http://127.0.0.1:5173
 ```
 
-In a plain browser the interface loads the server list straight from its public API. Ping, mod checks and launching
-only work in the desktop app.
+In a plain browser the interface loads the server list straight from its public API, and makes up pings, countries,
+an installed DayZ and which mods are on this computer, the same for each server every time, so every screen can be
+worked on. Launching and mod downloads only work in the desktop app.
 
 ## Test
 

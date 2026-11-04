@@ -41,7 +41,8 @@ export const backend = {
   serverMods: (id: string): Promise<Mod[]> =>
     isPreview ? preview().then((p) => p.serverMods(id)) : invoke("server_mods", { id }),
 
-  pingServers: (ids: string[]): Promise<Ping[]> => (isPreview ? Promise.resolve([]) : invoke("ping_servers", { ids })),
+  pingServers: (ids: string[]): Promise<Ping[]> =>
+    isPreview ? preview().then((p) => p.pingServers(ids)) : invoke("ping_servers", { ids }),
 
   /** Searches the local network for servers. Their rows have no mod positions. */
   searchLan: (): Promise<ServerRow[]> => (isPreview ? Promise.resolve([]) : invoke("search_lan")),
@@ -57,14 +58,14 @@ export const backend = {
       : invoke("find_server", { address }),
 
   detectInstall: (dayzDir: string): Promise<Install | null> =>
-    isPreview ? Promise.resolve(null) : invoke("detect_install", { dayzDir: dayzDir || null }),
+    isPreview ? preview().then((p) => p.PREVIEW_INSTALL) : invoke("detect_install", { dayzDir: dayzDir || null }),
 
   /** On Linux, the system's memory map limit when it's too low for DayZ, or `null` when it's fine. */
   lowMapCount: (): Promise<number | null> => (isPreview ? Promise.resolve(null) : invoke("low_map_count")),
 
   installedMods: (dayzDir: string, ids: number[]): Promise<ModCheck> =>
     isPreview
-      ? Promise.resolve({ installed: [], outdated: [], sizes: {} })
+      ? preview().then((p) => p.installedMods(ids))
       : invoke("installed_mods", { dayzDir: dayzDir || null, ids }),
 
   /** Of the given installed mods, those the server runs a different version of. Empty when it can't be checked. */
