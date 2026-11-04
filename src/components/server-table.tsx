@@ -488,8 +488,8 @@ const Row = memo(function Row({
         <span className={cn("truncate", selected && "font-medium")} title={row.name}>
           {row.name}
         </span>
-        {/* The marks line up in one column down the list, just before the space kept for Play. */}
-        <span className="ml-auto flex min-w-0 shrink-0 items-center gap-2 pl-1">
+        {/* The marks follow the name they belong to, however wide the column is. */}
+        <span className="flex min-w-0 shrink-0 items-center gap-2">
           {row.verified && (
             <span
               title={t`Verified owner: they've proved they run this server.`}
@@ -541,7 +541,7 @@ const Row = memo(function Row({
             onPlay(row);
           }}
           onDoubleClick={(event) => event.stopPropagation()}
-          className="invisible group-hover:visible"
+          className="invisible ml-auto group-hover:visible"
         >
           <Play fill="currentColor" aria-hidden />
           <Trans>Play</Trans>
