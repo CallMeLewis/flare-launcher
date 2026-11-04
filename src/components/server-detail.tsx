@@ -428,7 +428,7 @@ export function ServerDetail({
       </header>
 
       {/* The three things players compare servers by, large, then the rest as a short list. */}
-      <dl className="grid grid-cols-3 border-b">
+      <dl className="grid grid-cols-3 divide-x border-b">
         <Tile label={t`Players`}>
           {unlisted ? (
             <span className="data">–</span>
