@@ -596,23 +596,6 @@ const Row = memo(function Row({
   );
 });
 
-/**
- * How full a server is, as a thin bar under its player count in the detail panel. Full servers fill it in the warning
- * colour; the count above it says the same in numbers.
- */
-export function Fill({ players, maxPlayers, className }: { players: number; maxPlayers: number; className?: string }) {
-  const fraction = maxPlayers > 0 ? Math.min(players / maxPlayers, 1) : 0;
-  const full = maxPlayers > 0 && players >= maxPlayers;
-  return (
-    <span className={cn("block h-0.5 w-full overflow-hidden rounded-full bg-control", className)} aria-hidden>
-      <span
-        className={cn("block h-full rounded-full", full ? "bg-warning/60" : "bg-muted-foreground/45")}
-        style={{ width: `${Math.max(fraction * 100, players > 0 ? 6 : 0)}%` }}
-      />
-    </span>
-  );
-}
-
 function Tag({ title, children }: { title: string; children: ReactNode }) {
   return (
     <span
@@ -628,16 +611,7 @@ function Tag({ title, children }: { title: string; children: ReactNode }) {
  * How many players are waiting in DayZ's login queue: "+12" in the list, where the hover says what it is, and
  * "12 queued" where there's room.
  */
-export function QueueValue({
-  queue,
-  short = false,
-  muted = false,
-}: {
-  queue: number;
-  short?: boolean;
-  /** Muted where something beside it already marks the server as full, such as the detail panel's bar. */
-  muted?: boolean;
-}) {
+export function QueueValue({ queue, short = false }: { queue: number; short?: boolean }) {
   const { t } = useLingui();
   const label = t`${plural(queue, { one: "# player", other: "# players" })} waiting to join`;
   if (short) {
@@ -649,10 +623,7 @@ export function QueueValue({
     );
   }
   return (
-    <span
-      className={cn("text-[11px] font-medium whitespace-nowrap", muted ? "text-muted-foreground" : "text-warning")}
-      title={label}
-    >
+    <span className="text-[11px] font-medium whitespace-nowrap text-warning" title={label}>
       <Trans comment="Players waiting in a server's login queue, kept as short as possible">
         <span className="data text-xs">{queue}</span> queued
       </Trans>

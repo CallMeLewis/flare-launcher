@@ -28,7 +28,7 @@ import {
 import { toast } from "sonner";
 import { CountryFlag } from "@/components/country-flag";
 import { MapCountDialog } from "@/components/map-count-dialog";
-import { Fill, PingValue, QueueValue } from "@/components/server-table";
+import { PingValue, QueueValue } from "@/components/server-table";
 import { compareGameVersions, isNight, livePlayers, untilDayChange } from "@/lib/filter";
 import { Button } from "@/ui/components/button";
 import { Checkbox } from "@/ui/components/checkbox";
@@ -438,10 +438,9 @@ export function ServerDetail({
                 {players}
                 <span className="text-sm text-muted-foreground">/{maxPlayers}</span>
               </span>
-              <Fill players={players} maxPlayers={maxPlayers} className="mt-2 h-1" />
               {queue > 0 && (
-                <span className="mt-1.5 block">
-                  <QueueValue queue={queue} muted />
+                <span className="mt-1 block">
+                  <QueueValue queue={queue} />
                 </span>
               )}
             </>
