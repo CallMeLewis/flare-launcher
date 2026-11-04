@@ -110,7 +110,7 @@ export function ServerToolbar({
                   )}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent align="end" collisionPadding={12} className="w-[600px] p-0">
+              <PopoverContent align="start" collisionPadding={12} className="w-[600px] p-0">
                 <FilterMenu
                   filters={filters}
                   onChange={set}

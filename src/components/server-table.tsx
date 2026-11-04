@@ -256,7 +256,14 @@ export function ServerTable({
           onKeyDown={onKeyDown}
           className="flex min-h-0 flex-1 flex-col focus-visible:outline-2 focus-visible:-outline-offset-2"
         >
-          <div role="rowgroup" className="overflow-y-hidden border-b bg-card/60 [scrollbar-gutter:stable]">
+          {/* An empty list has nothing to sort, so its message stands alone. */}
+          <div
+            role="rowgroup"
+            className={cn(
+              "overflow-y-hidden border-b bg-card/60 [scrollbar-gutter:stable]",
+              !loading && rows.length === 0 && "hidden",
+            )}
+          >
             <div
               role="row"
               className={cn(COLUMNS, "h-8 text-[11px] font-medium tracking-wider text-muted-foreground uppercase")}
@@ -311,7 +318,7 @@ export function ServerTable({
                 ))}
               </div>
             ) : rows.length === 0 ? (
-              empty
+              <div className="flex min-h-full flex-col">{empty}</div>
             ) : (
               <div className="relative w-full" style={{ height: virtualizer.getTotalSize() }}>
                 {items.map((item) => {
@@ -478,7 +485,7 @@ const Row = memo(function Row({
       </div>
 
       <div role="gridcell" className="flex min-w-0 items-center gap-2 pr-3">
-        <span className="truncate" title={row.name}>
+        <span className="truncate font-medium" title={row.name}>
           {row.name}
         </span>
         {row.verified && (
@@ -557,7 +564,7 @@ const Row = memo(function Row({
         {unlisted ? (
           <span className="data w-[52px] text-right text-xs text-muted-foreground">–</span>
         ) : (
-          <span className="flex w-[52px] flex-col items-end gap-[3px]">
+          <span className="flex w-[52px] flex-col items-end gap-1">
             <span className="data text-xs leading-none">
               {players}
               <span className="text-muted-foreground">/{maxPlayers}</span>
@@ -597,9 +604,9 @@ export function Fill({ players, maxPlayers, className }: { players: number; maxP
   const fraction = maxPlayers > 0 ? Math.min(players / maxPlayers, 1) : 0;
   const full = maxPlayers > 0 && players >= maxPlayers;
   return (
-    <span className={cn("block h-[3px] w-full overflow-hidden rounded-full bg-control", className)} aria-hidden>
+    <span className={cn("block h-0.5 w-full overflow-hidden rounded-full bg-control", className)} aria-hidden>
       <span
-        className={cn("block h-full rounded-full", full ? "bg-warning" : "bg-muted-foreground/70")}
+        className={cn("block h-full rounded-full", full ? "bg-warning/60" : "bg-muted-foreground/45")}
         style={{ width: `${Math.max(fraction * 100, players > 0 ? 6 : 0)}%` }}
       />
     </span>

@@ -108,7 +108,7 @@ export function AppSidebar<Id extends string>({
       ))}
 
       {/* Settings and the update button share one row; folded, they stack to fit the narrow sidebar. */}
-      <div className="mt-auto flex items-center justify-between gap-1 border-t p-2 max-xl:flex-col">
+      <div className="mt-auto flex items-center justify-between gap-1 p-2 max-xl:flex-col">
         <Tooltip>
           <TooltipTrigger asChild>
             <Button

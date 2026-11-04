@@ -54,11 +54,12 @@ export function SettingsDialog({
         className="h-[min(760px,calc(100vh-4rem))] gap-0 overflow-hidden p-0 sm:max-w-[60rem]"
       >
         <Tabs value={current} onValueChange={change} orientation="vertical" className="h-full min-h-0 gap-0">
-          <div className="flex w-52 shrink-0 flex-col border-r bg-background/40 p-3">
-            <div className="px-2 pt-2 pb-4">
-              <DialogTitle className="text-base">{t("Settings")}</DialogTitle>
+          <div className="flex w-52 shrink-0 flex-col border-r bg-background/40">
+            {/* As tall as each section's title on the right, so the two titles and the line under them meet. */}
+            <div className="flex h-16 shrink-0 items-center border-b px-5">
+              <DialogTitle className="text-[15px] font-semibold">{t("Settings")}</DialogTitle>
             </div>
-            <TabsList className="h-auto w-full flex-1 flex-col items-stretch justify-start gap-0.5 bg-transparent p-0">
+            <TabsList className="h-auto w-full flex-1 flex-col items-stretch justify-start gap-0.5 bg-transparent p-3">
               {sections.map(({ id, label, icon: Icon, pinned, attention }) => (
                 <TabsTrigger
                   key={id}

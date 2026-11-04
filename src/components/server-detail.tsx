@@ -556,9 +556,9 @@ export function ServerDetail({
               <Trans>This is a vanilla server. No mods needed.</Trans>
             </p>
           ) : modGroups ? (
-            <div className="flex flex-col gap-3">
-              {modGroups.map((group) => (
-                <div key={group.key}>
+            <div className="flex flex-col gap-2">
+              {modGroups.map((group, index) => (
+                <div key={group.key} className={cn(index > 0 && "mx-2 border-t pt-1 [&>ul]:-mx-2 [&>h4]:px-0")}>
                   <h4
                     id={`mods-${group.key}`}
                     className="flex items-baseline gap-1.5 px-2 pt-2 pb-1 text-xs font-medium text-muted-foreground"
@@ -818,7 +818,7 @@ function ModRow({
   return (
     <li className="group flex h-8 items-center gap-2 rounded-md px-2 text-[13px] hover:bg-accent/50">
       {status === "installed" ? (
-        <CircleCheck className="size-3.5 shrink-0 text-success" role="img" aria-label={t`Installed`} />
+        <CircleCheck className="size-3.5 shrink-0 text-muted-foreground" role="img" aria-label={t`Installed`} />
       ) : status === "differs" ? (
         <span
           className="shrink-0"
@@ -868,7 +868,7 @@ function ModRow({
               .catch((e) => toast.error(t`Couldn't open the Workshop page`, { description: errorMessage(e) }))
           }
           // Faint until the row is hovered, like on the Mods page, rather than hidden until then.
-          className="shrink-0 text-muted-foreground/70 hover:text-foreground group-hover:text-muted-foreground"
+          className="shrink-0 text-muted-foreground hover:text-foreground [&_svg]:size-3.5"
         >
           <ExternalLink aria-hidden />
         </Button>
