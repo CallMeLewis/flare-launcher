@@ -428,7 +428,7 @@ export function ServerDetail({
       </header>
 
       {/* The three things players compare servers by, large, then the rest as a short list. */}
-      <dl className="grid grid-cols-3 divide-x border-b">
+      <dl className="grid grid-cols-3 border-b">
         <Tile label={t`Players`}>
           {unlisted ? (
             <span className="data">–</span>
@@ -438,9 +438,10 @@ export function ServerDetail({
                 {players}
                 <span className="text-sm text-muted-foreground">/{maxPlayers}</span>
               </span>
+              {/* Written as in the list, so each figure is one line and the three line up. */}
               {queue > 0 && (
-                <span className="mt-1 block">
-                  <QueueValue queue={queue} />
+                <span className="ml-2 [&>span]:text-sm">
+                  <QueueValue queue={queue} short />
                 </span>
               )}
             </>
@@ -460,15 +461,16 @@ export function ServerDetail({
             <>
               <span className="flex items-center gap-1.5">
                 {isNight(server.time) ? (
-                  <Moon className="size-4 shrink-0 text-muted-foreground" aria-hidden />
+                  <Moon className="size-4 shrink-0 text-muted-foreground" role="img" aria-label={t`Night`} />
                 ) : (
-                  <Sun className="size-4 shrink-0 text-muted-foreground" aria-hidden />
+                  <Sun className="size-4 shrink-0 text-muted-foreground" role="img" aria-label={t`Day`} />
                 )}
                 <span className="data">{server.time}</span>
-              </span>
-              <span className="mt-1 block truncate text-xs text-muted-foreground">
-                {isNight(server.time) ? t`Night` : t`Day`}
-                {server.timeAcceleration ? ` · ${t`${speed}× speed`}` : ""}
+                {server.timeAcceleration && server.timeAcceleration !== 1 ? (
+                  <span className="data text-xs text-muted-foreground" title={t`${speed}× speed`}>
+                    ×{speed}
+                  </span>
+                ) : null}
               </span>
             </>
           ) : (
