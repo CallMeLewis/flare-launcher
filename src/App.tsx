@@ -767,7 +767,8 @@ export function App() {
               )}
             </main>
 
-            {selected ? (
+            {/* An empty list shows nothing to pick, so a server picked in another list isn't shown beside it. */}
+            {selected && listed.length > 0 ? (
               <ServerDetail
                 server={selected}
                 ping={selectedPing}

@@ -578,7 +578,7 @@ export function ServerDetail({
         </div>
       </section>
 
-      <footer className="flex flex-col gap-3 border-t p-4">
+      <footer className="flex flex-col gap-3 p-4">
         {offline && (
           <Notice>
             {unlisted
@@ -868,7 +868,7 @@ function ModRow({
               .catch((e) => toast.error(t`Couldn't open the Workshop page`, { description: errorMessage(e) }))
           }
           // Faint until the row is hovered, like on the Mods page, rather than hidden until then.
-          className="shrink-0 text-muted-foreground hover:text-foreground [&_svg]:size-3.5"
+          className="shrink-0 text-foreground/70 hover:text-foreground [&_svg]:size-4"
         >
           <ExternalLink aria-hidden />
         </Button>

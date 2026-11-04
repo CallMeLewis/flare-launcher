@@ -77,7 +77,7 @@ const HEADERS: {
 ];
 
 function pingTone(pingMs: number): string {
-  if (pingMs < 60) return "text-success";
+  if (pingMs < 60) return "text-success/85";
   if (pingMs < 120) return "text-warning";
   return "text-danger";
 }
@@ -485,7 +485,7 @@ const Row = memo(function Row({
       </div>
 
       <div role="gridcell" className="flex min-w-0 items-center gap-2 pr-3">
-        <span className="truncate font-medium" title={row.name}>
+        <span className={cn("truncate", selected ? "font-semibold" : "font-medium")} title={row.name}>
           {row.name}
         </span>
         {row.verified && (
@@ -693,7 +693,7 @@ export function PingValue({
         <TooltipTrigger asChild>
           <span
             onClick={(event) => event.stopPropagation()}
-            className="mr-1 cursor-help font-sans text-[11px] text-muted-foreground underline decoration-dotted underline-offset-2"
+            className="mr-1 cursor-help font-sans text-[11px] text-muted-foreground"
           >
             <Trans comment="Short for estimated, before a ping the launcher had to estimate. Kept as short as possible">
               est.

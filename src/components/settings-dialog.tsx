@@ -98,7 +98,7 @@ export function SettingsDialog({ open, onOpenChange, settings, onChange, install
                     description={
                       <>
                         {i18n._(option.description)}{" "}
-                        <code className="data whitespace-nowrap text-foreground/70">{option.flag}</code>
+                        <code className="data font-normal whitespace-nowrap text-muted-foreground">{option.flag}</code>
                       </>
                     }
                   >

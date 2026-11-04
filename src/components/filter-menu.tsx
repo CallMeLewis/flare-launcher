@@ -143,19 +143,6 @@ export function FilterMenu({
             </Field>
           </Group>
 
-          <Group title={t`Players`}>
-            <Check
-              label={t`Hide empty servers`}
-              checked={filters.hasPlayers}
-              onChange={(hasPlayers) => onChange({ hasPlayers })}
-            />
-            <Check
-              label={t`Hide full servers`}
-              checked={filters.notFull}
-              onChange={(notFull) => onChange({ notFull })}
-            />
-          </Group>
-
           <Group title={t`Connection`}>
             {/* The unit is in the label, so each choice fits on one line. */}
             <Field
@@ -236,6 +223,18 @@ export function FilterMenu({
               hint={t`The anti-cheat DayZ uses`}
               checked={filters.battlEye}
               onChange={(battlEye) => onChange({ battlEye })}
+            />
+          </Group>
+          <Group title={t`Players`}>
+            <Check
+              label={t`Hide empty servers`}
+              checked={filters.hasPlayers}
+              onChange={(hasPlayers) => onChange({ hasPlayers })}
+            />
+            <Check
+              label={t`Hide full servers`}
+              checked={filters.notFull}
+              onChange={(notFull) => onChange({ notFull })}
             />
           </Group>
         </div>

@@ -61,10 +61,10 @@ import type { ModProgress, SubscribedMod } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 const ROW_HEIGHT = 36;
-// On wide screens the names stop growing and the spare room goes after the last column, so each mod's details stay
-// within reading distance of its name.
+// From 1280px the names stop growing and Status takes the spare room, so each mod's details stay within reading
+// distance of its name and the table still reaches the right edge.
 const COLUMNS =
-  "grid grid-cols-[40px_minmax(0,1fr)_84px_92px_124px_164px_44px] xl:grid-cols-[40px_minmax(0,32rem)_104px_112px_148px_180px_44px_1fr] 2xl:grid-cols-[40px_minmax(0,44rem)_152px_144px_176px_196px_48px_1fr] items-center";
+  "grid grid-cols-[40px_minmax(0,1fr)_84px_92px_124px_164px_44px] xl:grid-cols-[40px_minmax(0,24rem)_104px_112px_148px_minmax(180px,1fr)_48px] 2xl:grid-cols-[40px_minmax(0,28rem)_136px_136px_168px_minmax(196px,1fr)_48px] items-center";
 
 // Updated reads left to right, so it starts a little after the right-aligned sizes rather than running into them.
 const UPDATED_GAP = "pl-4 2xl:pl-6";
@@ -710,7 +710,7 @@ const ModRow = memo(function ModRow({
               .openWorkshopPage(mod.id)
               .catch((e) => toast.error(t`Couldn't open the Workshop page`, { description: errorMessage(e) }))
           }
-          className="text-muted-foreground hover:text-foreground [&_svg]:size-3.5"
+          className="text-foreground/70 hover:text-foreground [&_svg]:size-4"
         >
           <ExternalLink aria-hidden />
         </Button>
@@ -759,11 +759,7 @@ function ModStatus({ mod, progress }: { mod: SubscribedMod; progress: ModProgres
       case "failed":
         return line(<CircleX className="size-3.5 shrink-0" aria-hidden />, t`Download failed`, "text-danger");
       case "installed":
-        return line(
-          <CircleCheck className="size-3.5 shrink-0" aria-hidden />,
-          t`Up to date`,
-          "text-muted-foreground [&>svg]:text-success",
-        );
+        return line(<CircleCheck className="size-3.5 shrink-0" aria-hidden />, t`Up to date`, "text-muted-foreground");
     }
   }
 
@@ -785,11 +781,7 @@ function ModStatus({ mod, progress }: { mod: SubscribedMod; progress: ModProgres
         t`It was removed from the Workshop or made private. Your copy still works, but it won't get updates.`,
       );
     case "current":
-      return line(
-        <CircleCheck className="size-3.5 shrink-0" aria-hidden />,
-        t`Up to date`,
-        "text-muted-foreground [&>svg]:text-success",
-      );
+      return line(<CircleCheck className="size-3.5 shrink-0" aria-hidden />, t`Up to date`, "text-muted-foreground");
   }
 }
 

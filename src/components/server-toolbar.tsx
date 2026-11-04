@@ -485,7 +485,7 @@ export function ServerListStatus({ shown, total, players }: { shown: number; tot
     <div
       role="status"
       aria-atomic="true"
-      className="flex h-7 shrink-0 items-center gap-2.5 border-t bg-card px-4 text-xs whitespace-nowrap text-muted-foreground"
+      className="flex h-9 shrink-0 items-center gap-2.5 border-t bg-card px-4 text-xs whitespace-nowrap text-muted-foreground"
     >
       <span className="flex items-center gap-1.5">
         <Server className="size-3.5 shrink-0" aria-hidden />
