@@ -20,7 +20,6 @@ export const BACKEND_MESSAGES = [
   msg({ message: "DayZ wasn't found. Set the DayZ folder in Settings." }),
   msg({ message: "Enter the server's address, such as {example}." }),
   msg({ message: "Flare Launcher is in your app menu, but couldn't reopen: {error}" }),
-  msg({ message: "Mods couldn't be linked into the DayZ folder: {error}" }),
   msg({ message: "Mods are already being downloaded." }),
   msg({ message: "Mods are being downloaded. Try again once they've finished." }),
   msg({

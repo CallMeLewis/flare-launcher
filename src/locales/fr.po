@@ -1092,10 +1092,6 @@ msgstr "Des mods sont déjà en cours de téléchargement."
 msgid "Mods are being downloaded. Try again once they've finished."
 msgstr "Des mods sont en cours de téléchargement. Réessayez une fois le téléchargement terminé."
 
-#: src/lib/backend-messages.ts
-msgid "Mods couldn't be linked into the DayZ folder: {error}"
-msgstr "Impossible de créer les liens vers les mods dans le dossier DayZ : {error}"
-
 #: src/App.tsx
 #: src/components/game-start-dialog.tsx
 msgid "Mods ready"
