@@ -1092,10 +1092,6 @@ msgstr "Es werden bereits Mods heruntergeladen."
 msgid "Mods are being downloaded. Try again once they've finished."
 msgstr "Es werden gerade Mods heruntergeladen. Versuche es erneut, sobald sie fertig sind."
 
-#: src/lib/backend-messages.ts
-msgid "Mods couldn't be linked into the DayZ folder: {error}"
-msgstr "Mods konnten nicht im DayZ-Ordner verknüpft werden: {error}"
-
 #: src/App.tsx
 #: src/components/game-start-dialog.tsx
 msgid "Mods ready"

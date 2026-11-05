@@ -46,16 +46,14 @@ fn password(value: &Option<String>) -> Option<&str> {
 fn build_args(
   ip: &str,
   game_port: u16,
-  mod_ids: &[u64],
+  mod_paths: &[String],
   profile_name: Option<&str>,
   password: Option<&str>,
   extra_args: Option<&str>,
 ) -> Vec<String> {
   let mut args = vec![format!("-connect={ip}"), format!("-port={game_port}")];
-  if !mod_ids.is_empty() {
-    // A Windows path everywhere: on Linux, Steam runs DayZ under Proton.
-    let mods: Vec<String> = mod_ids.iter().map(|id| format!("{LINK_DIR}\\@{id}")).collect();
-    args.push(format!("-mod={}", mods.join(";")));
+  if !mod_paths.is_empty() {
+    args.push(format!("-mod={}", mod_paths.join(";")));
   }
   if let Some(name) = profile_name {
     args.push(format!("-name={name}"));
@@ -86,18 +84,31 @@ fn remove_link(link: &Path) -> std::io::Result<()> {
   std::fs::remove_dir(link).or_else(|_| std::fs::remove_file(link))
 }
 
-fn link_mods(install: &Install, mod_ids: &[u64]) -> Result<()> {
+/// A mod's full path as the game sees it: a Windows path everywhere, because on Linux Steam runs DayZ under Proton,
+/// which shows the whole file system as drive Z:.
+fn game_path(path: &Path) -> String {
+  let path = path.display().to_string();
+  if cfg!(windows) { path } else { format!("Z:{}", path.replace('/', "\\")) }
+}
+
+/// Links each mod into `!dzsl` and returns how `-mod=` should name it: by its link when it has one, otherwise by its
+/// full path. Some drives can't hold links at all, such as exFAT and FAT32 ones on Windows (which refuse with
+/// "Incorrect function"), and there a link only shortens the command line, so its full path does the same job.
+fn link_mods(install: &Install, mod_ids: &[u64]) -> Result<Vec<String>> {
   let link_dir = install.dayz_dir.join(LINK_DIR);
   std::fs::create_dir_all(&link_dir).map_err(|e| {
     log::warn!("could not create {}: {e}", link_dir.display());
     text!("The launcher couldn't make the {folder} folder in the DayZ folder: {error}", folder = LINK_DIR, error = e)
   })?;
+  let mut mod_paths = Vec::with_capacity(mod_ids.len());
   for &id in mod_ids {
     let target = install.mod_dir(id);
     let link = link_dir.join(format!("@{id}"));
+    let linked = format!("{LINK_DIR}\\@{id}");
     // Compared by where both lead: Windows reads a junction back as a `\\?\` path, never equal to the target as written.
     let resolved = std::fs::canonicalize(&link).ok();
     if resolved.is_some() && resolved == std::fs::canonicalize(&target).ok() {
+      mod_paths.push(linked);
       continue;
     }
     if link.symlink_metadata().is_ok() {
@@ -110,12 +121,17 @@ fn link_mods(install: &Install, mod_ids: &[u64]) -> Result<()> {
         )
       })?;
     }
-    create_link(&target, &link).map_err(|e| {
-      log::warn!("could not link {} to {}: {e}", link.display(), target.display());
-      text!("Mods couldn't be linked into the DayZ folder: {error}", error = e)
-    })?;
+    match create_link(&target, &link) {
+      Ok(()) => mod_paths.push(linked),
+      Err(e) => {
+        log::warn!("could not link {} to {}, so passing its full path: {e}", link.display(), target.display());
+        // A junction that can't be made leaves its empty folder behind. Only an empty folder is removed.
+        let _ = std::fs::remove_dir(&link);
+        mod_paths.push(game_path(&target));
+      }
+    }
   }
-  Ok(())
+  Ok(mod_paths)
 }
 
 #[cfg(windows)]
@@ -168,11 +184,11 @@ pub fn launch(cache: State<'_, ServerCache>, request: LaunchRequest) -> Result<(
     );
   }
 
-  link_mods(&install, &mod_ids)?;
+  let mod_paths = link_mods(&install, &mod_ids)?;
   let args = build_args(
     &ip,
     game_port,
-    &mod_ids,
+    &mod_paths,
     non_empty(&request.profile_name),
     password(&request.password),
     non_empty(&request.extra_args),
@@ -270,13 +286,14 @@ mod tests {
 
   #[test]
   fn builds_arguments_for_a_modded_server() {
-    let args = build_args("1.2.3.4", 2302, &[111, 222], Some("Survivor"), Some("hunter2"), Some("-nosplash  -window"));
+    let mods = [r"!dzsl\@111".to_string(), r"F:\SteamLibrary\steamapps\workshop\content\221100\222".to_string()];
+    let args = build_args("1.2.3.4", 2302, &mods, Some("Survivor"), Some("hunter2"), Some("-nosplash  -window"));
     assert_eq!(
       args,
       vec![
         "-connect=1.2.3.4".to_string(),
         "-port=2302".to_string(),
-        r"-mod=!dzsl\@111;!dzsl\@222".to_string(),
+        r"-mod=!dzsl\@111;F:\SteamLibrary\steamapps\workshop\content\221100\222".to_string(),
         "-name=Survivor".to_string(),
         "-password=hunter2".to_string(),
         "-nosplash".to_string(),
@@ -288,6 +305,20 @@ mod tests {
   #[test]
   fn omits_optional_arguments_for_a_vanilla_server() {
     assert_eq!(build_args("1.2.3.4", 2402, &[], None, None, None), vec!["-connect=1.2.3.4", "-port=2402"]);
+  }
+
+  #[cfg(windows)]
+  #[test]
+  fn names_a_mod_by_its_full_path_on_windows() {
+    let path = Path::new(r"F:\SteamLibrary\steamapps\workshop\content\221100\111");
+    assert_eq!(game_path(path), r"F:\SteamLibrary\steamapps\workshop\content\221100\111");
+  }
+
+  #[cfg(unix)]
+  #[test]
+  fn names_a_mod_through_protons_drive_z() {
+    let path = Path::new("/home/survivor/.steam/steam/steamapps/workshop/content/221100/111");
+    assert_eq!(game_path(path), r"Z:\home\survivor\.steam\steam\steamapps\workshop\content\221100\111");
   }
 
   #[test]
@@ -371,8 +402,8 @@ mod tests {
     std::fs::create_dir_all(&dayz_dir).unwrap();
     let install = Install { dayz_dir: dayz_dir.clone(), workshop_dir };
 
-    link_mods(&install, &[111]).unwrap();
-    link_mods(&install, &[111]).unwrap();
+    assert_eq!(link_mods(&install, &[111]).unwrap(), vec![r"!dzsl\@111"]);
+    assert_eq!(link_mods(&install, &[111]).unwrap(), vec![r"!dzsl\@111"]);
     assert_eq!(std::fs::read_to_string(dayz_dir.join(LINK_DIR).join("@111").join("meta.cpp")).unwrap(), "111");
 
     // A folder with files in it, made by someone else, is never deleted.
