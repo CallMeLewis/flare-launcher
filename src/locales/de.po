@@ -133,7 +133,6 @@ msgstr "{servers, plural, one {# Server} other {# Server}}"
 msgid "{shown, plural, one {<0>#</0> server match} other {<1>#</1> servers match}}"
 msgstr "{shown, plural, one {<0>#</0> passender Server} other {<1>#</1> passende Server}}"
 
-#: src/components/server-detail.tsx
 #: src/components/server-table.tsx
 msgid "{speed}× speed"
 msgstr "{speed}× Tempo"
@@ -1944,6 +1943,10 @@ msgstr "Zeit"
 #: src/components/filter-menu.tsx
 msgid "Time of day"
 msgstr "Tageszeit"
+
+#: src/components/server-detail.tsx
+msgid "Time speed"
+msgstr "Zeitbeschleunigung"
 
 #: src/components/server-detail.tsx
 msgid "To download"

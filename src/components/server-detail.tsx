@@ -440,7 +440,7 @@ export function ServerDetail({
               </span>
               {/* Written as in the list, so each figure is one line and the three line up. */}
               {queue > 0 && (
-                <span className="ml-2 [&>span]:text-sm">
+                <span className="[&>span]:text-sm">
                   <QueueValue queue={queue} short />
                 </span>
               )}
@@ -448,31 +448,26 @@ export function ServerDetail({
           )}
         </Tile>
         <Tile label={t`Ping`}>
-          <span className="data">
-            <PingValue ping={ping} offline={offline !== null} unit={false} />
+          <span className="whitespace-nowrap">
+            <span className="data">
+              <PingValue ping={ping} offline={offline !== null} unit={false} />
+            </span>
+            {ping?.pingMs != null && offline === null && (
+              <span className="data ml-1 text-xs text-muted-foreground">ms</span>
+            )}
           </span>
-          {ping?.pingMs != null && offline === null && (
-            <span className="data ml-1 text-xs text-muted-foreground">ms</span>
-          )}
         </Tile>
         <Tile label={t`In-game time`}>
           {/* What an unlisted server last reported is long out of date. */}
           {server.time && !unlisted ? (
-            <>
-              <span className="flex items-center gap-1.5">
-                {isNight(server.time) ? (
-                  <Moon className="size-4 shrink-0 text-muted-foreground" role="img" aria-label={t`Night`} />
-                ) : (
-                  <Sun className="size-4 shrink-0 text-muted-foreground" role="img" aria-label={t`Day`} />
-                )}
-                <span className="data">{server.time}</span>
-                {server.timeAcceleration && server.timeAcceleration !== 1 ? (
-                  <span className="data text-xs text-muted-foreground" title={t`${speed}× speed`}>
-                    ×{speed}
-                  </span>
-                ) : null}
-              </span>
-            </>
+            <span className="flex items-center gap-1.5">
+              {isNight(server.time) ? (
+                <Moon className="size-4 shrink-0 text-muted-foreground" role="img" aria-label={t`Night`} />
+              ) : (
+                <Sun className="size-4 shrink-0 text-muted-foreground" role="img" aria-label={t`Day`} />
+              )}
+              <span className="data">{server.time}</span>
+            </span>
           ) : (
             <span className="data">–</span>
           )}
@@ -496,6 +491,12 @@ export function ServerDetail({
             <span className="data">–</span>
           )}
         </Stat>
+        {/* Here rather than beside the time, which leaves the figure too wide for its column. */}
+        {server.timeAcceleration && server.timeAcceleration !== 1 && !unlisted ? (
+          <Stat label={t`Time speed`}>
+            <span className="data">×{speed}</span>
+          </Stat>
+        ) : null}
         <Stat label={t`Perspective`}>{server.firstPersonOnly ? t`First person only` : t`First and third person`}</Stat>
         <Stat label={t`Version`}>
           <span className="data">{server.version || "–"}</span>
@@ -946,7 +947,9 @@ function Tile({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div className="min-w-0 px-4 py-3">
       <dt className="text-[11px] font-medium tracking-wider text-muted-foreground uppercase">{label}</dt>
-      <dd className="mt-1 text-lg leading-6 font-medium">{children}</dd>
+      {/* A figure too wide for its column, such as a full server's queue in a narrow panel, wraps rather than
+          running past the edge. */}
+      <dd className="mt-1 flex flex-wrap items-baseline gap-x-2 text-lg leading-6 font-medium">{children}</dd>
     </div>
   );
 }
