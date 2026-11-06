@@ -77,7 +77,7 @@ const HEADERS: {
 ];
 
 function pingTone(pingMs: number): string {
-  if (pingMs < 60) return "text-success";
+  if (pingMs < 60) return "text-success/85";
   if (pingMs < 120) return "text-warning";
   return "text-danger";
 }
@@ -256,8 +256,18 @@ export function ServerTable({
           onKeyDown={onKeyDown}
           className="flex min-h-0 flex-1 flex-col focus-visible:outline-2 focus-visible:-outline-offset-2"
         >
-          <div role="rowgroup" className="overflow-y-hidden border-b bg-card/60 [scrollbar-gutter:stable]">
-            <div role="row" className={cn(COLUMNS, "h-8 text-xs font-medium text-muted-foreground")}>
+          {/* An empty list has nothing to sort, so its message stands alone. */}
+          <div
+            role="rowgroup"
+            className={cn(
+              "overflow-y-hidden border-b bg-card/60 [scrollbar-gutter:stable]",
+              !loading && rows.length === 0 && "hidden",
+            )}
+          >
+            <div
+              role="row"
+              className={cn(COLUMNS, "h-8 text-[11px] font-medium tracking-wider text-muted-foreground uppercase")}
+            >
               <div role="columnheader" aria-label={t`Favourite`} />
               {HEADERS.map((header) => {
                 const active = sort.key === header.key;
@@ -308,7 +318,7 @@ export function ServerTable({
                 ))}
               </div>
             ) : rows.length === 0 ? (
-              empty
+              <div className="flex min-h-full flex-col">{empty}</div>
             ) : (
               <div className="relative w-full" style={{ height: virtualizer.getTotalSize() }}>
                 {items.map((item) => {
@@ -421,7 +431,6 @@ const Row = memo(function Row({
   // The server's own count once it has answered, as the list's can be well out of date, and the queue beside it is
   // the server's own too.
   const { players, maxPlayers } = livePlayers(row, ping);
-  const full = maxPlayers > 0 && players >= maxPlayers;
   const TimeIcon = isNight(row.time) ? Moon : Sun;
   const version = row.version;
   const versionDiffers = compareGameVersions(version, gameVersion);
@@ -476,47 +485,50 @@ const Row = memo(function Row({
       </div>
 
       <div role="gridcell" className="flex min-w-0 items-center gap-2 pr-3">
-        <span className="truncate" title={row.name}>
+        <span className={cn("truncate", selected && "font-medium")} title={row.name}>
           {row.name}
         </span>
-        {row.verified && (
-          <span
-            title={t`Verified owner: they've proved they run this server.`}
-            className="flex shrink-0 items-center gap-1 rounded border border-verified/40 bg-verified/10 pr-1.5 pl-1 text-[11px] leading-4 font-semibold text-verified uppercase"
-          >
-            <BadgeCheck className="size-3" aria-hidden />
-            <Trans>Verified</Trans>
-          </span>
-        )}
-        {versionNote && (
-          <span className="shrink-0 text-warning" title={versionNote}>
-            <TriangleAlert className="size-3" role="img" aria-label={versionNote} />
-          </span>
-        )}
-        {row.password && (
-          <span className="shrink-0 text-warning" title={t`Password protected`}>
-            <Lock className="size-3" role="img" aria-label={t`Password protected`} />
-          </span>
-        )}
-        {row.firstPersonOnly && (
-          <Tag title={t`First person only`}>
-            <Trans>1PP</Trans>
-          </Tag>
-        )}
-        {row.official && (
-          <Tag title={t`Official server`}>
-            <Trans>Official</Trans>
-          </Tag>
-        )}
-        {modMatch && (
-          <span
-            title={t`Runs the mod ${modMatch}`}
-            className="flex max-w-[45%] min-w-0 shrink-0 items-center gap-1 rounded border border-primary/30 bg-primary/10 px-1.5 text-xs leading-4 text-foreground/85"
-          >
-            <Puzzle className="size-3 shrink-0 text-primary" aria-hidden />
-            <span className="truncate">{modMatch}</span>
-          </span>
-        )}
+        {/* The marks follow the name they belong to, however wide the column is. */}
+        <span className="flex min-w-0 shrink-0 items-center gap-2">
+          {row.verified && (
+            <span
+              title={t`Verified owner: they've proved they run this server.`}
+              className="flex shrink-0 items-center gap-1 rounded border border-verified/40 bg-verified/10 pr-1.5 pl-1 text-[11px] leading-4 font-semibold text-verified uppercase"
+            >
+              <BadgeCheck className="size-3" aria-hidden />
+              <Trans>Verified</Trans>
+            </span>
+          )}
+          {versionNote && (
+            <span className="shrink-0 text-warning" title={versionNote}>
+              <TriangleAlert className="size-3" role="img" aria-label={versionNote} />
+            </span>
+          )}
+          {row.password && (
+            <span className="shrink-0 text-warning" title={t`Password protected`}>
+              <Lock className="size-3" role="img" aria-label={t`Password protected`} />
+            </span>
+          )}
+          {row.firstPersonOnly && (
+            <Tag title={t`First person only`}>
+              <Trans>1PP</Trans>
+            </Tag>
+          )}
+          {row.official && (
+            <Tag title={t`Official server`}>
+              <Trans>Official</Trans>
+            </Tag>
+          )}
+          {modMatch && (
+            <span
+              title={t`Runs the mod ${modMatch}`}
+              className="flex max-w-40 min-w-0 items-center gap-1 rounded border border-primary/30 bg-primary/10 px-1.5 text-xs leading-4 text-foreground/85"
+            >
+              <Puzzle className="size-3 shrink-0 text-primary" aria-hidden />
+              <span className="truncate">{modMatch}</span>
+            </span>
+          )}
+        </span>
         {/*
           Shown on hover, but always laid out, so it never covers the marks before it and names don't shift when it
           appears. Out of the Tab order like the star: Enter on the list plays the selected server.
@@ -540,15 +552,22 @@ const Row = memo(function Row({
         {mapName(row.map)}
       </div>
 
-      <div role="gridcell" className="flex items-center pr-3">
-        {row.country && <CountryFlag code={row.country} />}
+      <div role="gridcell" className="flex items-center gap-1.5 pr-3">
+        {row.country && (
+          <>
+            <CountryFlag code={row.country} />
+            <span className="data text-[11px] text-muted-foreground" aria-hidden>
+              {row.country}
+            </span>
+          </>
+        )}
       </div>
 
       <div role="gridcell" className="flex items-center gap-2 pr-3">
         {unlisted ? (
           <span className="data w-[52px] text-right text-xs text-muted-foreground">–</span>
         ) : (
-          <span className={cn("data w-[52px] text-right text-xs", full && "text-warning")}>
+          <span className="data w-[52px] text-right text-xs">
             {players}
             <span className="text-muted-foreground">/{maxPlayers}</span>
           </span>
@@ -657,7 +676,7 @@ export function PingValue({
         <TooltipTrigger asChild>
           <span
             onClick={(event) => event.stopPropagation()}
-            className="mr-1 cursor-help font-sans text-[11px] text-muted-foreground underline decoration-dotted underline-offset-2"
+            className="mr-1 cursor-help font-sans text-[11px] text-muted-foreground"
           >
             <Trans comment="Short for estimated, before a ping the launcher had to estimate. Kept as short as possible">
               est.

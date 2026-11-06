@@ -13,7 +13,7 @@ import { ModsPage } from "@/components/mods-page";
 import { ReportDialog } from "@/components/report-dialog";
 import { ServerDetail } from "@/components/server-detail";
 import { ServerTable } from "@/components/server-table";
-import { ServerToolbar } from "@/components/server-toolbar";
+import { ServerListStatus, ServerToolbar } from "@/components/server-toolbar";
 import { SettingsDialog } from "@/components/settings-dialog";
 import { Message } from "@/components/message";
 import { Button } from "@/ui/components/button";
@@ -51,6 +51,7 @@ import {
   type Sort,
 } from "@/lib/filter";
 import { countryName } from "@/lib/countries";
+import { cn } from "@/lib/utils";
 import type { Install, PlayJob, ServerRow, Settings } from "@/lib/types";
 
 const DEFAULT_SETTINGS: Settings = {
@@ -685,8 +686,6 @@ export function App() {
                     countries={countries}
                     mods={mods}
                     shown={listed.length}
-                    total={inView.length}
-                    players={playersShown}
                     refreshing={view === "lan" ? lan.searching : servers.refreshing}
                     onRefresh={view === "lan" ? lan.search : servers.refresh}
                     refreshLabel={view === "lan" ? t`Search the network again` : t`Refresh server list`}
@@ -764,11 +763,16 @@ export function App() {
                       )
                     }
                   />
+                  {/* An empty list's message already says there's nothing in it. */}
+                  {inView.length > 0 && (
+                    <ServerListStatus shown={listed.length} total={inView.length} players={playersShown} />
+                  )}
                 </>
               )}
             </main>
 
-            {selected ? (
+            {/* An empty list shows nothing to pick, so a server picked in another list isn't shown beside it. */}
+            {selected && listed.length > 0 ? (
               <ServerDetail
                 server={selected}
                 ping={selectedPing}
@@ -786,12 +790,22 @@ export function App() {
                 onOpenSettings={() => setSettingsOpen(true)}
               />
             ) : (
-              <aside className="flex w-[300px] shrink-0 lg:w-[340px] xl:w-[400px] border-l bg-card">
-                <Message
-                  icon={<MousePointerClick className="size-6" aria-hidden />}
-                  title={t`Pick a server`}
-                  description={t`Select one to see its mods, or select Play on its row to join straight away.`}
-                />
+              <aside
+                className={cn(
+                  "flex w-[300px] shrink-0 border-l lg:w-[340px] xl:w-[400px]",
+                  // Beside an empty list the page reads as one surface around the list's message.
+                  listed.length > 0 ? "bg-card" : "bg-background",
+                )}
+              >
+                {/* Beside an empty list there is nothing to pick, and the list's own message says what to do. */}
+                {listed.length > 0 && (
+                  <Message
+                    quiet
+                    icon={<MousePointerClick className="size-5" aria-hidden />}
+                    title={t`Pick a server`}
+                    description={t`Select one to see its mods, or select Play on its row to join straight away.`}
+                  />
+                )}
               </aside>
             )}
           </>

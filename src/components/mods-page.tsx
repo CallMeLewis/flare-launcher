@@ -61,10 +61,10 @@ import type { ModProgress, SubscribedMod } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 const ROW_HEIGHT = 36;
-// On wide screens the names stop growing and the spare room goes after the last column, so each mod's details stay
-// within reading distance of its name.
+// From 1280px the spare room is shared out between the columns rather than all going to one, so the row has no long
+// empty stretch. The Workshop link sits right after the name, where the eye already is.
 const COLUMNS =
-  "grid grid-cols-[40px_minmax(0,1fr)_84px_92px_124px_164px_44px] 2xl:grid-cols-[40px_minmax(0,44rem)_152px_144px_176px_196px_48px_1fr] items-center";
+  "grid grid-cols-[40px_minmax(0,1fr)_84px_92px_124px_164px] xl:grid-cols-[40px_minmax(0,2.4fr)_minmax(104px,0.8fr)_minmax(104px,0.8fr)_minmax(148px,1fr)_minmax(180px,1.2fr)] items-center";
 
 // Updated reads left to right, so it starts a little after the right-aligned sizes rather than running into them.
 const UPDATED_GAP = "pl-4 2xl:pl-6";
@@ -313,48 +313,11 @@ export function ModsPage({
           )}
 
           <div className="ml-auto flex shrink-0 items-center gap-2 pl-2">
-            {listed && (
-              <p className="text-xs whitespace-nowrap text-muted-foreground" aria-live="polite">
-                {rows.length === mods.length ? (
-                  <Plural
-                    value={modCount}
-                    one={
-                      <Trans>
-                        <span className="data text-foreground">#</span> mod
-                      </Trans>
-                    }
-                    other={
-                      <Trans>
-                        <span className="data text-foreground">#</span> mods
-                      </Trans>
-                    }
-                  />
-                ) : (
-                  <Plural
-                    value={modCount}
-                    one={
-                      <Trans>
-                        <span className="data text-foreground">{shown}</span> of # mod
-                      </Trans>
-                    }
-                    other={
-                      <Trans>
-                        <span className="data text-foreground">{shown}</span> of # mods
-                      </Trans>
-                    }
-                  />
-                )}
-                <span className="max-xl:hidden">
-                  {" · "}
-                  <span className="data">{formatBytes(totalSize)}</span>
-                </span>
-              </p>
-            )}
             {toUpdate.length > 0 && !job && (
               <Button
-                variant="outline"
+                variant="secondary"
                 size="sm"
-                className="gap-1.5 px-2.5 text-[13px] font-normal"
+                className="gap-1.5 px-2.5 text-[13px]"
                 disabled={busy}
                 onClick={() => onUpdate(toUpdate.map((mod) => mod.id))}
               >
@@ -413,6 +376,47 @@ export function ModsPage({
       </div>
 
       {body}
+
+      {listed && (
+        <p
+          aria-live="polite"
+          className="h-9 shrink-0 border-t bg-card px-4 text-xs leading-[35px] whitespace-nowrap text-muted-foreground"
+        >
+          {rows.length === mods.length ? (
+            <Plural
+              value={modCount}
+              one={
+                <Trans>
+                  <span className="data text-foreground">#</span> mod
+                </Trans>
+              }
+              other={
+                <Trans>
+                  <span className="data text-foreground">#</span> mods
+                </Trans>
+              }
+            />
+          ) : (
+            <Plural
+              value={modCount}
+              one={
+                <Trans>
+                  <span className="data text-foreground">{shown}</span> of # mod
+                </Trans>
+              }
+              other={
+                <Trans>
+                  <span className="data text-foreground">{shown}</span> of # mods
+                </Trans>
+              }
+            />
+          )}
+          <span>
+            {" · "}
+            <span className="data">{formatBytes(totalSize)}</span>
+          </span>
+        </p>
+      )}
 
       <UnsubscribeDialog
         mods={confirming.mods}
@@ -526,7 +530,10 @@ function ModTable({
       className="flex min-h-0 flex-1 flex-col focus-visible:outline-2 focus-visible:-outline-offset-2"
     >
       <div role="rowgroup" className="overflow-y-hidden border-b bg-card/60 [scrollbar-gutter:stable]">
-        <div role="row" className={cn(COLUMNS, "h-8 text-xs font-medium text-muted-foreground")}>
+        <div
+          role="row"
+          className={cn(COLUMNS, "h-8 text-[11px] font-medium tracking-wider text-muted-foreground uppercase")}
+        >
           <div role="columnheader" className="flex justify-center">
             <Checkbox
               tabIndex={-1}
@@ -658,10 +665,26 @@ const ModRow = memo(function ModRow({
         <Checkbox tabIndex={-1} aria-label={t`Select ${name}`} checked={selected} onCheckedChange={toggle} />
       </div>
 
-      <div role="gridcell" className="flex min-w-0 items-center gap-2 pr-4">
+      <div role="gridcell" className="flex min-w-0 items-center gap-1 pr-4">
         <span className={cn("truncate", mod.name === null && "text-muted-foreground")} title={name}>
           {name}
         </span>
+        <Button
+          variant="ghost"
+          size="icon-xs"
+          tabIndex={-1}
+          aria-label={t`Open ${name} in the Steam Workshop`}
+          title={t`Open in the Steam Workshop`}
+          onClick={(event) => {
+            stop(event);
+            backend
+              .openWorkshopPage(mod.id)
+              .catch((e) => toast.error(t`Couldn't open the Workshop page`, { description: errorMessage(e) }));
+          }}
+          className="shrink-0 text-muted-foreground hover:text-foreground [&_svg]:size-3.5"
+        >
+          <ExternalLink aria-hidden />
+        </Button>
       </div>
 
       <div role="gridcell" className="data flex items-center justify-end gap-1.5 pr-4 text-xs">
@@ -693,24 +716,6 @@ const ModRow = memo(function ModRow({
 
       <div role="gridcell" className="min-w-0 pr-3">
         <ModStatus mod={mod} progress={progress} />
-      </div>
-
-      <div role="gridcell" className="flex justify-center" onClick={stop}>
-        <Button
-          variant="ghost"
-          size="icon-xs"
-          tabIndex={-1}
-          aria-label={t`Open ${name} in the Steam Workshop`}
-          title={t`Open in the Steam Workshop`}
-          onClick={() =>
-            backend
-              .openWorkshopPage(mod.id)
-              .catch((e) => toast.error(t`Couldn't open the Workshop page`, { description: errorMessage(e) }))
-          }
-          className="text-muted-foreground/70 hover:text-foreground group-hover:text-muted-foreground"
-        >
-          <ExternalLink aria-hidden />
-        </Button>
       </div>
     </div>
   );
@@ -756,7 +761,7 @@ function ModStatus({ mod, progress }: { mod: SubscribedMod; progress: ModProgres
       case "failed":
         return line(<CircleX className="size-3.5 shrink-0" aria-hidden />, t`Download failed`, "text-danger");
       case "installed":
-        return line(<CircleCheck className="size-3.5 shrink-0" aria-hidden />, t`Up to date`, "text-success");
+        return line(<CircleCheck className="size-3.5 shrink-0" aria-hidden />, t`Up to date`, "text-muted-foreground");
     }
   }
 
@@ -778,7 +783,7 @@ function ModStatus({ mod, progress }: { mod: SubscribedMod; progress: ModProgres
         t`It was removed from the Workshop or made private. Your copy still works, but it won't get updates.`,
       );
     case "current":
-      return line(<CircleCheck className="size-3.5 shrink-0" aria-hidden />, t`Up to date`, "text-success");
+      return line(<CircleCheck className="size-3.5 shrink-0" aria-hidden />, t`Up to date`, "text-muted-foreground");
   }
 }
 
@@ -934,7 +939,6 @@ function LoadingRows() {
           <Skeleton className="ml-auto mr-4 h-3.5 w-14" />
           <Skeleton className="h-3.5 w-20" />
           <Skeleton className="h-3.5 w-24" />
-          <span />
         </div>
       ))}
     </div>

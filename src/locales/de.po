@@ -531,7 +531,6 @@ msgid "Countries"
 msgstr "Länder"
 
 #: src/components/filter-menu.tsx
-#: src/components/server-detail.tsx
 #: src/components/server-table.tsx
 #: src/lib/filter.ts
 msgid "Country"
@@ -1023,7 +1022,6 @@ msgid "Makes text and controls larger or smaller."
 msgstr "Macht Text und Bedienelemente größer oder kleiner."
 
 #: src/components/filter-menu.tsx
-#: src/components/server-detail.tsx
 #: src/components/server-table.tsx
 #: src/components/server-toolbar.tsx
 #: src/lib/filter.ts

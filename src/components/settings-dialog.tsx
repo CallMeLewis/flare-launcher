@@ -98,7 +98,7 @@ export function SettingsDialog({ open, onOpenChange, settings, onChange, install
                     description={
                       <>
                         {i18n._(option.description)}{" "}
-                        <code className="data whitespace-nowrap text-foreground/70">{option.flag}</code>
+                        <code className="data font-normal whitespace-nowrap text-muted-foreground">{option.flag}</code>
                       </>
                     }
                   >
@@ -130,7 +130,7 @@ export function SettingsDialog({ open, onOpenChange, settings, onChange, install
                 <p className="text-xs font-medium text-muted-foreground">
                   <Trans>Added to the command line</Trans>
                 </p>
-                <code className="data selectable rounded-md border bg-background/60 px-3 py-2 text-xs break-all text-foreground/85">
+                <code className="data selectable rounded-md border border-dashed bg-muted/40 px-3 py-2 text-xs break-all text-foreground/85">
                   {launchArgs(settings) || (
                     <span className="text-muted-foreground">
                       <Trans>Nothing extra</Trans>

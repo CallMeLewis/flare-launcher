@@ -26,10 +26,8 @@ type Props = {
   countries: Option[];
   /** Mods in the list, busiest first. */
   mods: Option[];
+  /** Servers the filters match, for the Filters menu. */
   shown: number;
-  total: number;
-  /** Players on the servers shown. */
-  players: number;
   refreshing: boolean;
   onRefresh: () => void;
   /** What refreshing does in this list, for the button's label. */
@@ -48,8 +46,6 @@ export function ServerToolbar({
   countries,
   mods,
   shown,
-  total,
-  players,
   refreshing,
   onRefresh,
   refreshLabel,
@@ -60,9 +56,6 @@ export function ServerToolbar({
   const filtersElsewhere = t`Filters only apply to All servers.`;
   const chips = filterChips(filters, (code) => countryName(code, i18n.locale));
   const filtersOn = chips.length;
-  const shownCount = i18n.number(shown);
-  const totalCount = i18n.number(total);
-  const playerCount = i18n.number(players);
   const reset = () => onChange({ ...NO_FILTERS, search: filters.search });
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -117,7 +110,7 @@ export function ServerToolbar({
                   )}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent align="end" collisionPadding={12} className="w-[600px] p-0">
+              <PopoverContent align="start" collisionPadding={12} className="w-[600px] p-0">
                 <FilterMenu
                   filters={filters}
                   onChange={set}
@@ -152,62 +145,6 @@ export function ServerToolbar({
         )}
 
         <div className="ml-auto flex shrink-0 items-center gap-2 pl-2">
-          {/* One status, so a change is read out as the whole summary rather than a bare number. */}
-          <div
-            role="status"
-            aria-atomic="true"
-            className="flex items-center gap-2.5 text-xs whitespace-nowrap text-muted-foreground"
-          >
-            <span className="flex items-center gap-1.5">
-              <Server className="size-3.5 shrink-0" aria-hidden />
-              {shown === total ? (
-                <Plural
-                  value={total}
-                  one={
-                    <Trans>
-                      <span className="data text-foreground">{shownCount}</span> server
-                    </Trans>
-                  }
-                  other={
-                    <Trans>
-                      <span className="data text-foreground">{shownCount}</span> servers
-                    </Trans>
-                  }
-                />
-              ) : (
-                <Plural
-                  value={total}
-                  one={
-                    <Trans>
-                      <span className="data text-foreground">{shownCount}</span> of {totalCount} server
-                    </Trans>
-                  }
-                  other={
-                    <Trans>
-                      <span className="data text-foreground">{shownCount}</span> of {totalCount} servers
-                    </Trans>
-                  }
-                />
-              )}
-            </span>
-            <span className="h-4 w-px bg-border" aria-hidden />
-            <span className="flex items-center gap-1.5">
-              <Users className="size-3.5 shrink-0" aria-hidden />
-              <Plural
-                value={players}
-                one={
-                  <Trans>
-                    <span className="data text-foreground">{playerCount}</span> player
-                  </Trans>
-                }
-                other={
-                  <Trans>
-                    <span className="data text-foreground">{playerCount}</span> players
-                  </Trans>
-                }
-              />
-            </span>
-          </div>
           {/* Folds to its icon when the toolbar is narrow, which depends on the window and on how long its words are. */}
           <Tooltip>
             <TooltipTrigger asChild>
@@ -456,7 +393,7 @@ function SmartSearch({
   const { active, setActive, onKeyDown } = useActiveOption(suggestions.length, choose, () => setOpen(false));
 
   return (
-    <div className="relative w-[26rem] min-w-40">
+    <div className="relative max-w-[26rem] min-w-56 flex-[2_1_18rem]">
       <Search
         className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground"
         aria-hidden
@@ -535,4 +472,70 @@ function SmartSearch({
 
 function ServerCount({ servers }: { servers: number }) {
   return <Plural value={servers} one="# server" other="# servers" />;
+}
+
+/** Under the list: how many servers are shown, out of how many, and how many players are on them. */
+export function ServerListStatus({ shown, total, players }: { shown: number; total: number; players: number }) {
+  const { i18n } = useLingui();
+  const shownCount = i18n.number(shown);
+  const totalCount = i18n.number(total);
+  const playerCount = i18n.number(players);
+  return (
+    // One status, so a change is read out as the whole summary rather than a bare number.
+    <div
+      role="status"
+      aria-atomic="true"
+      className="flex h-9 shrink-0 items-center gap-2.5 border-t bg-card px-4 text-xs whitespace-nowrap text-muted-foreground"
+    >
+      <span className="flex items-center gap-1.5">
+        <Server className="size-3.5 shrink-0" aria-hidden />
+        {shown === total ? (
+          <Plural
+            value={total}
+            one={
+              <Trans>
+                <span className="data text-foreground">{shownCount}</span> server
+              </Trans>
+            }
+            other={
+              <Trans>
+                <span className="data text-foreground">{shownCount}</span> servers
+              </Trans>
+            }
+          />
+        ) : (
+          <Plural
+            value={total}
+            one={
+              <Trans>
+                <span className="data text-foreground">{shownCount}</span> of {totalCount} server
+              </Trans>
+            }
+            other={
+              <Trans>
+                <span className="data text-foreground">{shownCount}</span> of {totalCount} servers
+              </Trans>
+            }
+          />
+        )}
+      </span>
+      <span className="h-4 w-px bg-border" aria-hidden />
+      <span className="flex items-center gap-1.5">
+        <Users className="size-3.5 shrink-0" aria-hidden />
+        <Plural
+          value={players}
+          one={
+            <Trans>
+              <span className="data text-foreground">{playerCount}</span> player
+            </Trans>
+          }
+          other={
+            <Trans>
+              <span className="data text-foreground">{playerCount}</span> players
+            </Trans>
+          }
+        />
+      </span>
+    </div>
+  );
 }
