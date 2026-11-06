@@ -389,6 +389,30 @@ mod tests {
     std::fs::remove_dir_all(root).unwrap();
   }
 
+  // A folder no link can be made in stands in for a drive that can't hold links, such as an exFAT one on Windows.
+  #[cfg(unix)]
+  #[test]
+  fn passes_the_full_path_when_a_mod_cant_be_linked() {
+    use std::os::unix::fs::PermissionsExt;
+    let root = std::env::temp_dir().join(format!("dzsl-no-links-test-{}", std::process::id()));
+    let dayz_dir = root.join("steamapps/common/DayZ");
+    let workshop_dir = root.join("steamapps/workshop/content/221100");
+    let link_dir = dayz_dir.join(LINK_DIR);
+    std::fs::create_dir_all(workshop_dir.join("111")).unwrap();
+    std::fs::create_dir_all(&link_dir).unwrap();
+    let install = Install { dayz_dir, workshop_dir: workshop_dir.clone() };
+
+    std::fs::set_permissions(&link_dir, std::fs::Permissions::from_mode(0o555)).unwrap();
+    // Root can write to it anyway, so then there's nothing to test.
+    if std::fs::write(link_dir.join("probe"), "").is_err() {
+      assert_eq!(link_mods(&install, &[111]).unwrap(), vec![game_path(&workshop_dir.join("111"))]);
+      assert!(link_dir.join("@111").symlink_metadata().is_err());
+    }
+
+    std::fs::set_permissions(&link_dir, std::fs::Permissions::from_mode(0o755)).unwrap();
+    std::fs::remove_dir_all(root).unwrap();
+  }
+
   // Junctions on Windows, symlinks elsewhere.
   #[test]
   fn links_mods_but_leaves_real_folders_alone() {
