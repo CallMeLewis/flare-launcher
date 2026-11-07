@@ -2,6 +2,13 @@
 
 What changed in each version of Flare Launcher, newest first.
 
+## 1.8.0 - 2026-11-07
+
+- Improved the look of the server list, server panel and Mods page: colour now only marks what needs your attention, so player counts are no longer amber when a server is full, the search box has more room, flags in the server list show their country code, the server panel shows players, ping and in-game time as large figures at the top, and the Mods page spreads its columns across the window.
+- The number of servers and players shown has moved from the toolbar to a bar under the server list.
+- Fixed Play failing with "Mods couldn't be linked into the DayZ folder" when your mods are on a drive formatted exFAT or FAT32.
+- Fixed the server panel showing a server from another list when the list you're on is empty.
+
 ## 1.7.1 - 2026-11-03
 
 - Improved the est. ping shown for servers that don't answer pings: it's now usually within 10 ms of a real ping instead of reading about 25 ms too high, and hovering over est. warns when a server's DDoS protection answered for it, as the server may then be much further away.
