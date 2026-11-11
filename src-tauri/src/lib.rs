@@ -163,8 +163,14 @@ pub fn run() {
       app_menu::refresh_entry();
       Ok(())
     })
-    .run(tauri::generate_context!())
-    .expect("error while building tauri application");
+    .build(tauri::generate_context!())
+    .expect("error while building tauri application")
+    // After the plugins have handled the exit, as the update's installer ends the process on Windows.
+    .run(|app, event| {
+      if let tauri::RunEvent::Exit = event {
+        tauri_plugin_flare_updater::install_on_exit(app);
+      }
+    });
 }
 
 #[cfg(test)]

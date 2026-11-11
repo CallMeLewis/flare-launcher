@@ -20,7 +20,12 @@ function label(status: UpdateStatus, t: Translate, appName: string, locale: stri
     case "downloading":
       return t("Downloading update… {percent}%", { percent: Math.floor(status.percent) });
     case "ready":
-      return t("Restart to update to version {version}", { version: status.version });
+      return status.installsOnClose
+        ? t("Version {version} will install when you close {app}. Select to install it now.", {
+            version: status.version,
+            app: appName,
+          })
+        : t("Restart to update to version {version}", { version: status.version });
     case "error":
       return t("{error} Select to try again.", { error: t(status.message.message, status.message.values) });
     case "upToDate": {

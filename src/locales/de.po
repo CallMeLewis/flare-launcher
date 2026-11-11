@@ -329,10 +329,6 @@ msgstr "Charaktername"
 msgid "Check for updates"
 msgstr "Nach Updates suchen"
 
-#: src/lib/shared-messages.ts
-msgid "Check for updates automatically"
-msgstr "Automatisch nach Updates suchen"
-
 #: src/components/mods-page.tsx
 msgid "Check your mods again"
 msgstr "Deine Mods erneut prüfen"
@@ -352,6 +348,10 @@ msgstr "Mods werden geprüft"
 #: src/lib/shared-messages.ts
 msgid "Checking…"
 msgstr "Wird geprüft…"
+
+#: src/lib/shared-messages.ts
+msgid "Checks when {app} starts and every few hours, and downloads new versions in the background."
+msgstr "Sucht beim Start von {app} und alle paar Stunden nach Updates und lädt neue Versionen im Hintergrund herunter."
 
 #: src/components/server-toolbar.tsx
 msgid "Choose one to add it as a filter, or press Enter to search names for “{search}”."
@@ -2021,6 +2021,10 @@ msgstr "bis zu {downloadSize}"
 msgid "Up to date"
 msgstr "Aktuell"
 
+#: src/lib/shared-messages.ts
+msgid "Update automatically"
+msgstr "Automatisch aktualisieren"
+
 #: src/components/mods-page.tsx
 msgid "Update available"
 msgstr "Update verfügbar"
@@ -2106,6 +2110,14 @@ msgstr "Version {version} ist verfügbar."
 msgid "Version {version} is ready to install. {app} restarts to finish."
 msgstr "Version {version} ist bereit zur Installation. {app} startet dafür neu."
 
+#: src/lib/shared-messages.ts
+msgid "Version {version} will install when you close {app}."
+msgstr "Version {version} wird installiert, wenn du {app} schließt."
+
+#: src/lib/shared-messages.ts
+msgid "Version {version} will install when you close {app}. Select to install it now."
+msgstr "Version {version} wird installiert, wenn du {app} schließt. Klicke, um sie jetzt zu installieren."
+
 #: src/components/settings-dialog.tsx
 msgid "Version, updates and release notes."
 msgstr "Version, Updates und Versionshinweise."
@@ -2152,10 +2164,6 @@ msgstr "Neuigkeiten"
 #: src/lib/shared-messages.ts
 msgid "What's new in version {version}"
 msgstr "Neu in Version {version}"
-
-#: src/lib/shared-messages.ts
-msgid "When {app} starts and every few hours."
-msgstr "Beim Start von {app} und alle paar Stunden."
 
 #: src/components/first-run-dialog.tsx
 #: src/components/settings-dialog.tsx

@@ -26,7 +26,8 @@ const real = {
 };
 
 // A pretend update, so the update controls can be tried in development builds: checking always finds the next patch
-// version with the running version's release notes, the download fills over a few seconds, and installing reloads.
+// version with the running version's release notes, the download fills over a few seconds (starting by itself while
+// updating automatically is on), and installing reloads.
 let fakeStatus: UpdateStatus = { state: "idle" };
 let fakeSettings: UpdateSettings = { channel: "stable", autoCheck: true };
 let fakeRelease = { version: "0.0.0", notes: [] as string[] };
@@ -46,7 +47,9 @@ const fake: typeof real = {
     const version = fakeRelease.version.replace(/\d+$/, (patch) => String(Number(patch) + 1));
     const notes = fakeRelease.notes.map((item) => `- ${item}`).join("\n") || "- A pretend change, to show the notes.";
     setFakeStatus({ state: "available", version, releaseDate: new Date().toISOString(), notes });
-    return fakeStatus;
+    const found = fakeStatus;
+    if (fakeSettings.autoCheck) void fake.download();
+    return found;
   },
   download: async () => {
     if (fakeStatus.state !== "available") return;
@@ -55,7 +58,7 @@ const fake: typeof real = {
       setFakeStatus({ state: "downloading", version, percent, notes });
       await wait(400);
     }
-    setFakeStatus({ state: "ready", version, notes });
+    setFakeStatus({ state: "ready", version, notes, installsOnClose: true });
   },
   install: async () => {
     await wait(1500);

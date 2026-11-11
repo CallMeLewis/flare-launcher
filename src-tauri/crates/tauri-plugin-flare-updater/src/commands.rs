@@ -12,7 +12,7 @@ pub(crate) fn status(updater: State<'_, Updater>) -> UpdateStatus {
 
 #[tauri::command]
 pub(crate) async fn check<R: Runtime>(app: AppHandle<R>, updater: State<'_, Updater>) -> Result<UpdateStatus, ()> {
-  Ok(updater.check(&app).await)
+  Ok(updater.check_and_download(&app).await)
 }
 
 #[tauri::command]

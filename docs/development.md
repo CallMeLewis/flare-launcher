@@ -63,7 +63,9 @@ The launcher ships for both, and a feature, fix or release that only works on on
 - **Windows:** an NSIS installer and the launcher's own title bar. Mods are linked into the DayZ folder with
   junctions, and DayZ starts through `DayZ_BE.exe`. Steam is found through the registry.
 - **Linux:** an AppImage, a `.deb` and an `.rpm`, all with the system title bar. Each install updates itself in its own
-  format (`.deb` and `.rpm` updates ask for the password, as system packages do). Mods are linked with symlinks, and
+  format. Updates download in the background and the AppImage installs them when it closes, as the Windows build does;
+  `.deb` and `.rpm` updates ask for the password, as system packages do, so they wait for Restart to update. Mods are
+  linked with symlinks, and
   DayZ starts through `steam -applaunch`, so Steam runs it under Proton with BattlEye. Steam is found in
   `~/.steam/steam`, `~/.local/share/Steam`, `~/.steam/debian-installation`, and the Flatpak and Snap folders. When the
   game is in the Flatpak's library, or the Flatpak is the only Steam, it starts through

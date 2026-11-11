@@ -1,8 +1,11 @@
-//! Nothing downloads or installs without the user asking: downloading and installing are separate actions, and
-//! installing is only reached through a confirmation in the window. The one exception: if the feed offers a different
-//! version while a downloaded one is waiting to be installed (a newer release, or the user switched channel), that one
-//! replaces it, so someone who already chose to update never installs an outdated version or one from the channel
-//! they left.
+//! With automatic updates on (the default), an update the feed offers downloads in the background. With them off,
+//! nothing downloads until the user asks. Once downloaded, an update installs when the app closes, without reopening
+//! it (see `install_on_exit`), except the .deb and .rpm, which ask for a password to install and so wait for the user.
+//! Installing straight away is always there, through a confirmation in the window.
+//!
+//! If the feed offers a different version while a downloaded one is waiting to be installed (a newer release, or the
+//! user switched channel), that one replaces it, so an outdated version or one from the channel the user left is never
+//! installed.
 //!
 //! Every installer is signed by the app's release script, and Tauri's updater refuses one whose signature doesn't
 //! match the public key in the app's tauri.conf.json, or whose signed version differs from the one the feed announces,
@@ -51,9 +54,11 @@ pub enum UpdateStatus {
     percent: f64,
     notes: Option<String>,
   },
+  /// `installs_on_close`: the update installs by itself when the app closes. Otherwise it waits for the user.
   Ready {
     version: String,
     notes: Option<String>,
+    installs_on_close: bool,
   },
   Error {
     message: Text,
@@ -90,7 +95,8 @@ pub struct UpdateSettings {
   /// Apps saved before they had a beta channel only saved `autoCheck`, so they start on stable.
   #[serde(default = "stable")]
   pub channel: UpdateChannel,
-  /// Whether the app checks on its own, at start and every few hours.
+  /// Whether the app updates on its own: it checks at start and every few hours, downloads what it finds and installs
+  /// it when the app closes. Named for when it only checked.
   #[serde(default = "checks_automatically")]
   pub auto_check: bool,
 }
@@ -117,7 +123,7 @@ struct Inner {
   settings: Option<UpdateSettings>,
   /// The update on offer, kept so it can be downloaded without checking again.
   offered: Option<Update>,
-  /// A downloaded update waiting for the user to confirm the install.
+  /// A downloaded update waiting to be installed.
   downloaded: Option<(Update, Vec<u8>)>,
   /// Counts checks started, so only the latest one reports what it found.
   latest_check: u64,
@@ -162,7 +168,7 @@ impl Updater {
       loop {
         let updater = app.state::<Updater>();
         if updater.settings(&app).auto_check {
-          updater.check(&app).await;
+          updater.check_and_download(&app).await;
         }
         tokio::time::sleep(CHECK_INTERVAL).await;
       }
@@ -232,7 +238,7 @@ impl Updater {
   /// Turning automatic checks back on checks straight away.
   pub async fn set_auto_check<R: Runtime>(&self, app: &AppHandle<R>, auto_check: bool) -> Result<UpdateStatus, Text> {
     self.change_settings(app, |settings| settings.auto_check = auto_check)?;
-    Ok(if auto_check { self.check(app).await } else { self.status() })
+    Ok(if auto_check { self.check_and_download(app).await } else { self.status() })
   }
 
   pub async fn set_channel<R: Runtime>(
@@ -249,7 +255,7 @@ impl Updater {
         inner.status = UpdateStatus::Idle;
       }
     }
-    Ok(self.check(app).await)
+    Ok(self.check_and_download(app).await)
   }
 
   async fn fetch<R: Runtime>(&self, app: &AppHandle<R>) -> Result<Option<Update>, tauri_plugin_updater::Error> {
@@ -293,6 +299,17 @@ impl Updater {
       }
     }
     self.status()
+  }
+
+  /// Checks, and while updating automatically is on, downloads what it finds. The download carries on in the
+  /// background, so this reports what the check found straight away.
+  pub async fn check_and_download<R: Runtime>(&self, app: &AppHandle<R>) -> UpdateStatus {
+    let status = self.check(app).await;
+    if matches!(status, UpdateStatus::Available { .. }) && self.settings(app).auto_check {
+      let app = app.clone();
+      tauri::async_runtime::spawn(async move { app.state::<Updater>().download(&app).await });
+    }
+    status
   }
 
   /// Behind a downloaded update: checks the feed still offers that version. If it offers another one (a newer
@@ -371,7 +388,7 @@ impl Updater {
           inner.offered = None;
           inner.downloaded = Some((update, bytes));
         }
-        self.set(app, UpdateStatus::Ready { version, notes });
+        self.set(app, UpdateStatus::Ready { version, notes, installs_on_close: installs_on_close() });
         // The user switched channel while this downloaded: make sure the new channel offers it too.
         if self.channel(app) != channel {
           Box::pin(self.check(app)).await;
@@ -382,6 +399,7 @@ impl Updater {
         let kept = self.inner.lock().unwrap().downloaded.as_ref().map(|(update, _)| UpdateStatus::Ready {
           version: update.version.clone(),
           notes: notes_text(update.body.as_deref()),
+          installs_on_close: installs_on_close(),
         });
         let failed = UpdateStatus::Error { message: friendly_error(&error, self.channel(app)) };
         self.set(app, kept.unwrap_or(failed));
@@ -404,6 +422,24 @@ impl Updater {
     // Windows never gets here: the installer takes over and the process exits.
     app.restart();
   }
+
+  /// Installs a downloaded update as the app closes, without reopening it. Does nothing when there isn't one, or when
+  /// installing would ask for a password. On Windows the installer runs silently after the app has gone; elsewhere the
+  /// new version is in place by the time this returns. Failing leaves the app as it was: it checks again next time.
+  pub fn install_on_exit(&self) {
+    if !installs_on_close() {
+      return;
+    }
+    let Some((update, bytes)) = self.inner.lock().unwrap().downloaded.take() else { return };
+    // On Windows this ends the process once the installer has started.
+    let _ = update.restart_after_install(false).install(&bytes);
+  }
+}
+
+/// Whether a downloaded update can install by itself when the app closes: the Windows installer and the AppImage can,
+/// while the .deb and .rpm ask for a password.
+fn installs_on_close() -> bool {
+  matches!(install_format(), "nsis" | "appimage")
 }
 
 fn offered_status(update: &Update) -> UpdateStatus {
@@ -549,6 +585,11 @@ mod tests {
     assert_eq!(
       serde_json::to_value(status).unwrap(),
       serde_json::json!({ "state": "downloading", "version": "1.2.0", "percent": 42.0, "notes": null })
+    );
+    assert_eq!(
+      serde_json::to_value(UpdateStatus::Ready { version: "1.2.0".into(), notes: None, installs_on_close: true })
+        .unwrap(),
+      serde_json::json!({ "state": "ready", "version": "1.2.0", "notes": null, "installsOnClose": true })
     );
     assert_eq!(
       serde_json::to_value(UpdateStatus::UpToDate { checked_at: 5 }).unwrap(),

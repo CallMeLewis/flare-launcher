@@ -35,10 +35,12 @@ function describeUpdate(status: UpdateStatus, t: Translate, appName: string, loc
         percent: Math.floor(status.percent),
       });
     case "ready":
-      return t("Version {version} is ready to install. {app} restarts to finish.", {
-        version: status.version,
-        app: appName,
-      });
+      return status.installsOnClose
+        ? t("Version {version} will install when you close {app}.", { version: status.version, app: appName })
+        : t("Version {version} is ready to install. {app} restarts to finish.", {
+            version: status.version,
+            app: appName,
+          });
     case "error":
       return t(status.message.message, status.message.values);
   }
@@ -110,7 +112,7 @@ function failure(error: unknown, t: Translate): string {
 }
 
 /**
- * The Updates group for the About section of Settings: checking automatically, the version with its release notes
+ * The Updates group for the About section of Settings: updating automatically, the version with its release notes
  * and the update action, and the update channel. `onReport` adds a "Send report" link to a failed update.
  */
 export function UpdatesSettings({ onReport }: { onReport?: (message: UpdaterText) => void }) {
@@ -148,8 +150,13 @@ export function UpdatesSettings({ onReport }: { onReport?: (message: UpdaterText
     <SettingsGroup title={t("Updates")}>
       <SettingRow
         id="auto-update-check"
-        label={t("Check for updates automatically")}
-        description={errorFor("autoCheck") ?? t("When {app} starts and every few hours.", { app: app.name })}
+        label={t("Update automatically")}
+        description={
+          errorFor("autoCheck") ??
+          t("Checks when {app} starts and every few hours, and downloads new versions in the background.", {
+            app: app.name,
+          })
+        }
       >
         <Switch
           id="auto-update-check"

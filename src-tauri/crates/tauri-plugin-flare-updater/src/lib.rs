@@ -12,6 +12,20 @@
 //! and the `flare-updater:default` permission in its capabilities. The installer's public key stays in the app's
 //! `tauri.conf.json` (`plugins.updater.pubkey`), with `windows.installMode` set to `quiet`.
 //!
+//! So a downloaded update installs when the app closes, the app runs `install_on_exit` from its own run callback:
+//!
+//! ```ignore
+//! .build(tauri::generate_context!())?
+//! .run(|app, event| {
+//!     if let tauri::RunEvent::Exit = event {
+//!         tauri_plugin_flare_updater::install_on_exit(app);
+//!     }
+//! });
+//! ```
+//!
+//! It goes there rather than in this plugin because on Windows the installer ends the process, and the app's callback
+//! runs after every plugin has handled the exit, such as the window-state plugin saving the window's size.
+//!
 //! The window calls `plugin:flare-updater|<command>` (see `commands.rs`) and hears every change of status as the
 //! `update:status` event.
 
@@ -40,6 +54,14 @@ pub const NO_AUTO_CHECK_VAR: &str = "FLARE_NO_AUTO_UPDATE_CHECK";
 /// plugin that adds another while the app is setting its plugins up waits on itself and the app never opens.
 pub fn updater<R: Runtime>() -> TauriPlugin<R, tauri_plugin_updater::Config> {
   tauri_plugin_updater::Builder::new().build()
+}
+
+/// Installs a downloaded update as the app exits, without reopening it, where that needs nothing from the user. Call
+/// it on `RunEvent::Exit`; see the crate's documentation.
+pub fn install_on_exit<R: Runtime>(app: &AppHandle<R>) {
+  if let Some(updater) = app.try_state::<Updater>() {
+    updater.install_on_exit();
+  }
 }
 
 /// What an app runs just before the installer closes it.
