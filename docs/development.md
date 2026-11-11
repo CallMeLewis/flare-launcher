@@ -207,6 +207,11 @@ activated). Tauri signs the launcher, its uninstaller and the installer while bu
 added. The certificate expires on 2027-10-14; renewing it changes its thumbprint, which is in `build.yml`. To check
 signing without releasing, run the CI workflow from the Actions tab with "Sign the Windows build".
 
+Release stable versions every two to four weeks, from what has collected on `main`. Each stable release asks every
+player to update, so a steady rhythm keeps that to once or twice a month. Anything that needs trying sooner goes out as
+a beta. Release a stable fix early only when players can't find, prepare for or join servers, such as a broken server
+list, mod download or Play.
+
 The version number tells players how much has changed, so choose it by what the release notes say:
 
 - **Major** (`2.0.0`) only when players have to do something, or something they rely on stops working: a release with
